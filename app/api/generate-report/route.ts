@@ -3,6 +3,81 @@ import { geminiClient } from "@/lib/gemini";
 
 export const runtime = "nodejs";
 
+// --- DYNAMIC CALENDAR CORRECTOR HELPERS ---
+
+function getCorrectWeekdayIndo(dayNameMatched: string, dateNum: number, monthName: string, yearNum: number): string {
+  const monthMap: Record<string, number> = {
+    januari: 0, jan: 0,
+    februari: 1, pebruari: 1, feb: 1,
+    maret: 2, mar: 2,
+    april: 3, apr: 3,
+    mei: 4,
+    juni: 5, jun: 5,
+    juli: 6, jul: 6,
+    agustus: 7, agt: 7, agust: 7,
+    september: 8, sep: 8, sept: 8,
+    oktober: 9, okt: 9,
+    november: 10, nopember: 10, nov: 10,
+    desember: 11, des: 11
+  };
+  const key = monthName.toLowerCase();
+  const monthIndex = monthMap[key];
+  if (monthIndex === undefined) return dayNameMatched;
+
+  const dateObj = new Date(yearNum, monthIndex, dateNum);
+  if (isNaN(dateObj.getTime())) return dayNameMatched;
+
+  const weekdaysIndo = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  const correctDay = weekdaysIndo[dateObj.getDay()];
+
+  if (dayNameMatched === dayNameMatched.toUpperCase()) {
+    return correctDay.toUpperCase();
+  } else if (dayNameMatched === dayNameMatched.toLowerCase()) {
+    return correctDay.toLowerCase();
+  } else {
+    return correctDay;
+  }
+}
+
+function correctWeekdaysInString(text: string): string {
+  if (typeof text !== "string") return text;
+  
+  const regex = /(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Jum'at|Sabtu)(,\s*|\s+)(tanggal\s+)?(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember|Jan|Feb|Mar|Apr|Jun|Jul|Agt|Agust|Sep|Sept|Okt|Nov|Nop|Des|Pebruari|Nopember)\s+(\d{4})/gi;
+  
+  return text.replace(regex, (match, dayGroup, separatorGroup, tanggalGroup, dateGroup, monthGroup, yearGroup) => {
+    const dateNum = parseInt(dateGroup, 10);
+    const yearNum = parseInt(yearGroup, 10);
+    const correctDay = getCorrectWeekdayIndo(dayGroup, dateNum, monthGroup, yearNum);
+    
+    const optionalTanggal = tanggalGroup || "";
+    return `${correctDay}${separatorGroup}${optionalTanggal}${dateGroup} ${monthGroup} ${yearGroup}`;
+  });
+}
+
+function correctWeekdaysInObject(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  
+  if (typeof obj === "string") {
+    return correctWeekdaysInString(obj);
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => correctWeekdaysInObject(item));
+  }
+  
+  if (typeof obj === "object") {
+    const result: any = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        result[key] = correctWeekdaysInObject(obj[key]);
+      }
+    }
+    return result;
+  }
+  
+  return obj;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { transcript, imageAnalysis, pdfText, userInput, templateType } = await req.json();
@@ -16,11 +91,40 @@ export async function POST(req: NextRequest) {
       year: "numeric",
     });
 
+    const currentDay = new Date().toLocaleDateString("id-ID", { weekday: "long" });
+
+    // Calendar helper matrix to guarantee 100% accurate day-to-date mapping for all of 2026
+    const calendarContext = `
+=========================================
+PENTING: ACUAN KALENDER & HARI LIBUR NASIONAL TAHUN 2026 (Wajib presisi 100%):
+- Hari ini adalah hari ${currentDay}, tanggal ${currentDate}.
+- Daftar Hari Libur Nasional & Kejadian Penting 2026 Resmi SKB 3 Menteri:
+  * 1 Januari (Kamis): Tahun Baru 2026 Masehi
+  * 16 Januari (Jumat): Isra Mikraj Nabi Muhammad SAW
+  * 17 Februari (Selasa): Tahun Baru Imlek 2577 Kongzili
+  * 16 Februari (Senin) & 18 Maret (Rabu): Cuti Bersama Imlek & Nyepi
+  * 19 Maret (Kamis): Hari Suci Nyepi (Tahun Baru Saka 1948)
+  * 21-22 Maret (Sabtu-Minggu): Hari Raya Idul Fitri 1447 Hijriah
+  * 20, 23, 24 Maret (Jumat, Senin, Selasa): Cuti Bersama Idul Fitri 1447 H
+  * 1 Mei (Jumat): Hari Buruh Internasional
+  * 14 Mei (Kamis): Hari Kenaikan Yesus Kristus
+  * 15 Mei (Jumat): Cuti Bersama Kenaikan Yesus Kristus
+  * 27 Mei (Rabu): Hari Raya Idul Adha 1447 Hijriah
+  * 28 Mei (Kamis): Cuti Bersama Hari Raya Idul Adha 1447 H
+  * 31 Mei (Minggu - Hari Ini): Hari Raya Waisak 2570 BE
+  * 1 Juni (Senin - Besok): Hari Lahir Pancasila
+  * 16 Juni (Selasa): Tahun Baru Islam 1448 Hijriah
+  * 17 Agustus (Senin): Hari Kemerdekaan RI
+- Anda dilarang keras mengarang atau salah memetakan nama hari dengan tanggalnya. Pastikan semua penulisan hari dan tanggal dalam laporan Anda disinkronkan secara matematis dengan kalender Masehi 2026 yang sahih (misalnya, jika Anda menulis tanggal 19 Mei 2026 itu adalah hari Selasa, 27 Mei 2026 adalah hari Rabu, dan 31 Mei 2026 adalah hari Minggu).
+=========================================`;
+
     let systemPrompt = "";
     if (templateType === "laporan-informasi") {
       systemPrompt = `Anda adalah asisten AI profesional pembuat Laporan Informasi dinas resmi kepolisian dan intelkam berbahasa Indonesia.
 Tugas Anda adalah membuat isi Laporan Informasi formal berdasarkan hasil transkrip audio/sambutan, analisa gambar rundown acara, isi guidebook PDF panduan acara, dan catatan user. 
 Anda WAJIB mengikuti format parafrase, gaya bahasa formal-analitis, dan struktur kalimat persis seperti dokumen referensi intelkam resmi.
+
+${calendarContext}
 
 PENTING - JANGAN PERNAH MENYUSUN TENTANG "TURNAMEN FUTSAL IKAMMI" JIKA MASUKAN PENGGUNA MEMBAHAS HAL LAIN:
 1. Anda DILARANG keras berasumsi atau memasukkan fakta bawaan (seperti Turnamen Futsal IKAMMI Singgalang Cup, lokasi GOR Futsal Stadion Undip Tembalang, 24 tim putra, Polsek Tembalang, dsb.) ke dalam laporan jika input data dari pengguna membahas topik acara lain yang berbeda!
@@ -84,6 +188,8 @@ Aturan Tambahan:
 Tugas Anda adalah membuat isi Laporan Harian berdasarkan hasil transkrip audio/sambutan, analisa gambar rundown acara, isi guidebook PDF panduan acara, dan catatan user.
 Anda WAJIB mengikuti format parafrase, gaya bahasa formal-analitis, dan struktur kalimat persis seperti contoh referensi Laporan Harian.
 
+${calendarContext}
+
 PENTING:
 1. Susun seluruh isi laporan 100% secara dinamis dan faktual berdasarkan data nyata yang disediakan di bawah ini (rundown gambar, PDF guidebook, transkrip, catatan teks). Jangan pernah menyalin konten contoh "Nobar Film Pesta Babi" di bawah ini kecuali jika masukan pengguna memang tentang itu!
 2. Rujuk contoh di bawah HANYA SEBAGAI REFERENSI GAYA BAHASA, FORMAT PENULISAN JSON, DAN STRUKTUR KALIMAT.
@@ -122,6 +228,8 @@ Aturan Tambahan:
     } else {
       systemPrompt = `Anda adalah asisten AI profesional pembuat laporan dinas resmi dan korporat berbahasa Indonesia.
 Tugas Anda adalah membuat isi laporan resmi formal bahasa Indonesia berdasarkan hasil transkrip audio, analisis gambar rundown acara, isi guidebook PDF panduan acara, dan catatan user. Gunakan gaya bahasa profesional, singkat, jelas, dan format sesuai laporan dinas resmi (EYD yang disempurnakan, sopan, objektif, dan bernada formal).
+
+${calendarContext}
 
 PENTING:
 1. Susun seluruh laporan HANYA berdasarkan data nyata yang disediakan di masukan pengguna (gambar rundown, PDF guidebook, transkrip rekaman suara, catatan teks). Jangan mengada-ada atau berhalusinasi.
@@ -193,9 +301,12 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
     }
 
     const resultText = response.choices[0].message.content || "{}";
-    const reportData = JSON.parse(resultText);
+    let reportData = JSON.parse(resultText);
 
-    console.log("Report narrative generated successfully via Gemini!");
+    // Apply dynamic calendar corrector to ensure 100% precision for any day/date combination
+    reportData = correctWeekdaysInObject(reportData);
+
+    console.log("Report narrative generated and calendar-synchronized successfully via Gemini!");
     return NextResponse.json(reportData);
   } catch (error: any) {
     console.error("Generate Report API Error:", error);
