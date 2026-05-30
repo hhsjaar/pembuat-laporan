@@ -1,7 +1,8 @@
 "use client";
 
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Download, RotateCcw, FileSpreadsheet, MapPin, Calendar, FileText } from "lucide-react";
+import { Download, RotateCcw, FileSpreadsheet, MapPin, Calendar, FileText, Copy, CheckCircle2 } from "lucide-react";
 
 interface ReportData {
   judul?: string;
@@ -23,6 +24,10 @@ interface ReportData {
   prediksi?: string;
   langkah?: string;
   rekomendasi?: string;
+  
+  // Custom template fields for Laporan Harian
+  E?: string;
+  F?: string;
 }
 
 interface ReportPreviewProps {
@@ -40,14 +45,94 @@ export default function ReportPreview({
   onReset,
   isDownloading,
 }: ReportPreviewProps) {
+  const [copied, setCopied] = useState(false);
+
   // Mapping template titles for the header display
   const templateTitles: Record<string, string> = {
     "laporan-informasi": "LAPORAN INFORMASI RESMI",
+    "laporan-harian": "LAPORAN HARIAN POLSEK TEMBALANG",
     "laporan-harian-khusus": "LAPORAN HARIAN KHUSUS (LHK)",
     "laporan-khusus-3": "LAPORAN KHUSUS - TIPE 3",
   };
 
   const currentTemplateTitle = templateTitles[templateType] || "DOKUMEN DOKUMENTASI LAPORAN";
+
+  const stripPrefix = (text: string | undefined, prefix: string) => {
+    if (!text) return "";
+    const trimmed = text.trim();
+    const regex = new RegExp(`^${prefix}\\s*`, "i");
+    return trimmed.replace(regex, "");
+  };
+
+  const getPlainReportText = () => {
+    const cleanA = stripPrefix(reportData.A, "A\\.");
+    const cleanB = stripPrefix(reportData.B, "B\\.");
+    const cleanC = stripPrefix(reportData.C, "C\\.");
+    const cleanD = stripPrefix(reportData.D, "D\\.");
+    const cleanE = stripPrefix(reportData.E, "E\\.");
+    const cleanF = stripPrefix(reportData.F, "F\\.");
+
+    return `POLRESTABES SEMARANG
+POLSEK TEMBALANG
+================
+
+Kepada Yth.
+*KAPOLRESTABES SEMARANG*
+
+Dari :
+*KAPOLSEK TEMBALANG*
+
+Perihal : *${reportData.perihal || ""}*
+
+A. ${cleanA}
+
+B. ${cleanB}
+
+C. ${cleanC}
+
+D. ${cleanD}
+
+E. ${cleanE}
+
+F. ${cleanF}
+
+
+*DUMP*
+
+Kapolsek Tembalang
+*KOMPOL KRISTIYASTUTI HANDAYANI, SH, MH.*
+
+Tembusan:
+
+1. Waka Polrestabes Semarang.
+2. KabagOps Polrestabes Semarang.
+3. KasatIntelkam Polrestabes Semarang.`;
+  };
+
+  const handleCopyText = async () => {
+    try {
+      await navigator.clipboard.writeText(getPlainReportText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Gagal menyalin teks:", err);
+    }
+  };
+
+  const handleTextDownload = () => {
+    const text = getPlainReportText();
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `laporan-harian-${Date.now()}.txt`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const isLaporanHarian = templateType === "laporan-harian";
 
   return (
     <motion.div
@@ -67,7 +152,9 @@ export default function ReportPreview({
               Pratinjau Laporan Sukses Dibuat
             </h3>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Dokumen Anda telah siap diunduh dalam format Microsoft Word (.docx).
+              {isLaporanHarian 
+                ? "Teks laporan harian siap disalin langsung untuk dibagikan ke WhatsApp/Telegram." 
+                : "Dokumen Anda telah siap diunduh dalam format Microsoft Word (.docx)."}
             </p>
           </div>
         </div>
@@ -82,19 +169,50 @@ export default function ReportPreview({
             <span>Generate Ulang</span>
           </button>
           
-          <button
-            type="button"
-            onClick={onDownload}
-            disabled={isDownloading}
-            className="flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all text-xs font-semibold shadow-lg shadow-neutral-950/10 dark:shadow-white/10 w-full sm:w-auto"
-          >
-            {isDownloading ? (
-              <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Download className="w-3.5 h-3.5" />
-            )}
-            <span>{isDownloading ? "Mengekspor..." : "Unduh Dokumen (.docx)"}</span>
-          </button>
+          {isLaporanHarian ? (
+            <>
+              <button
+                type="button"
+                onClick={handleCopyText}
+                className="flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shadow-lg w-full sm:w-auto"
+              >
+                {copied ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Tersalin!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Salin Laporan</span>
+                  </>
+                )}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleTextDownload}
+                className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-xs font-semibold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-900 active:scale-95 transition-all w-full sm:w-auto"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Unduh Teks (.txt)</span>
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={onDownload}
+              disabled={isDownloading}
+              className="flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all text-xs font-semibold shadow-lg shadow-neutral-950/10 dark:shadow-white/10 w-full sm:w-auto"
+            >
+              {isDownloading ? (
+                <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Download className="w-3.5 h-3.5" />
+              )}
+              <span>{isDownloading ? "Mengekspor..." : "Unduh Dokumen (.docx)"}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -250,6 +368,36 @@ export default function ReportPreview({
                 </div>
                 <div className="w-32 border-b border-neutral-900 ml-auto" />
               </div>
+            </div>
+          </div>
+        ) : isLaporanHarian ? (
+          /* Sleek Mono Space Plain Text Preview with Copy to Clipboard Integration */
+          <div className="space-y-6 max-w-2xl mx-auto text-neutral-900 select-text">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+              <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest font-sans">Pratinjau Teks (WhatsApp / Telegram)</span>
+              <button
+                type="button"
+                onClick={handleCopyText}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-[11px] font-bold text-neutral-800 transition-colors"
+              >
+                {copied ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="text-emerald-700">Tersalin!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Salin Laporan</span>
+                  </>
+                )}
+              </button>
+            </div>
+            
+            <div className="relative rounded-2xl border border-neutral-200/60 bg-neutral-50 p-6 sm:p-8 font-mono text-xs leading-relaxed overflow-x-auto text-neutral-800 shadow-inner select-text">
+              <pre className="whitespace-pre-wrap font-mono text-[11.5px] select-text">
+                {getPlainReportText()}
+              </pre>
             </div>
           </div>
         ) : (

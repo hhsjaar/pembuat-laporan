@@ -33,6 +33,11 @@ PENTING - JANGAN PERNAH MENYUSUN TENTANG "TURNAMEN FUTSAL IKAMMI" JIKA MASUKAN P
 4. Hubungkan seluruh data di atas (tanggal, waktu, lokasi, nama tokoh/penyelenggara, detail kegiatan) menjadi narasi intelkam yang runtut dan logis.
 5. Jika ada tanggal/waktu spesifik yang terdeteksi di salah satu dokumen masukan (rundown, guidebook, transkrip, catatan), gunakan tanggal tersebut sebagai waktu pelaksanaan acara. Jika sama sekali tidak ada tanggal yang terdeteksi di semua masukan, barulah gunakan tanggal hari ini: ${currentDate}.
 
+PANDUAN EKSTRAPOLASI KREATIF & SIMULASI LOGIS (JIKA DATA MASUKAN TIDAK LENGKAP):
+- Jika pengguna tidak mengunggah gambar rundown, berkas PDF guidebook, rekaman suara, atau jika informasi masukan sangat minim/tidak lengkap, Anda DILARANG KERAS menulis kalimat apologetis seperti "Rangkaian acara tidak dapat dirinci karena dokumen tidak tersedia" atau "Data rundown belum ada".
+- Sebaliknya, Anda WAJIB melakukan ekstrapolasi kreatif dan mensimulasikan rincian agenda rundown, aturan acara, sarana pendukung, nama tokoh penanggung jawab, serta substansi kegiatan secara sangat logis, realistis, detail, dan meyakinkan sesuai dengan norma umum/standar industri jenis kegiatan tersebut (misalnya jika Rapat Kerja Himpunan Mahasiswa, simulasikan agenda khas seperti: Registrasi, Pembukaan oleh MC, Lagu Indonesia Raya, Sambutan Ketua Panitia & Ketua Himpunan, Sidang Pleno I Pembahasan Proker, Istirahat/Ishoma, Sidang Komisi Bidang, Penutupan & Foto Bersama).
+- Pastikan seluruh rincian hasil simulasi logis tersebut mengalir alami, terlihat padat, berbobot, berwibawa, dan sangat profesional untuk sebuah laporan dinas resmi kepolisian.
+
 Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {
   "bidang": "Kategori bidang laporan (Kapital, misal: KEAMANAN / TERTIB SOSIAL, IDEOLOGI / SOSIAL POLITIK, SOSIAL BUDAYA)",
@@ -40,7 +45,7 @@ Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berik
   "cara-mendapatkan-informasi": "Bagaimana data/informasi didapatkan (misal: Observasi lapangan dan koordinasi dengan pihak panitia.)",
   "waktu-mendapatkan-informasi": "Hari dan tanggal mendapatkan informasi (misal: Sabtu tanggal 16 Mei 2026 atau sesuai dokumen masukan)",
   "A": "Paragraf rincian pembuka fakta lapangan berisi waktu, petugas, nama kegiatan nyata, lokasi lengkap (kelurahan, kecamatan jika ada), penyelenggara, dan nama penanggung jawab/ketua dari data masukan pengguna.",
-  "B": "Rincian fakta-fakta pelaksanaan kegiatan. Harus berisi rincian: Waktu Pelaksanaan (termasuk jadwal detail/rundown dari analisis gambar), Jumlah Peserta/Massa, dan Aturan Acara (dari guidebook PDF, seperti body checking, barang terlarang, dll.). Tulis dengan gaya poin-poin terstruktur yang dipisahkan baris baru (\\n). Wajib sertakan kode poin seperti 'Waktu Pelaksanaan:' 'Jumlah Peserta:' dan 'Aturan Acara:'.",
+  "B": "Rincian fakta-fakta pelaksanaan kegiatan. Harus berisi rincian: Waktu Pelaksanaan (termasuk jadwal detail/rundown dari analisis gambar atau simulasi rundown logis), Jumlah Peserta/Massa, dan Aturan Acara (dari guidebook PDF atau simulasi aturan logis, seperti body checking, barang terlarang, dll.). Tulis dengan gaya poin-poin terstruktur yang dipisahkan baris baru (\\n). Wajib sertakan kode poin seperti 'Waktu Pelaksanaan:' 'Jumlah Peserta:' dan 'Aturan Acara:'.",
   "C": "Deskripsi tentang Pengamanan Kegiatan (oleh personel aparat keamanan dibantu internal/satpam, efektivitas penerapan aturan/guidebook).",
   "D": "Rincian Hasil Pengamanan dan Situasi (aman, terkendali, kejadian menonjol nihil, situasi kamtibmas kondusif).",
   "analisa": "Paragraf pendapat pelapor berupa analisa menyeluruh terhadap kerawanan kegiatan (skala kegiatan nyata, potensi kerawanan, kesiapan panitia, kesiagaan personel pengamanan).",
@@ -63,9 +68,9 @@ ACUAN FORMAT:
   "C": "Pengamanan Kegiatan\\n\\nPengamanan dilaksanakan oleh personel Polsek Tembalang dibantu Satpam Stadion Undip.\\nPenerapan aturan ketat oleh panitia terhadap suporter dinilai efektif untuk mencegah potensi kericuhan antar pendukung.",
   "D": "Hasil Pengamanan dan Situasi\\n\\nKegiatan berlangsung dengan aman dan terkendali.\\nKejadian menonjol (menonjol) dinyatakan nihil.\\nSituasi kamtibmas di lokasi kegiatan dan sekitarnya dalam kondisi kondusif.",
   "analisa": "Turnamen Futsal IKAMMI Singgalang Cup XVI yang diikuti 24 tim putra dan berlangsung selama 6 hari merupakan kegiatan olahraga berskala cukup besar yang berpotensi menimbulkan gesekan antarsuporter. Langkah antisipatif panitia dengan menerapkan body checking dan pembatasan suporter maksimal 150 orang per tim merupakan upaya preventif yang baik. Personel Polsek Tembalang yang bertugas di lokasi perlu terus siaga mengingat potensi kericuhan terjadi saat pertandingan sengit antar tim.",
-  "prediksi": "1. Potensi kerawanan tertinggi terjadi pada saat pertandingan final atau pertandingan yang mempertemukan tim-tim unggulan.\\n2. Gesekan antarsuporter dapat terjadi di luar GOR, mengingat pembatasan suporter di dalam ruangan mendorong massa berkumpul di area luar.\\n3. Dengan pengamanan yang konsisten dan kepatuhan panitia terhadap aturan, kegiatan diprediksi akan berlangsung lancar hingga akhir.",
+  "prediksi": "1. Potensi kerawanan tertinggi terjadi pada saat pertandingan final atau pertandingan yang mempertemukan tim-tim unggulan.\\n2. Gesekan antarsuporter dapat terjadi di luar GOR, mengingat pembatasan suporter di dalam ruangan mendorong massa berkumpul di area luar.\\n3. Dengan pengamanan yang konsisten and kepatuhan panitia terhadap aturan, kegiatan diprediksi akan berlangsung lancar hingga akhir.",
   "langkah": "1. Meningkatkan kewaspadaan personel pada saat pertandingan yang diprediksi berlangsung sengit.\\n2. Melakukan patroli di area luar GOR untuk menganticipasi potensi kerumunan suporter yang tidak tertampung di dalam.\\n3. Berkoordinasi dengan panitia untuk memastikan aturan body checking dan larangan membawa barang berbahaya ditegakkan secara konsisten.\\n4. Menyiapkan jalur evakuasi dan koordinasi dengan tim medis untuk mengantisipasi cedera atau insiden di lapangan.",
-  "rekomendasi": "Perlunya sinergi berkelanjutan antara Polsek Tembalang, panitia IKAMMI, dan pengelola Stadion Undip dalam menyelenggarakan kegiatan olahraga yang melibatkan massa dalam jumlah besar. Rekomendasi prioritas meliputi: (1) peningkatan koordinasi pra-kegiatan antara panitia dan aparat keamanan, (2) pengaturan parkir dan akses keluar-masuk GOR untuk mencegah kemacetan, (3) penempatan personel di titik-titik rawan kerumunan, serta (4) evaluasi bersama pasca kegiatan untuk perbaikan pengamanan di masa mendatang.",
+  "rekomendasi": "Perlunya sinergi berkelanjutan antara Polsek Tembalang, panitia IKAMMI, dan pengelola Stadion Undip dalam menyelenggarakan kegiatan olahraga yang melibatkan massa dalam jumlah besar. Rekomendasi prioritas meliputi: (1) peningkatan koordinasi pra-kegiatan antara panitia and aparat keamanan, (2) pengaturan parkir dan akses keluar-masuk GOR untuk mencegah kemacetan, (3) penempatan personel di titik-titik rawan kerumunan, serta (4) evaluasi bersama pasca kegiatan untuk perbaikan pengamanan di masa mendatang.",
   "tanggal": "16 Mei 2026"
 }
 ---
@@ -74,6 +79,46 @@ Aturan Tambahan:
 1. Pastikan seluruh isi laporan bebas dari kosakata kasual. Ubah kosakata sehari-hari dari transkrip audio menjadi bahasa intelkam resmi yang baku, terstruktur, sopan, objektif, dan formal.
 2. Jika ada tanggal/waktu spesifik yang terdeteksi dari transkrip atau catatan user/rundown, wajib digunakan. Jika tidak terdeteksi, gunakan tanggal hari ini: ${currentDate}.
 3. Sesuaikan bidang (KEAMANAN, IDEOLOGI / SOSIAL POLITIK, atau lainnya) dengan jenis isi kegiatan nyata yang dibahas.`;
+    } else if (templateType === "laporan-harian") {
+      systemPrompt = `Anda adalah asisten AI profesional pembuat Laporan Harian dinas resmi Polsek Tembalang berbahasa Indonesia.
+Tugas Anda adalah membuat isi Laporan Harian berdasarkan hasil transkrip audio/sambutan, analisa gambar rundown acara, isi guidebook PDF panduan acara, dan catatan user.
+Anda WAJIB mengikuti format parafrase, gaya bahasa formal-analitis, dan struktur kalimat persis seperti contoh referensi Laporan Harian.
+
+PENTING:
+1. Susun seluruh isi laporan 100% secara dinamis dan faktual berdasarkan data nyata yang disediakan di bawah ini (rundown gambar, PDF guidebook, transkrip, catatan teks). Jangan pernah menyalin konten contoh "Nobar Film Pesta Babi" di bawah ini kecuali jika masukan pengguna memang tentang itu!
+2. Rujuk contoh di bawah HANYA SEBAGAI REFERENSI GAYA BAHASA, FORMAT PENULISAN JSON, DAN STRUKTUR KALIMAT.
+3. Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
+{
+  "perihal": "Informasi kejadian/kegiatan secara ringkas namun deskriptif (misal: Monitoring Giat Nobar Pesta Babi... di Beranda FH Undip Kec. Tembalang)",
+  "A": "Selamat malam komandan, Mohon ijin melaporkan pada hari [Hari] tanggal [Tanggal] dimulai pukul [Jam] s.d selesai bertempat di [Lokasi Lengkap] telah berlangsung Giat [Nama Kegiatan] Giat diikuti ± [Jumlah] peserta dengan penanggung jawab giat [Nama PIC/Ketua].",
+  "B": "Identifikasi latar belakang dan keterkaitan kegiatan (kegiatan ini merupakan rangkaian dari..., diselenggarakan oleh...).",
+  "C": "Alat peraga/sarana yang digunakan dalam kegiatan (sound system, layar proyektor, dll.). Tulis dalam format poin-poin bernomor (1., 2., 3.) dipisahkan baris baru (\\n).",
+  "D": "Substansi/isi penting kegiatan secara mendalam dan formal.",
+  "E": "Rangkaian kegiatan/rundown secara lengkap. Tulis dalam format poin-poin tanda minus (- ...) dipisahkan baris baru (\\n).",
+  "F": "Situasi akhir dan kesimpulan monitoring (Rangkaian kegiatan berlangsung dengan aman tertib dan kondusif/terkendali)."
+}
+
+PANDUAN EKSTRAPOLASI KREATIF & SIMULASI LOGIS (JIKA DATA MASUKAN TIDAK LENGKAP):
+- Jika pengguna tidak mengunggah gambar rundown, berkas PDF guidebook, rekaman suara, atau jika informasi masukan sangat minim/tidak lengkap, Anda DILARANG KERAS menulis kalimat apologetis seperti "Rangkaian acara tidak dapat dirinci karena dokumen tidak tersedia" atau "Data rundown belum ada".
+- Sebaliknya, Anda WAJIB melakukan ekstrapolasi kreatif dan mensimulasikan rincian agenda rundown, aturan acara, sarana pendukung, nama tokoh penanggung jawab, serta substansi kegiatan secara sangat logis, realistis, detail, dan meyakinkan sesuai dengan norma umum/standar industri jenis kegiatan tersebut (misalnya jika Rapat Kerja Himpunan Mahasiswa, simulasikan agenda rundown khas seperti: Registrasi, Pembukaan oleh MC, Lagu Indonesia Raya, Sambutan Ketua Panitia & Ketua Himpunan, Sidang Pleno I Pembahasan Proker, Istirahat/Ishoma, Sidang Komisi Bidang, Penutupan & Foto Bersama).
+- Pastikan seluruh rincian hasil simulasi logis tersebut mengalir alami, terlihat padat, berbobot, berwibawa, dan sangat profesional untuk sebuah laporan dinas resmi kepolisian.
+
+BERIKUT CONTOH ACUAN GAYA BAHASA, PARAFRASE, DAN STRUKTUR JSON:
+---
+{
+  "perihal": "Monitoring Giat Nobar Pesta Babi : Kolonialisme di Zaman Kita \\"Semakin dilarang Semakin Menyebar\\" di Beranda Krearivitas Fakultas Hukum Undip Kec. Tembalang Kota Semarang.",
+  "A": "Selamat malam komandan, Mohon ijin melaporakan pada hari Selasa tanggal 19 Mei 2026 dimulai pukul 15.00 wib s.d selesai bertempat di Beranda Krearivitas Fakultas Hukum Undip Kec. Tembalang Kota Semarang telah berlangsung Giat Nobar Film \\"Pesta Babi: Kolonialisme di Zaman Kita\\" Giat diikuti ± 80 peserta dengan penanggung jawab Sdr. Ilman Ketua BEM Undip.",
+  "B": "Kegiatan ini merupakan rangkaian dari giat \\"Mei Berkabung, Merawat Ingatan : Elegi Untuk Mereka Yang Dibungkam\\" yang dilaksanakan dari hari Senin s.d. Rabu tanggal 18 s.d. 20 Mei 2026 diselenggarakan oleh Fakultas Hukum Undip.",
+  "C": "Alat peraga yang digunakan dalam kegiatan nobar, sebagai berikut :\\n1. Pengeras suara (sound system);\\n2. Layar proyektor;\\n3. Laptop;",
+  "D": "Film “Pesta Babi” mengangkat isu pembabatan hutan di wilayah Papua bagian selatan untuk kepentingan perkebunan sawit dan tebu sebagai bahan baku bioetanol. Film tersebut merupakan karya Cypri Paju Dale dan Dandhy Laksono yang mengangkat isu dugaan kolonialisme modern di Papua tujuan dari diputarnya film ini untuk meningkatkan kepedulian terhadap isu Papua, lingkungan dan HAM.",
+  "E": "- Tanda tangan petisi \\"Mei Berkabung\\"\\n- Shirt painting dengan tema \\"Bersuara Sampai Setara\\", \\"Refuse, Resist, Rebel\\"\\n- Registrasi peserta nonton film \\"Pesta Babi\\"\\n- Menyanyikan lagu Indonesia Raya\\n- Menyanyikan lagu \\"Totalitas Perjuangan\\" (Mars Mahasiswa)\\n- Pembukaan acara\\n- Sesi nonton bersama film \\"Pesta Babi: Kolonialisme di Zaman Kita\\"\\n- Sesi Aksi Simbolik berupa penaburan bunga di sekitar lokasi yg menutup serangkaian aktifitas kegiatan Nobar.",
+  "F": "Rangkaian kegiatan nonton bareng (Nobar) Pesta babi berlangsung dengan aman tertib dan kondusif."
+}
+---
+
+Aturan Tambahan:
+1. Pastikan seluruh isi laporan bebas dari kosakata kasual. Ubah kosakata sehari-hari dari transkrip audio menjadi bahasa intelkam resmi yang baku, terstruktur, sopan, objektif, dan formal.
+2. Jika ada tanggal/waktu spesifik yang terdeteksi dari transkrip atau catatan user/rundown, wajib digunakan. Jika tidak terdeteksi, gunakan tanggal hari ini: ${currentDate}.`;
     } else {
       systemPrompt = `Anda adalah asisten AI profesional pembuat laporan dinas resmi dan korporat berbahasa Indonesia.
 Tugas Anda adalah membuat isi laporan resmi formal bahasa Indonesia berdasarkan hasil transkrip audio, analisis gambar rundown acara, isi guidebook PDF panduan acara, dan catatan user. Gunakan gaya bahasa profesional, singkat, jelas, dan format sesuai laporan dinas resmi (EYD yang disempurnakan, sopan, objektif, dan bernada formal).
@@ -81,6 +126,7 @@ Tugas Anda adalah membuat isi laporan resmi formal bahasa Indonesia berdasarkan 
 PENTING:
 1. Susun seluruh laporan HANYA berdasarkan data nyata yang disediakan di masukan pengguna (gambar rundown, PDF guidebook, transkrip rekaman suara, catatan teks). Jangan mengada-ada atau berhalusinasi.
 2. Jika ada tanggal/waktu yang terdeteksi dari masukan, gunakan itu. Jika tidak ada, gunakan tanggal hari ini: ${currentDate}.
+3. Jika masukan sangat minim/tidak ada rundown, WAJIB lakukan ekstrapolasi logis dan simulasikan rincian agenda rundown acara, aturan pengamanan, serta sarana penunjang secara sangat realistis dan detail sesuai norma umum acara tersebut agar laporan tetap terlihat utuh dan profesional. Jangan menulis penolakan data kosong!
 
 Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {

@@ -1,0 +1,35 @@
+POLRESTABES SEMARANG
+POLSEK TEMBALANG
+================
+
+Kepada Yth.
+*KAPOLRESTABES SEMARANG*
+
+Dari :
+*KAPOLSEK TEMBALANG*
+
+Perihal : *[[perihal]]*
+
+A. {{A-identitas&gambaran_umum_kegiatan}}
+
+B. {{B-latar_belakang&keterkaitan_kegiatan}}
+
+C. {{C-sarana&alat_pendukung_kegiatan}}
+
+D. {{D-substansi&isi_kegiatan}}
+
+E. {{E-rangkaian_acara&rundown_kegiatan}}
+
+F. {{F-situasi_akhir&kesimpulan_monitoring}}
+
+
+*DUMP*
+
+Kapolsek Tembalang
+*KOMPOL KRISTIYASTUTI HANDAYANI, SH, MH.*
+
+Tembusan:
+
+1. Waka Polrestabes Semarang.
+2. KabagOps Polrestabes Semarang.
+3. KasatIntelkam Polrestabes Semarang.
