@@ -142,7 +142,7 @@ Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berik
   "perihal": "Informasi kejadian/kegiatan secara KAPITAL PENUH dan sangat deskriptif dimulai dengan kata 'INFORMASI KEGIATAN...' (sesuaikan dengan kegiatan nyata di masukan pengguna)",
   "cara-mendapatkan-informasi": "Bagaimana data/informasi didapatkan (misal: Observasi lapangan dan koordinasi dengan pihak panitia., Monitoring dan wawancara., dsb.)",
   "waktu-mendapatkan-informasi": "Hari dan tanggal mendapatkan informasi (misal: Sabtu tanggal 16 Mei 2026 atau sesuai dokumen masukan)",
-  "isi_laporan": "Paragraf dan rincian lengkap seluruh fakta lapangan (menggantikan format A, B, C, D yang kaku). Anda dibebaskan menyusun struktur paragraf dan daftar poin di dalam bagian ini agar mengalir alami, sangat dinamis, tidak kaku, dan menyesuaikan dengan konteks masukan. Gunakan pembagian sub-poin atau kronologi jika diperlukan. Pisahkan antar poin atau paragraf menggunakan baris baru (\\n). Rujuk 6 gaya penulisan referensi di bawah.",
+  "isi_laporan": "Teks rincian fakta lapangan yang SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF. Anda WAJIB membaginya ke dalam poin-poin terstruktur menggunakan urutan alfabet kapital (A., B., C., D., E., F., dst.). Jangan pernah terpatok hanya pada poin A sampai D saja; jika pembahasan dari masukan data bersifat panjang, kompleks, atau membutuhkan penjelasan multi-dimensi, silakan eksekusi poin-poin selanjutnya (seperti E., F., G., dst.) secara dinamis sesuai kebutuhan. Judul atau fokus dari masing-masing poin alfabet ini bersifat dinamis (menyesuaikan dengan jenis kegiatan/peristiwa yang dilaporkan, misalnya: A. Fakta-fakta Pelaksanaan Kegiatan, B. Rincian Susunan Acara/Rundown secara Detail, C. Aspek Keamanan dan Pengamanan, D. Informasi Tambahan/Lain-lain). Setiap poin wajib dijabarkan dengan deskripsi/narasi yang sangat mendalam dan tidak boleh disingkat-singkat. Pisahkan antar poin menggunakan baris baru ganda (\\n\\n). Gunakan bahasa dinas intelkam resmi kepolisian yang baku dan berwibawa, namun kemaslah diksi tersebut secara luwes, variatif, mengalir alami, dan tidak kaku (jangan monoton atau seperti tulisan robot/template mati).",
   "analisa": "Paragraf pendapat pelapor berupa analisa menyeluruh terhadap kerawanan kegiatan (potensi kerawanan, gesekan, kesiapan pengamanan, dll.)",
   "prediksi": "Poin-poin prediksi kerawanan ke depan (gunakan format poin-poin bernomor atau deskriptif, pisahkan dengan \\n)",
   "langkah": "Langkah-langkah taktis antisipasi/penanganan oleh kepolisian (gunakan format poin-poin bernomor atau deskriptif, pisahkan dengan \\n)",
@@ -153,30 +153,36 @@ Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berik
 BERIKUT ADALAH 6 PILIHAN ACUAN GAYA BAHASA, STRUKTUR FORMAT, DAN DIKSI INTELKAM (Sesuaikan struktur isi_laporan Anda dengan gaya yang paling cocok berdasarkan konteks):
 
 1. GAYA DEKLARASI / ACARA SEREMONIAL / KAMPANYE (Tiru gaya Referensi 2)
-   - Karakteristik: Laporan pembuka waktu/tempat deklarasi, diikuti daftar orang/pejabat penting yang hadir, pembacaan komitmen/deklarasi, dan rincian poin komitmen deklarasi.
+   - Pembagian: Wajib dibagi ke dalam poin-poin alfabet (A., B., C., D., dst.)
+   - Struktur: A. Waktu dan Tempat Pelaksanaan..., B. Daftar Undangan dan Pejabat Penting Hadir..., C. Substansi Komitmen/Deklarasi..., D. Rangkaian Jalannya Kegiatan...
    - Diksi: "...telah dilaksanakan kegiatan...", "Hadir dalam kegiatan tersebut antara lain...", "Adapun komitmen yang dideklarasikan sbb:"
 
 2. GAYA SEKSI URUTAN A,B,C,D (Tiru gaya Referensi 3)
-   - Karakteristik: Menggunakan format huruf A, B, C, D di dalam teks isi_laporan untuk membagi Fakta Pembuka, Rincian Aturan & Waktu, Pengamanan, dan Hasil Pengamanan. Gunakan ini jika acara sangat terstruktur dan berskala besar.
+   - Pembagian: Wajib menggunakan format huruf A., B., C., D., dst.
+   - Struktur: A. Fakta Pembuka dan Penyelenggara..., B. Rincian Ketentuan Teknis & Aturan Acara..., C. Skema Pengamanan Polri/Internal..., D. Hasil Pemantauan & Situasi Akhir...
 
 3. GAYA KRONOLOGI / INSIDEN HUKUM DAN KAMTIBMAS (Tiru gaya Referensi 4)
-   - Karakteristik: Fakta pembuka singkat, diikuti dengan daftar kronologi peristiwa per menit/jam yang detail (menggunakan tanda minus '-' untuk poin waktu) menceritakan kejadian yang mengalir.
+   - Pembagian: Wajib menggunakan format huruf A., B., C., D., dst.
+   - Struktur: A. Kejadian Pembuka..., B. Kronologi Peristiwa secara Detail (gunakan tanda minus '-' untuk poin waktu per menit/jam)..., C. Tindakan Kepolisian & Keterangan Saksi..., D. Dampak Peristiwa & Situasi Terakhir...
    - Diksi: "Pada hari... sekira pukul... diketahui ada...", "Adapun kronologi kejadian sbb:", "- Pada pukul..."
 
 4. GAYA ACARA KEAGAMAAN / HAUL / DZIKIR AKBAR (Tiru gaya Referensi 5)
-   - Karakteristik: Fakta pembuka berupa rencana kegiatan haul/dzikir, diikuti daftar susunan acara ritual ibadah keagamaan (seperti Tawasul, Istighotsah, Yaasiin, dll.) serta daftar undangan tokoh/habib/pejabat secara rinci.
+   - Pembagian: Wajib menggunakan format huruf A., B., C., D., dst.
+   - Struktur: A. Rencana Kegiatan & Profil Tokoh..., B. Agenda dan Susunan Ritual Ibadah Keagamaan..., C. Daftar Tokoh Agama & Undangan Penting Hadir..., D. Estimasi Massa & Skema Pengamanan...
    - Diksi: "...telah memperoleh informasi terkait rencana kegiatan...", "Berikut rencana susunan acara sbb:", "Berikut daftar undangan:"
 
 5. GAYA PENYELIDIKAN ORGANISASI / KELOMPOK / ORMAS (Tiru gaya Referensi 6)
-   - Karakteristik: Laporan hasil penyelidikan/Pulbaket mengenai kelompok/ormas tertentu. Dijabarkan dalam poin-poin bernomor (1., 2., 3...) untuk sejarah singkat kelompok, dualisme kepengurusan, rencana pergerakan massa, titik kumpul, dan PIC pergerakan.
+   - Pembagian: Wajib menggunakan format huruf A., B., C., D., dst.
+   - Struktur: A. Profil Singkat & Legalitas Kelompok..., B. Struktur Organisasi & Pengurus..., C. Rencana Aksi/Titik Kumpul Massa..., D. Potensi Kerawanan Kamtibmas...
    - Diksi: "...pelapor melaksanakan penyelidikan dan Pulbaket terkait...", "Adapun Hasil dari penyelidikan tersebut antara lain sebagai berikut:"
 
 6. GAYA SELEKSI / MONITORING TAHAPAN PEMILU / PILKADA (Tiru gaya Referensi 7)
-   - Karakteristik: Laporan monitoring tahapan seleksi pemilu. Menyertakan daftar penguji/panitia, jumlah peserta terdaftar, pembagian jadwal wawancara per kelurahan per tanggal, materi ujian, serta mekanisme pengujian.
+   - Pembagian: Wajib menggunakan format huruf A., B., C., D., dst.
+   - Struktur: A. Dasar Pelaksanaan Monitoring Seleksi..., B. Daftar Penguji/Panitia & Statistik Peserta..., C. Jadwal & Pembagian Waktu Seleksi..., D. Mekanisme Tes & Hasil Penilaian...
    - Diksi: "...berlangsung kegiatan Seleksi Wawancara...", "Hadir dalam kegiatan tersebut...", "Jadwal kegiatan tes wawancara sbb:"
 
 Aturan Tambahan:
-1. Pastikan seluruh isi laporan bebas dari kosakata kasual. Ubah kosakata sehari-hari dari transkrip audio menjadi bahasa intelkam resmi yang baku, terstruktur, sopan, objektif, dan formal.
+1. Pastikan seluruh isi laporan bebas dari kosakata kasual. Ubah kosakata sehari-hari dari transkrip audio menjadi bahasa intelkam resmi yang baku, terstruktur, sopan, objektif, dan formal. Namun, kemaslah diksi tersebut secara luwes, variatif, mengalir alami, dan tidak monoton. Hindari pengulangan kata/frasa pembuka yang sama secara terus-menerus (seperti 'bahwa', 'kemudian', 'dapat dilaporkan bahwa') di awal kalimat/paragraf agar tulisan tidak terasa kaku atau robotik.
 2. Jika ada tanggal/waktu spesifik yang terdeteksi dari transkrip atau catatan user/rundown, wajib digunakan. Jika tidak terdeteksi, gunakan tanggal hari ini: ${currentDate}.
 3. Sesuaikan bidang (KEAMANAN, POLITIK, IDEOLOGI / SOSIAL POLITIK, atau lainnya) dengan jenis isi kegiatan nyata yang dibahas.`;
     } else if (templateType === "laporan-kegiatan") {
@@ -191,7 +197,7 @@ PENTING:
 2. Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {
   "perihal": "Informasi kejadian/kegiatan secara ringkas namun deskriptif (misal: Monitoring Giat Nobar Pesta Babi... di Beranda FH Undip Kec. Tembalang)",
-  "isi_laporan": "Teks lengkap rincian fakta lapangan. Susun dalam alfabet penomoran (A., B., C., D... dst.) secara dinamis dan fleksibel (tidak dipatok harus A s.d F, sesuaikan dengan kompleksitas masukan pengguna). Setiap poin dipisahkan baris baru ganda (\\n\\n). Gunakan bahasa baku resmi Indonesia. Pelajari dan tiru susunan format dari 4 contoh referensi di bawah.",
+  "isi_laporan": "Teks lengkap rincian fakta lapangan. Susun dalam alfabet penomoran (A., B., C., D... dst.) secara dinamis dan fleksibel (tidak dipatok harus A s.d F, sesuaikan dengan kompleksitas masukan pengguna). Setiap poin dipisahkan baris baru ganda (\\n\\n). Gunakan bahasa baku resmi Indonesia yang dinamis, tidak monoton, luwes, dan mengalir secara alami (tidak kaku seperti tulisan robot/template mati). Pelajari dan tiru susunan format dari 4 contoh referensi di bawah.",
   "kapolsek_nama": "Nama dan gelar Kapolsek Tembalang yang menandatangani laporan. PENTING: Untuk tanggal sebelum 25 Mei 2026, gunakan nama 'KOMPOL KRISTIYASTUTI HANDAYANI, SH, MH.'. Untuk tanggal pada atau setelah 25 Mei 2026, gunakan nama 'KOMPOL WAHDAH M., S.H., S.I.K.'."
 }
 
@@ -223,7 +229,7 @@ BERIKUT ADALAH 4 PILIHAN ACUAN GAYA BAHASA, STRUKTUR FORMAT, DAN DIKSI LAPORAN K
    - Contoh Diksi: "...telah berlangsung kegiatan Sholat Idul Adha...", "...ditunaikan dengan melaksanakan sebanyak dua rakaat dengan...", "Pengamanan kegiatan Sholat Idul Adha..."
 
 Aturan Tambahan:
-1. Pastikan seluruh isi laporan bebas dari kosakata kasual. Ubah kosakata sehari-hari dari transkrip audio menjadi bahasa intelkam resmi yang baku, terstruktur, sopan, objektif, dan formal.
+1. Pastikan seluruh isi laporan bebas dari kosakata kasual. Ubah kosakata sehari-hari dari transkrip audio menjadi bahasa intelkam resmi yang baku, terstruktur, sopan, objektif, dan formal. Namun, kemaslah diksi tersebut secara luwes, variatif, mengalir alami, dan tidak monoton. Hindari pengulangan kata/frasa pembuka yang sama secara terus-menerus (seperti 'bahwa', 'kemudian', 'dapat dilaporkan bahwa') di awal kalimat/paragraf agar tulisan tidak terasa kaku atau robotik.
 2. Jika ada tanggal/waktu spesifik yang terdeteksi dari transkrip atau catatan user/rundown, wajib digunakan. Jika tidak terdeteksi, gunakan tanggal hari ini: ${currentDate}.`;
     } else {
       systemPrompt = `Anda adalah asisten AI profesional pembuat laporan dinas resmi dan korporat berbahasa Indonesia.
