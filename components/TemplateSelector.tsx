@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { FileText, Calendar, Shield, CheckCircle2 } from "lucide-react";
 
-export type TemplateType = "laporan-informasi" | "laporan-harian" | "laporan-harian-khusus" | "laporan-khusus-3";
+export type TemplateType = "laporan-informasi" | "laporan-kegiatan" | "laporan-harian-khusus" | "laporan-khusus-3";
 
 interface TemplateSelectorProps {
   selected: TemplateType;
@@ -21,9 +21,9 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
       borderColor: "hover:border-blue-500/30 selected:border-blue-500",
     },
     {
-      id: "laporan-harian" as TemplateType,
-      title: "Laporan Harian",
-      description: "Format laporan harian Polsek Tembalang yang ringkas untuk disalin langsung ke WhatsApp/Telegram.",
+      id: "laporan-kegiatan" as TemplateType,
+      title: "Laporan Kegiatan",
+      description: "Format laporan kegiatan Polsek Tembalang yang ringkas untuk disalin langsung ke WhatsApp/Telegram.",
       icon: FileText,
       color: "from-amber-500/10 to-orange-500/10 text-amber-500 dark:text-amber-400",
       borderColor: "hover:border-amber-500/30 selected:border-amber-500",

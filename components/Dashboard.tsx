@@ -32,8 +32,8 @@ const INITIAL_STEPS: ProcessingStep[] = [
   },
   {
     id: "analyze-image",
-    label: "Analisa Rundown Acara",
-    description: "Mengekstrak jadwal, sesi, jam, dan pembicara dari gambar rundown.",
+    label: "Analisa Gambar Dokumen & Rundown",
+    description: "Mengekstrak jadwal, rincian detail, latar belakang, dan susunan dari seluruh gambar dokumen.",
     status: "idle",
   },
   {
@@ -463,7 +463,7 @@ export default function Dashboard() {
                   <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
                     <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
                       <ImageIcon className="w-4.5 h-4.5 text-neutral-500" />
-                      <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Rundown / Agenda Acara (Gambar)</span>
+                      <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Gambar Dokumen (Rundown, Detail & Latar Belakang)</span>
                     </div>
                     <div className="flex-grow">
                       <ImageUploader images={images} onChange={setImages} />

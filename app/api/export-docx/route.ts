@@ -126,27 +126,8 @@ export async function POST(req: NextRequest) {
       // 1. Clean up any split runs inside the placeholders
       docXml = cleanXmlTags(docXml);
 
-      // 2. Remove preceding bullets inside B, C, D paragraphs using precise literal string replacements (properly closing runs and using double curly delimiters)
-      const targetB = '<w:t xml:space="preserve">B. </w:t><w:tab/></w:r><w:r w:rsidDel="00000000" w:rsidR="00000000" w:rsidRPr="00000000"><w:rPr><w:rFonts w:ascii="Calibri" w:cs="Calibri" w:eastAsia="Calibri" w:hAnsi="Calibri"/><w:rtl w:val="0"/></w:rPr><w:t xml:space="preserve">{{B}}</w:t></w:r>';
-      docXml = docXml.replace(
-        targetB,
-        '<w:t xml:space="preserve">{{@B}}</w:t></w:r>'
-      );
-
-      const targetC = '<w:t xml:space="preserve">C. </w:t><w:tab/></w:r><w:r w:rsidDel="00000000" w:rsidR="00000000" w:rsidRPr="00000000"><w:rPr><w:rFonts w:ascii="Calibri" w:cs="Calibri" w:eastAsia="Calibri" w:hAnsi="Calibri"/><w:rtl w:val="0"/></w:rPr><w:t xml:space="preserve">{{C}}</w:t></w:r>';
-      docXml = docXml.replace(
-        targetC,
-        '<w:t xml:space="preserve">{{@C}}</w:t></w:r>'
-      );
-
-      const targetD = '<w:t xml:space="preserve">D.</w:t><w:tab/><w:t xml:space="preserve">{{D}}</w:t>';
-      docXml = docXml.replace(
-        targetD,
-        '<w:t xml:space="preserve">{{@D}}</w:t>'
-      );
-
-      // 3. Replace remaining multiline fields with raw XML tags using double curly delimiters
-      const otherFields = ["analisa", "prediksi", "langkah", "rekomendasi"];
+      // 2. Replace multiline fields with raw XML tags using double curly delimiters
+      const otherFields = ["isi_laporan", "analisa", "prediksi", "langkah", "rekomendasi"];
       otherFields.forEach((field) => {
         const regex = new RegExp(`\\{\\{${field}\\}\\}`, "g");
         docXml = docXml.replace(regex, `{{@${field}}}`);
@@ -167,11 +148,31 @@ export async function POST(req: NextRequest) {
 
     const isLaporanInformasi = templateType === "laporan-informasi";
 
+    // Backward compatibility helper to combine old A, B, C, D fields if isi_laporan is missing
+    let finalIsiLaporan = reportData.isi_laporan;
+    if (!finalIsiLaporan && (reportData.A || reportData.B || reportData.C || reportData.D)) {
+      const parts = [];
+      if (reportData.A) parts.push(reportData.A);
+      if (reportData.B) {
+        const cleanB = reportData.B.trim();
+        parts.push(cleanB.match(/^[B]\./i) ? cleanB : `B. ${cleanB}`);
+      }
+      if (reportData.C) {
+        const cleanC = reportData.C.trim();
+        parts.push(cleanC.match(/^[C]\./i) ? cleanC : `C. ${cleanC}`);
+      }
+      if (reportData.D) {
+        const cleanD = reportData.D.trim();
+        parts.push(cleanD.match(/^[D]\./i) ? cleanD : `D. ${cleanD}`);
+      }
+      finalIsiLaporan = parts.join("\n\n");
+    }
+
     const renderData: Record<string, any> = {
       tanggal: reportData.tanggal || "",
       lokasi: reportData.lokasi || "",
       judul: reportData.judul || "",
-      isi_laporan: reportData.isi_laporan || "",
+      isi_laporan: isLaporanInformasi ? convertTextToOpenXml(finalIsiLaporan || "") : (reportData.isi_laporan || ""),
       kesimpulan: reportData.kesimpulan || "",
       
       // Laporan Informasi placeholders
@@ -179,10 +180,7 @@ export async function POST(req: NextRequest) {
       perihal: reportData.perihal || "",
       "cara-mendapatkan-informasi": reportData["cara-mendapatkan-informasi"] || "",
       "waktu-mendapatkan-informasi": reportData["waktu-mendapatkan-informasi"] || "",
-      A: reportData.A || "",
-      B: isLaporanInformasi ? convertTextToOpenXml(reportData.B || "", "B. ") : (reportData.B || ""),
-      C: isLaporanInformasi ? convertTextToOpenXml(reportData.C || "", "C. ") : (reportData.C || ""),
-      D: isLaporanInformasi ? convertTextToOpenXml(reportData.D || "", "D. ") : (reportData.D || ""),
+      isi_laporan_raw: finalIsiLaporan || "", // raw string fallback if needed
       analisa: isLaporanInformasi ? convertTextToOpenXml(reportData.analisa || "") : (reportData.analisa || ""),
       prediksi: isLaporanInformasi ? convertTextToOpenXml(reportData.prediksi || "") : (reportData.prediksi || ""),
       langkah: isLaporanInformasi ? convertTextToOpenXml(reportData.langkah || "") : (reportData.langkah || ""),

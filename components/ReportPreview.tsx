@@ -47,10 +47,32 @@ export default function ReportPreview({
 }: ReportPreviewProps) {
   const [copied, setCopied] = useState(false);
 
+  const getDisplayIsiLaporan = () => {
+    if (reportData.isi_laporan) {
+      return reportData.isi_laporan;
+    }
+    // Backward compatibility helper to combine old A, B, C, D fields
+    const parts = [];
+    if (reportData.A) parts.push(reportData.A);
+    if (reportData.B) {
+      const cleanB = reportData.B.trim();
+      parts.push(cleanB.match(/^[B]\./i) ? cleanB : `B. ${cleanB}`);
+    }
+    if (reportData.C) {
+      const cleanC = reportData.C.trim();
+      parts.push(cleanC.match(/^[C]\./i) ? cleanC : `C. ${cleanC}`);
+    }
+    if (reportData.D) {
+      const cleanD = reportData.D.trim();
+      parts.push(cleanD.match(/^[D]\./i) ? cleanD : `D. ${cleanD}`);
+    }
+    return parts.join("\n\n");
+  };
+
   // Mapping template titles for the header display
   const templateTitles: Record<string, string> = {
     "laporan-informasi": "LAPORAN INFORMASI RESMI",
-    "laporan-harian": "LAPORAN HARIAN POLSEK TEMBALANG",
+    "laporan-kegiatan": "LAPORAN KEGIATAN POLSEK TEMBALANG",
     "laporan-harian-khusus": "LAPORAN HARIAN KHUSUS (LHK)",
     "laporan-khusus-3": "LAPORAN KHUSUS - TIPE 3",
   };
@@ -125,14 +147,14 @@ Tembusan:
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `laporan-harian-${Date.now()}.txt`);
+    link.setAttribute("download", `laporan-kegiatan-${Date.now()}.txt`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  const isLaporanHarian = templateType === "laporan-harian";
+  const isLaporanKegiatan = templateType === "laporan-kegiatan";
 
   return (
     <motion.div
@@ -152,8 +174,8 @@ Tembusan:
               Pratinjau Laporan Sukses Dibuat
             </h3>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              {isLaporanHarian 
-                ? "Teks laporan harian siap disalin langsung untuk dibagikan ke WhatsApp/Telegram." 
+              {isLaporanKegiatan 
+                ? "Teks laporan kegiatan siap disalin langsung untuk dibagikan ke WhatsApp/Telegram." 
                 : "Dokumen Anda telah siap diunduh dalam format Microsoft Word (.docx)."}
             </p>
           </div>
@@ -169,7 +191,7 @@ Tembusan:
             <span>Generate Ulang</span>
           </button>
           
-          {isLaporanHarian ? (
+          {isLaporanKegiatan ? (
             <>
               <button
                 type="button"
@@ -293,26 +315,8 @@ Tembusan:
                 HAL-HAL YANG DILAPORKAN
               </h3>
               
-              <div className="space-y-4 pl-3 text-neutral-900 text-justify">
-                <div className="flex items-start space-x-3">
-                  <span className="font-bold text-neutral-950">A.</span>
-                  <p style={{ textIndent: "0.25in" }}>{reportData.A}</p>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <span className="font-bold text-neutral-950">B.</span>
-                  <div className="flex-grow whitespace-pre-line" style={{ textIndent: "0.25in" }}>{reportData.B}</div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <span className="font-bold text-neutral-950">C.</span>
-                  <div className="flex-grow whitespace-pre-line" style={{ textIndent: "0.25in" }}>{reportData.C}</div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <span className="font-bold text-neutral-950">D.</span>
-                  <div className="flex-grow whitespace-pre-line" style={{ textIndent: "0.25in" }}>{reportData.D}</div>
-                </div>
+              <div className="whitespace-pre-line text-neutral-900 pl-3 text-justify leading-relaxed" style={{ textIndent: "0.25in" }}>
+                {getDisplayIsiLaporan()}
               </div>
             </div>
 
@@ -370,7 +374,7 @@ Tembusan:
               </div>
             </div>
           </div>
-        ) : isLaporanHarian ? (
+        ) : isLaporanKegiatan ? (
           /* Sleek Mono Space Plain Text Preview with Copy to Clipboard Integration */
           <div className="space-y-6 max-w-2xl mx-auto text-neutral-900 select-text">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-100">

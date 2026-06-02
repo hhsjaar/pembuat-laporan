@@ -12,21 +12,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Gambar tidak ditemukan dalam unggahan." }, { status: 400 });
     }
 
-    console.log(`Analyzing ${files.length} rundown images using Gemini...`);
+    console.log(`Analyzing ${files.length} document/rundown images using Gemini...`);
 
     // Prepare content array for Gemini vision request
     const contentParts: any[] = [
       {
         type: "text",
-        text: `Minta tolong analisis gambar Rundown / Jadwal Acara / Agenda Acara yang terlampir ini dalam bahasa Indonesia yang formal.
-Mohon ekstrak dan susun secara detail, terperinci, dan kronologis:
-1. Jadwal waktu/timestamps spesifik (jam pelaksanaan setiap sesi).
-2. Nama kegiatan atau sesi acara secara lengkap.
-3. Nama pembicara (speaker), narasumber, moderator, atau penanggung jawab sesi jika tercantum.
-4. Lokasi spesifik ruang/tempat acara jika disebutkan.
-5. Aturan khusus atau instruksi pengamanan/tertib yang tertera pada agenda tersebut.
+        text: `Minta tolong analisis seluruh gambar dokumen terlampir yang berisi Rundown, Jadwal Acara, Potongan Detail Acara, Informasi Latar Belakang, maupun dokumen pendukung lainnya dalam bahasa Indonesia yang formal.
+Mohon lakukan analisis mendalam dan lakukan ekstraksi detail terperinci:
+1. Jadwal & Rundown Acara: Waktu/timestamps pelaksanaan, nama sesi, pembicara, narasumber, moderator, atau penanggung jawab, dan lokasi ruang/tempat acara jika tercantum.
+2. Latar Belakang & Detail Acara: Informasi konteks acara, tujuan, sejarah singkat, kepengurusan panitia, latar belakang organisasi, atau profil tokoh penting yang relevan.
+3. Aturan & Ketentuan Khusus: Segala aturan keamanan, petunjuk teknis pelaksanaan, body checking, barang terlarang, atau tata tertib acara.
+4. Fakta Tambahan: Informasi penting lainnya yang dapat dijadikan bahan fakta dasar penyusunan laporan intelkam resmi.
 
-Berikan hasil analisis ekstraksi jadwal yang sangat padat, runtut, terstruktur sesuai urutan waktu acara, dan profesional untuk dijadikan fakta dasar dalam laporan resmi.`,
+Berikan hasil analisis ekstraksi yang sangat detail, padat, runtut, terstruktur, dan profesional. Kelompokkan berdasarkan kategori informasi yang Anda temukan agar mudah dibaca dan dijadikan dasar penyusunan laporan.`,
       },
     ];
 
@@ -46,7 +45,7 @@ Berikan hasil analisis ekstraksi jadwal yang sangat padat, runtut, terstruktur s
     }
 
     const response = await geminiClient.chat.completions.create({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.5-flash",
       messages: [
         {
           role: "user",

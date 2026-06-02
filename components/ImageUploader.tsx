@@ -106,7 +106,7 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
           </div>
           <div className="space-y-1">
             <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
-              Seret dan lepas gambar ke sini, atau <span className="text-neutral-900 dark:text-white underline underline-offset-2 decoration-neutral-400">cari berkas</span>
+              Seret dan lepas satu atau beberapa gambar sekaligus ke sini, atau <span className="text-neutral-900 dark:text-white underline underline-offset-2 decoration-neutral-400">cari berkas</span>
             </p>
             <p className="text-xs text-neutral-400 dark:text-neutral-500">
               Format PNG, JPG, JPEG hingga 10MB per berkas
