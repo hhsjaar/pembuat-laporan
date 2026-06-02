@@ -7,11 +7,84 @@ import { Image, Upload, X, FileImage, Trash2 } from "lucide-react";
 interface ImageUploaderProps {
   images: File[];
   onChange: (images: File[]) => void;
+  onError?: (message: string) => void;
 }
 
-export default function ImageUploader({ images, onChange }: ImageUploaderProps) {
+// Client-side image compression helper to downscale and re-compress images to prevent Vercel 413 (Payload Too Large)
+const compressImage = (file: File): Promise<File> => {
+  return new Promise((resolve) => {
+    if (!file.type.startsWith("image/")) {
+      resolve(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 1000;
+        const MAX_HEIGHT = 1000;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              
+              if (compressedFile.size < file.size || file.size > 1024 * 1024) {
+                console.log(`[Image Compressor] Compressed ${file.name}: ${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+                resolve(compressedFile);
+              } else {
+                resolve(file);
+              }
+            } else {
+              resolve(file);
+            }
+          },
+          "image/jpeg",
+          0.7 // compress quality
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
+export default function ImageUploader({ images, onChange, onError }: ImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -23,7 +96,7 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
     }
   };
 
-  const processFiles = (files: FileList) => {
+  const processFiles = async (files: FileList) => {
     const validImages: File[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -31,8 +104,44 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
         validImages.push(file);
       }
     }
+    
     if (validImages.length > 0) {
-      onChange([...images, ...validImages]);
+      setIsCompressing(true);
+      try {
+        const compressedImages = await Promise.all(validImages.map(compressImage));
+        const newImagesList = [...images, ...compressedImages];
+        const totalSize = newImagesList.reduce((acc, img) => acc + img.size, 0);
+        
+        if (totalSize > 4 * 1024 * 1024) {
+          const errMsg = "Total ukuran gambar melebihi batas 4MB untuk hosting Vercel. Silakan kurangi jumlah gambar atau gunakan ukuran yang lebih kecil.";
+          if (onError) {
+            onError(errMsg);
+          } else {
+            alert(errMsg);
+          }
+          return;
+        }
+        
+        onChange(newImagesList);
+      } catch (err) {
+        console.error("Gagal mengompresi gambar:", err);
+        const fallbackList = [...images, ...validImages];
+        const totalSize = fallbackList.reduce((acc, img) => acc + img.size, 0);
+        
+        if (totalSize > 4 * 1024 * 1024) {
+          const errMsg = "Total ukuran gambar melebihi batas 4MB untuk hosting Vercel. Silakan kurangi jumlah gambar.";
+          if (onError) {
+            onError(errMsg);
+          } else {
+            alert(errMsg);
+          }
+          return;
+        }
+        
+        onChange(fallbackList); // fallback to uncompressed
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -100,19 +209,33 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
           className="hidden"
         />
 
-        <div className="flex flex-col items-center justify-center space-y-3">
-          <div className="p-3 rounded-2xl bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400 group-hover:scale-105 transition-transform duration-300">
-            <Upload className="w-5 h-5" />
+        {isCompressing ? (
+          <div className="flex flex-col items-center justify-center space-y-3">
+            <div className="w-8 h-8 border-2 border-neutral-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
+                Sedang mengompresi gambar...
+              </p>
+              <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                Memperkecil ukuran berkas untuk menghindari galat Vercel 413
+              </p>
+            </div>
           </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
-              Seret dan lepas satu atau beberapa gambar sekaligus ke sini, atau <span className="text-neutral-900 dark:text-white underline underline-offset-2 decoration-neutral-400">cari berkas</span>
-            </p>
-            <p className="text-xs text-neutral-400 dark:text-neutral-500">
-              Format PNG, JPG, JPEG hingga 10MB per berkas
-            </p>
+        ) : (
+          <div className="flex flex-col items-center justify-center space-y-3">
+            <div className="p-3 rounded-2xl bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400 group-hover:scale-105 transition-transform duration-300">
+              <Upload className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
+                Seret dan lepas satu atau beberapa gambar sekaligus ke sini, atau <span className="text-neutral-900 dark:text-white underline underline-offset-2 decoration-neutral-400">cari berkas</span>
+              </p>
+              <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                Format PNG, JPG, JPEG hingga 10MB per berkas
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Thumbnails grid */}

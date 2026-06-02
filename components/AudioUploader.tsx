@@ -7,9 +7,10 @@ import { Mic, Square, Upload, Play, Trash2, CheckCircle2, Pause } from "lucide-r
 interface AudioUploaderProps {
   audioFile: File | null;
   onChange: (file: File | null) => void;
+  onError?: (message: string) => void;
 }
 
-export default function AudioUploader({ audioFile, onChange }: AudioUploaderProps) {
+export default function AudioUploader({ audioFile, onChange, onError }: AudioUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -55,6 +56,15 @@ export default function AudioUploader({ audioFile, onChange }: AudioUploaderProp
   const processFile = (file: File) => {
     const validTypes = ["audio/mp3", "audio/mpeg", "audio/wav", "audio/x-wav", "audio/m4a", "audio/x-m4a", "audio/mp4"];
     if (validTypes.includes(file.type) || file.name.endsWith(".m4a") || file.name.endsWith(".mp3") || file.name.endsWith(".wav")) {
+      if (file.size > 4 * 1024 * 1024) {
+        const errMsg = "Ukuran berkas audio melebihi batas 4MB untuk hosting Vercel. Silakan kompres audio atau unggah berkas yang lebih kecil.";
+        if (onError) {
+          onError(errMsg);
+        } else {
+          alert(errMsg);
+        }
+        return;
+      }
       onChange(file);
     }
   };
@@ -91,6 +101,19 @@ export default function AudioUploader({ audioFile, onChange }: AudioUploaderProp
       recorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/mp3" });
         const file = new File([audioBlob], `rekaman-${Date.now()}.mp3`, { type: "audio/mp3" });
+        
+        if (file.size > 4 * 1024 * 1024) {
+          const errMsg = "Ukuran rekaman suara melebihi batas 4MB untuk hosting Vercel. Harap rekam dalam durasi yang lebih singkat.";
+          if (onError) {
+            onError(errMsg);
+          } else {
+            alert(errMsg);
+          }
+          // Stop all media tracks to release the hardware
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
         onChange(file);
         
         // Stop all media tracks to release the hardware

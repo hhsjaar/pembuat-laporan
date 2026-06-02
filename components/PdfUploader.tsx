@@ -6,9 +6,10 @@ import { FileText, Upload, Trash2, CheckCircle2 } from "lucide-react";
 interface PdfUploaderProps {
   pdfFile: File | null;
   onChange: (file: File | null) => void;
+  onError?: (message: string) => void;
 }
 
-export default function PdfUploader({ pdfFile, onChange }: PdfUploaderProps) {
+export default function PdfUploader({ pdfFile, onChange, onError }: PdfUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
 
@@ -24,6 +25,15 @@ export default function PdfUploader({ pdfFile, onChange }: PdfUploaderProps) {
 
   const processFile = (file: File) => {
     if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+      if (file.size > 4 * 1024 * 1024) {
+        const errMsg = "Ukuran berkas PDF melebihi batas 4MB untuk hosting Vercel. Silakan unggah berkas yang lebih kecil.";
+        if (onError) {
+          onError(errMsg);
+        } else {
+          alert(errMsg);
+        }
+        return;
+      }
       onChange(file);
     }
   };

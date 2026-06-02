@@ -117,6 +117,23 @@ export default function Dashboard() {
       return;
     }
 
+    // Safety checks for file size limits to prevent Vercel 413 Payload Too Large
+    if (audioFile && audioFile.size > 4.2 * 1024 * 1024) {
+      addToast("Ukuran berkas audio melebihi batas 4.2MB untuk hosting Vercel. Silakan gunakan berkas audio yang lebih kecil.", "error");
+      return;
+    }
+
+    if (pdfFile && pdfFile.size > 4.2 * 1024 * 1024) {
+      addToast("Ukuran berkas PDF melebihi batas 4.2MB untuk hosting Vercel. Silakan gunakan berkas PDF yang lebih kecil.", "error");
+      return;
+    }
+
+    const totalImagesSize = images.reduce((acc, img) => acc + img.size, 0);
+    if (totalImagesSize > 4.2 * 1024 * 1024) {
+      addToast("Total ukuran gambar melebihi batas 4.2MB untuk hosting Vercel. Silakan kurangi jumlah gambar atau perkecil resolusinya.", "error");
+      return;
+    }
+
     // Reset step statuses
     const resetSteps = INITIAL_STEPS.map((step) => ({
       ...step,
@@ -466,7 +483,7 @@ export default function Dashboard() {
                       <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Gambar Dokumen (Rundown, Detail & Latar Belakang)</span>
                     </div>
                     <div className="flex-grow">
-                      <ImageUploader images={images} onChange={setImages} />
+                      <ImageUploader images={images} onChange={setImages} onError={(msg) => addToast(msg, "error")} />
                     </div>
                   </div>
 
@@ -477,7 +494,7 @@ export default function Dashboard() {
                       <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Guidebook / Panduan Acara (PDF)</span>
                     </div>
                     <div className="flex-grow">
-                      <PdfUploader pdfFile={pdfFile} onChange={setPdfFile} />
+                      <PdfUploader pdfFile={pdfFile} onChange={setPdfFile} onError={(msg) => addToast(msg, "error")} />
                     </div>
                   </div>
 
@@ -488,7 +505,7 @@ export default function Dashboard() {
                       <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Rekaman Suara / Sambutan (Audio)</span>
                     </div>
                     <div className="flex-grow">
-                      <AudioUploader audioFile={audioFile} onChange={setAudioFile} />
+                      <AudioUploader audioFile={audioFile} onChange={setAudioFile} onError={(msg) => addToast(msg, "error")} />
                     </div>
                   </div>
 
