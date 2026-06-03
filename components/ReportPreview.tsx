@@ -93,6 +93,68 @@ export default function ReportPreview({
       return reportData.isi_laporan || "";
     }
 
+    if (templateType === "laporan-informasi") {
+      let mainBody = "";
+      if (reportData.isi_laporan) {
+        mainBody = reportData.isi_laporan;
+      } else {
+        const cleanA = stripPrefix(reportData.A, "A\\.");
+        const cleanB = stripPrefix(reportData.B, "B\\.");
+        const cleanC = stripPrefix(reportData.C, "C\\.");
+        const cleanD = stripPrefix(reportData.D, "D\\.");
+        const cleanE = stripPrefix(reportData.E, "E\\.");
+        const cleanF = stripPrefix(reportData.F, "F\\.");
+        
+        const parts = [];
+        if (cleanA) parts.push(`A. ${cleanA}`);
+        if (cleanB) parts.push(`B. ${cleanB}`);
+        if (cleanC) parts.push(`C. ${cleanC}`);
+        if (cleanD) parts.push(`D. ${cleanD}`);
+        if (cleanE) parts.push(`E. ${cleanE}`);
+        if (cleanF) parts.push(`F. ${cleanF}`);
+        mainBody = parts.join("\n\n");
+      }
+
+      return `POLRI DAERAH JAWA TENGAH
+RESOR KOTA BESAR SEMARANG
+SEKTOR TEMBALANG
+Jl. Turus Asri no 9 Tembalang Semarang
+======================================
+
+Nomor : R / LI / / / / Intelkam
+
+LAPORAN - INFORMASI
+-------------------
+BIDANG                      : ${reportData.bidang || ""}
+PERIHAL                     : ${reportData.perihal || ""}
+
+I. PENDAHULUAN
+   1. Sumber Informasi          : Pelapor
+   2. Hubungan dengan Sasaran   : -
+   3. Cara Mendapatkan Info     : ${reportData["cara-mendapatkan-informasi"] || ""}
+   4. Waktu Mendapatkan Info    : ${reportData["waktu-mendapatkan-informasi"] || ""}
+   5. Nilai Informasi           : A - 1
+
+II. HAL-HAL YANG DILAPORKAN
+${mainBody}
+
+III. PENDAPAT PELAPOR
+   A. Analisa
+      ${reportData.analisa || ""}
+
+   B. Prediksi
+      ${reportData.prediksi || ""}
+
+   C. Langkah-langkah Antisipasi / Penanganan
+      ${reportData.langkah || ""}
+
+   D. Rekomendasi
+      ${reportData.rekomendasi || ""}
+
+Semarang, ${reportData.tanggal || ""}
+PELAPOR`;
+    }
+
     let mainBody = "";
     if (reportData.isi_laporan) {
       mainBody = reportData.isi_laporan;
@@ -114,7 +176,7 @@ export default function ReportPreview({
       mainBody = parts.join("\n\n");
     }
 
-    const kapolsekNama = reportData.kapolsek_nama || "KOMPOL KRISTIYASTUTI HANDAYANI, SH, MH.";
+    const kapolsekNama = reportData.kapolsek_nama || "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H.";
 
     return `POLRESTABES SEMARANG
 POLSEK TEMBALANG

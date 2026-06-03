@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool } from "lucide-react";
+import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye } from "lucide-react";
 import TemplateSelector, { TemplateType } from "./TemplateSelector";
 import ImageUploader from "./ImageUploader";
 import AudioUploader from "./AudioUploader";
@@ -73,6 +73,266 @@ export default function Dashboard() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [userInput, setUserInput] = useState("");
+
+  // History tab states
+  const [activeTab, setActiveTab] = useState<"generator" | "history">("generator");
+  const [historyList, setHistoryList] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<any | null>(null);
+  const [historySearchQuery, setHistorySearchQuery] = useState("");
+  const [isCopiedHistoryId, setIsCopiedHistoryId] = useState<string | null>(null);
+  const [supabaseConfigured, setSupabaseConfigured] = useState(false);
+
+  useEffect(() => {
+    // Check configuration
+    import("@/lib/supabase").then(({ isSupabaseConfigured }) => {
+      setSupabaseConfigured(isSupabaseConfigured());
+    });
+  }, []);
+
+  const fetchHistory = async () => {
+    setIsLoadingHistory(true);
+    try {
+      const res = await fetch("/api/history");
+      if (res.ok) {
+        const data = await res.json();
+        setHistoryList(data);
+      } else {
+        console.warn("Gagal mengambil riwayat laporan.");
+      }
+    } catch (err) {
+      console.error("Gagal fetch riwayat:", err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const deleteHistoryItem = async (id: string) => {
+    try {
+      const res = await fetch(`/api/history?id=${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        addToast("Laporan berhasil dihapus dari riwayat.", "success");
+        setHistoryList(prev => prev.filter(item => item.id !== id));
+      } else {
+        addToast("Gagal menghapus laporan dari riwayat.", "error");
+      }
+    } catch (err) {
+      console.error("Gagal menghapus item:", err);
+      addToast("Terjadi kesalahan saat menghapus laporan.", "error");
+    }
+  };
+
+  const handleCopyHistoryContent = (item: any) => {
+    navigator.clipboard.writeText(item.content);
+    setIsCopiedHistoryId(item.id);
+    addToast("Isi laporan disalin ke papan klip!", "success");
+    setTimeout(() => setIsCopiedHistoryId(null), 2000);
+  };
+
+  const handleDownloadHistoryTxt = (item: any) => {
+    try {
+      const element = document.createElement("a");
+      const file = new Blob([item.content], { type: 'text/plain;charset=utf-8' });
+      element.href = URL.createObjectURL(file);
+      const filename = `${item.template_type}-${item.id.slice(0, 8)}.txt`;
+      element.download = filename;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      addToast("Berkas teks (.txt) berhasil diunduh!", "success");
+    } catch (err) {
+      console.error(err);
+      addToast("Gagal mengunduh berkas teks.", "error");
+    }
+  };
+
+  const handleDownloadHistoryDocx = async (item: any) => {
+    const rawReport = item.meta_data?.raw_report;
+    if (item.template_type !== "laporan-informasi" || !rawReport) {
+      handleDownloadHistoryTxt(item);
+      return;
+    }
+
+    setIsDownloading(true);
+    try {
+      const response = await fetch("/api/export-docx", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          templateType: item.template_type,
+          reportData: rawReport,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal mengemas berkas Word dari riwayat.");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${item.template_type}-${item.id.slice(0, 8)}.docx`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      addToast("Berkas Microsoft Word (.docx) berhasil diunduh!", "success");
+    } catch (err: any) {
+      console.error(err);
+      addToast(err.message || "Gagal mengunduh berkas Word.", "error");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const saveReportToHistory = async (report: any, type: string) => {
+    try {
+      let title = "";
+      let body = "";
+      let kapolsek = report.kapolsek_nama || "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H.";
+
+      if (type === "laporan-informasi") {
+        title = report.perihal || "LAPORAN INFORMASI";
+        if (report.isi_laporan) {
+          body = report.isi_laporan;
+        } else {
+          const parts = [];
+          if (report.A) parts.push(`A. ${report.A}`);
+          if (report.B) parts.push(`B. ${report.B}`);
+          if (report.C) parts.push(`C. ${report.C}`);
+          if (report.D) parts.push(`D. ${report.D}`);
+          if (report.E) parts.push(`E. ${report.E}`);
+          if (report.F) parts.push(`F. ${report.F}`);
+          body = parts.join("\n\n");
+        }
+      } else if (type === "laporan-kegiatan") {
+        title = report.perihal || "LAPORAN KEGIATAN";
+        body = report.isi_laporan || "";
+      } else if (type === "laporan-harian") {
+        title = report.perihal || "LAPORAN HARIAN SITUASI KAMTIBMAS";
+        body = report.isi_laporan || "";
+      } else {
+        title = report.judul || "LAPORAN RESMI";
+        body = report.isi_laporan || "";
+      }
+
+      // Format report exactly as shown in ReportPreview.tsx (unless it's laporan-harian which is already pre-formatted by LLM)
+      let formattedContent = body;
+      if (type === "laporan-informasi") {
+        const stripPrefix = (text: string, prefix: string) => {
+          if (!text) return "";
+          const trimmed = text.trim();
+          const regex = new RegExp(`^${prefix}\\s*`, "i");
+          return trimmed.replace(regex, "");
+        };
+
+        let mainBody = body;
+        if (!report.isi_laporan) {
+          const cleanA = stripPrefix(report.A, "A\\.");
+          const cleanB = stripPrefix(report.B, "B\\.");
+          const cleanC = stripPrefix(report.C, "C\\.");
+          const cleanD = stripPrefix(report.D, "D\\.");
+          const cleanE = stripPrefix(report.E, "E\\.");
+          const cleanF = stripPrefix(report.F, "F\\.");
+          
+          const parts = [];
+          if (cleanA) parts.push(`A. ${cleanA}`);
+          if (cleanB) parts.push(`B. ${cleanB}`);
+          if (cleanC) parts.push(`C. ${cleanC}`);
+          if (cleanD) parts.push(`D. ${cleanD}`);
+          if (cleanE) parts.push(`E. ${cleanE}`);
+          if (cleanF) parts.push(`F. ${cleanF}`);
+          mainBody = parts.join("\n\n");
+        }
+
+        formattedContent = `POLRI DAERAH JAWA TENGAH
+RESOR KOTA BESAR SEMARANG
+SEKTOR TEMBALANG
+Jl. Turus Asri no 9 Tembalang Semarang
+======================================
+
+Nomor : R / LI / / / / Intelkam
+
+LAPORAN - INFORMASI
+-------------------
+BIDANG                      : ${report.bidang || ""}
+PERIHAL                     : ${title}
+
+I. PENDAHULUAN
+   1. Sumber Informasi          : Pelapor
+   2. Hubungan dengan Sasaran   : -
+   3. Cara Mendapatkan Info     : ${report["cara-mendapatkan-informasi"] || ""}
+   4. Waktu Mendapatkan Info    : ${report["waktu-mendapatkan-informasi"] || ""}
+   5. Nilai Informasi           : A - 1
+
+II. HAL-HAL YANG DILAPORKAN
+${mainBody}
+
+III. PENDAPAT PELAPOR
+   A. Analisa
+      ${report.analisa || ""}
+
+   B. Prediksi
+      ${report.prediksi || ""}
+
+   C. Langkah-langkah Antisipasi / Penanganan
+      ${report.langkah || ""}
+
+   D. Rekomendasi
+      ${report.rekomendasi || ""}
+
+Semarang, ${report.tanggal || ""}
+PELAPOR`;
+      } else if (type !== "laporan-harian") {
+        formattedContent = `POLRESTABES SEMARANG
+POLSEK TEMBALANG
+================
+
+Kepada Yth.
+*KAPOLRESTABES SEMARANG*
+
+Dari :
+*KAPOLSEK TEMBALANG*
+
+Perihal : *${title}*
+
+${body}
+
+
+*DUMP*
+
+Kapolsek Tembalang
+*${kapolsek}*
+
+Tembusan:
+
+1. Waka Polrestabes Semarang.
+2. KabagOps Polrestabes Semarang.
+3. KasatIntelkam Polrestabes Semarang.`;
+      }
+
+      await fetch("/api/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          template_type: type,
+          perihal: title,
+          content: formattedContent,
+          kapolsek_nama: kapolsek,
+          meta_data: {
+            timestamp: new Date().toISOString(),
+            date_input: report.tanggal || "",
+            raw_report: report
+          }
+        })
+      });
+    } catch (err) {
+      console.error("Gagal menyimpan ke riwayat:", err);
+    }
+  };
 
   // Custom states for Laporan Harian structured form input
   const [formTab, setFormTab] = useState<"umum" | "ekonomi" | "patroli" | "rencana">("umum");
@@ -376,6 +636,7 @@ export default function Dashboard() {
 
       // Save report data state
       setReportData(generatedReport);
+      saveReportToHistory(generatedReport, templateType);
       
       // Auto-trigger word packaging state as complete
       updateStepStatus("export-docx", "success");
@@ -526,8 +787,48 @@ export default function Dashboard() {
 
       {/* Main Content Area */}
       <main className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 pt-10">
+        {/* Apple Style Segmented Tab Controls */}
+        <div className="flex items-center justify-between mb-8 border-b border-neutral-200/40 dark:border-neutral-800/40 pb-4">
+          <div className="flex space-x-1 p-0.5 bg-neutral-100/80 dark:bg-neutral-900/80 rounded-xl border border-neutral-200/30 dark:border-neutral-800/30 backdrop-blur-md">
+            <button
+              onClick={() => setActiveTab("generator")}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+                activeTab === "generator"
+                  ? "bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 fill-current" />
+              <span>Generator Laporan</span>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("history");
+                fetchHistory();
+              }}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+                activeTab === "history"
+                  ? "bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300"
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>Riwayat Laporan</span>
+            </button>
+          </div>
+        </div>
+
         <AnimatePresence mode="wait">
-          {!reportData ? (
+          {activeTab === "generator" ? (
+            <motion.div
+              key="generator-view"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <AnimatePresence mode="wait">
+                {!reportData ? (
             /* Input Page State */
             <motion.div
               key="input-form"
@@ -1058,10 +1359,308 @@ export default function Dashboard() {
                 onReset={handleReset}
                 isDownloading={isDownloading}
               />
-            </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="history-view"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-6"
+        >
+          {/* Header section */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-neutral-950 dark:text-white">
+                Riwayat Pembuatan Laporan
+              </h2>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                Daftar seluruh dokumen laporan resmi yang telah berhasil digenerate dan tersimpan otomatis.
+              </p>
+            </div>
+
+            {/* Search Bar */}
+            {supabaseConfigured && historyList.length > 0 && (
+              <div className="relative max-w-xs w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <input
+                  type="text"
+                  value={historySearchQuery}
+                  onChange={(e) => setHistorySearchQuery(e.target.value)}
+                  placeholder="Cari laporan..."
+                  className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/40 dark:bg-neutral-950/20 text-neutral-900 dark:text-white outline-none hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-neutral-900 dark:focus:border-white focus:ring-1 focus:ring-neutral-900 dark:focus:ring-white transition-all"
+                />
+              </div>
+            )}
+          </div>
+
+          {!supabaseConfigured ? (
+            /* Warning Panel for Missing Supabase Configuration */
+            <div className="rounded-3xl p-6 sm:p-8 border border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10 backdrop-blur-md space-y-5">
+              <div className="flex items-start space-x-3.5">
+                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-amber-900 dark:text-amber-200">
+                    Supabase Belum Dikonfigurasi
+                  </h3>
+                  <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mt-1">
+                    Fitur riwayat memerlukan database Supabase. Silakan ikuti langkah-langkah di bawah ini untuk mengonfigurasinya:
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-xs font-sans">
+                <div className="bg-neutral-900 text-neutral-100 rounded-2xl p-4 font-mono select-all overflow-x-auto border border-neutral-800">
+                  <p className="text-neutral-500 mb-2"># 1. Jalankan SQL ini di SQL Editor Supabase Anda:</p>
+                  <pre className="text-[11px] leading-relaxed">
+{`CREATE TABLE report_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  template_type TEXT NOT NULL,
+  perihal TEXT NOT NULL,
+  content TEXT NOT NULL,
+  kapolsek_nama TEXT NOT NULL,
+  meta_data JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Buat index pencarian perihal
+CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
+                  </pre>
+                </div>
+
+                <div className="bg-neutral-900 text-neutral-100 rounded-2xl p-4 font-mono select-all border border-neutral-800">
+                  <p className="text-neutral-500 mb-2"># 2. Tambahkan variabel ini di file .env.local Anda:</p>
+                  <p className="text-emerald-400">NEXT_PUBLIC_SUPABASE_URL=<span className="text-white">URL_PROJEK_SUPABASE_ANDA</span></p>
+                  <p className="text-emerald-400">NEXT_PUBLIC_SUPABASE_ANON_KEY=<span className="text-white">ANON_KEY_SUPABASE_ANDA</span></p>
+                </div>
+
+                <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                  Setelah ditambahkan, mulai ulang (restart) server pengembangan Anda agar perubahan file `.env.local` dapat diterapkan.
+                </p>
+              </div>
+            </div>
+          ) : isLoadingHistory ? (
+            /* Loading State */
+            <div className="flex flex-col items-center justify-center py-20 space-y-3">
+              <div className="w-8 h-8 rounded-full border-2 border-neutral-300 dark:border-neutral-700 border-t-neutral-900 dark:border-t-white animate-spin" />
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
+                Memuat riwayat laporan...
+              </p>
+            </div>
+          ) : historyList.length === 0 ? (
+            /* Empty State */
+            <div className="flex flex-col items-center justify-center py-20 text-center rounded-3xl border border-neutral-200/30 dark:border-neutral-800/30 bg-neutral-50/30 dark:bg-neutral-950/10 backdrop-blur-md p-8">
+              <div className="p-4 rounded-full bg-neutral-100 dark:bg-neutral-900 text-neutral-400 dark:text-neutral-600 mb-4">
+                <FileText className="w-8 h-8" />
+              </div>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200">
+                Belum Ada Riwayat Laporan
+              </h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-sm mt-1">
+                Mulai generate laporan resmi Anda, dan laporan tersebut akan disimpan secara otomatis di sini.
+              </p>
+            </div>
+          ) : (
+            /* History Grid Cards */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {historyList
+                .filter((item) =>
+                  item.perihal.toLowerCase().includes(historySearchQuery.toLowerCase()) ||
+                  item.template_type.toLowerCase().includes(historySearchQuery.toLowerCase())
+                )
+                .map((item) => {
+                  const date = new Date(item.created_at);
+                  const formattedDate = date.toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+
+                  // Badge colors & label mapping
+                  let badgeLabel = "";
+                  let badgeStyles = "";
+                  if (item.template_type === "laporan-informasi") {
+                    badgeLabel = "Laporan Informasi";
+                    badgeStyles = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
+                  } else if (item.template_type === "laporan-kegiatan") {
+                    badgeLabel = "Laporan Kegiatan";
+                    badgeStyles = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+                  } else if (item.template_type === "laporan-harian") {
+                    badgeLabel = "Laporan Harian";
+                    badgeStyles = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+                  } else {
+                    badgeLabel = "Laporan Lainnya";
+                    badgeStyles = "bg-neutral-500/10 text-neutral-600 dark:text-neutral-400 border-neutral-500/20";
+                  }
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="group flex flex-col justify-between rounded-2xl p-5 border border-neutral-200/50 dark:border-neutral-800/40 bg-white/40 dark:bg-neutral-900/30 hover:bg-white dark:hover:bg-neutral-900/70 hover:shadow-lg dark:hover:shadow-white/5 transition-all duration-300 backdrop-blur-md"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badgeStyles}`}>
+                            {badgeLabel}
+                          </span>
+                          <div className="flex items-center space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => setSelectedHistoryItem(item)}
+                              className="p-1.5 rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 bg-white/50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                              title="Lihat Laporan"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => deleteHistoryItem(item.id)}
+                              className="p-1.5 rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 bg-white/50 dark:bg-neutral-800/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                              title="Hapus"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <h4 className="text-xs font-extrabold text-neutral-900 dark:text-white line-clamp-2 leading-relaxed">
+                          {item.perihal}
+                        </h4>
+
+                        <p className="text-[11px] text-neutral-500 dark:text-neutral-400 line-clamp-3 leading-relaxed">
+                          {item.content}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-1.5 pt-4 mt-4 border-t border-neutral-100 dark:border-neutral-800/60 text-[10px] text-neutral-400 font-medium">
+                        <Clock className="w-3 h-3" />
+                        <span>{formattedDate}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
           )}
-        </AnimatePresence>
-      </main>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </main>
+
+      {/* Detail Riwayat Laporan Modal Overlay */}
+      <AnimatePresence>
+        {selectedHistoryItem && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedHistoryItem(null)}
+              className="absolute inset-0 bg-neutral-950/40 dark:bg-neutral-950/60 backdrop-blur-sm animate-fade-in"
+            />
+
+            {/* Modal Box */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl border border-neutral-200/50 dark:border-neutral-800/50 bg-white/95 dark:bg-neutral-900/95 shadow-2xl overflow-hidden backdrop-blur-md"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-neutral-100 dark:border-neutral-800/60">
+                <div>
+                  <div className="flex items-center space-x-2.5">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                      selectedHistoryItem.template_type === "laporan-informasi"
+                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                        : selectedHistoryItem.template_type === "laporan-kegiatan"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                        : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
+                    }`}>
+                      {selectedHistoryItem.template_type === "laporan-informasi"
+                        ? "Laporan Informasi"
+                        : selectedHistoryItem.template_type === "laporan-kegiatan"
+                        ? "Laporan Kegiatan"
+                        : "Laporan Harian"}
+                    </span>
+                    <span className="text-[10px] text-neutral-400 font-medium">
+                      {new Date(selectedHistoryItem.created_at).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-extrabold text-neutral-900 dark:text-white mt-2 line-clamp-1 pr-6">
+                    {selectedHistoryItem.perihal}
+                  </h3>
+                </div>
+
+                <button
+                  onClick={() => setSelectedHistoryItem(null)}
+                  className="p-1.5 rounded-xl border border-neutral-200/50 dark:border-neutral-800/50 bg-neutral-50 dark:bg-neutral-800/50 text-neutral-500 hover:text-neutral-950 dark:hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-grow p-6 overflow-y-auto font-sans text-xs text-neutral-700 dark:text-neutral-300 space-y-4 select-text">
+                <div className="bg-neutral-50 dark:bg-neutral-950/40 rounded-2xl p-5 border border-neutral-100 dark:border-neutral-800/40 whitespace-pre-wrap leading-relaxed font-mono text-[11px]">
+                  {selectedHistoryItem.content}
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end space-x-2.5 p-5 border-t border-neutral-100 dark:border-neutral-800/60 bg-neutral-50/50 dark:bg-neutral-950/20">
+                <button
+                  onClick={() => handleCopyHistoryContent(selectedHistoryItem)}
+                  className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl border border-neutral-200/60 dark:border-neutral-800/60 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all font-semibold text-xs shadow-sm"
+                >
+                  {isCopiedHistoryId === selectedHistoryItem.id ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>Tersalin</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Salin Teks</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleDownloadHistoryDocx(selectedHistoryItem)}
+                  disabled={isDownloading}
+                  className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:opacity-90 disabled:opacity-50 transition-all font-bold text-xs shadow-sm"
+                >
+                  {isDownloading ? (
+                    <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5" />
+                  )}
+                  <span>
+                    {isDownloading 
+                      ? "Mengunduh..." 
+                      : selectedHistoryItem.template_type === "laporan-informasi" && selectedHistoryItem.meta_data?.raw_report
+                      ? "Unduh (.docx)" 
+                      : "Unduh (.txt)"}
+                  </span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Sequential Loading Process Modal Backdrop Overlay */}
       <ProcessingModal
