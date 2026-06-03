@@ -50,6 +50,19 @@ const INITIAL_STEPS: ProcessingStep[] = [
   },
 ];
 
+const getIndoDayName = (date: Date): string => {
+  const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  return days[date.getDay()];
+};
+
+const getIndoFormattedDate = (date: Date): string => {
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
 export default function Dashboard() {
   // Theme state (system default fallback to light mode)
   const [darkMode, setDarkMode] = useState(false);
@@ -60,6 +73,58 @@ export default function Dashboard() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [userInput, setUserInput] = useState("");
+
+  // Custom states for Laporan Harian structured form input
+  const [formTab, setFormTab] = useState<"umum" | "ekonomi" | "patroli" | "rencana">("umum");
+  const [laporanHarianForm, setLaporanHarianForm] = useState({
+    hari: "",
+    tanggal: "",
+    waktu: "08.00 s.d. 08.00 WIB",
+    berasMin: "15.000", berasMax: "17.000",
+    kedelaiMin: "9.000", kedelaiMax: "13.000",
+    cabaiBesarMin: "40.000", cabaiBesarMax: "45.000",
+    cabaiRawitMin: "90.000", cabaiRawitMax: "95.000",
+    cabaiTamparMin: "35.000", cabaiTamparMax: "40.000",
+    bawangMerahMin: "45.000", bawangMerahMax: "50.000",
+    bawangPutihMin: "35.000", bawangPutihMax: "40.000",
+    jagungMin: "8.000", jagungMax: "11.000",
+    gulaMin: "17.500", gulaMax: "18.500",
+    minyakMin: "15.700", minyakMax: "19.000",
+    teriguMin: "10.000", teriguMax: "12.500",
+    dagingSapiMin: "120.000", dagingSapiMax: "130.000",
+    dagingAyamMin: "40.000", dagingAyamMax: "48.000",
+    telurMin: "29.000", telurMax: "31.000",
+    garamMin: "2.500", garamMax: "3.500",
+    lpgMin: "18.000", lpgMax: "23.000",
+    kriminalitas: "Tidak ada hal yang dapat dilaporkan.",
+    lakaLantas: "Tidak ada hal yang dapat dilaporkan.",
+    tahananL: "0",
+    tahananP: "0",
+    bencanaAlam: "Tidak ada hal yang dapat dilaporkan.",
+    vvip: "Tidak ada kegiatan untuk dilaporkan.",
+    patroliSiangWaktu: "11.00 Wib s/d Selesai.",
+    patroliSiangCuaca: "CERAH",
+    patroliSiangPersonil: "1. KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H (Kapolsek)\n2. IPTU SUTANTO (Kanit Binmas)\n3. AIPTU. RF JATI P, S.H (Piket Samapta)",
+    patroliSiangSasaran: "1. Tempat Rawan Kriminalitas, Balap liar dan tawuran.\n2. Pemukiman penduduk/Perumahan/Aspol\n3. Tempat ibadah di wilayah Tembalang\n4. Obvit, ATM dan SPBU di wilayah Tembalang.",
+    patroliSiangRute: "Mako Polsek Tembalang-Jl. Imam Soeparto-Jl. Gondang Raya-Jl. Mulawarman Raya-Jl. Sirojudin-Jl. Prof. Soedarto, SH-Jl. Jatimulyo-Jl. Banjarsari-Jl. Imam Soeparto(Sigar Bencah)-Jl. Kompol R. Soekanto-Jl. Sambiroto Raya-Jl. Kedungmundu-Jl. Fatmawati-Jl. Ketileng Raya-Jl. Gendong Raya-Jl. Raya Sendangmulyo-Jl. Tunggu Raya-Jl. Rowosari-Jl. Prof. Suharso-Jl. Imam Soeparto (Sigar Bencah)-kembali Ke Mako Polsek Tembalang",
+    patroliSiangHasil: "1. Selama pelaksanaant kegiatan patroli BLP tidak di temukan adanya balap liar dan tawuran.\n2. Tidak di temukan pengendara sepeda motor yang menggunakan knalpot yang tidak sesuai dengan spesifikasi teknis.\n3. Situasi kamtibmas secara umum wilayah hukum Polsek Tembalang dalam keadaan aman dan kondusif.",
+    patroliMalamWaktu: "22.00 Wib s/d selesai",
+    patroliMalamCuaca: "Cerah",
+    patroliMalamPersonil: "1. AIPTU SANDRE MAKASAR (Piket Samapta)\n2. BRIPKA DIKA PRASETYA, S.Psi ( Piket Samapta)",
+    patroliMalamSasaran: "1. Tempat Rawan Kriminalitas, Balap liar dan tawuran.\n2. Pemukiman penduduk/Perumahan\n3. Tempat ibadah di wilayah Tembalang\n4. Obvit, ATM dan SPBU di wilayah Tembalang",
+    patroliMalamRute: "Mako Polsek Tembalang-Jl. Imam Soeparto-Jl. Gondang raya-Jl. Mulawarman selatan Raya-Jl. Banjarsari selatan-Jl. Baru Tembalang-Jangli-Jl. Banjarsari-Jl. Bulusan selatan raya-Jl. Baru Tembalang Jangli-Jl. Imam Soeparto-kembali Ke Mako Polsek Tembalang",
+    patroliMalamHasil: "1. Selama pelaksanaan kegiatan patroli BLP tidak di temukan adanya balap liar dan tawuran.\n2. Tidak di temukan pengendara sepeda motor yang menggunakan knalpot yang tidak sesuai dengan spesifikasi teknis.\n3. Situasi kamtibmas secara umum wilayah hukum Polsek Tembalang dalam keadaan aman dan kondusif.",
+    catatan: "Secara umum situasi di wilayah Hukum Polsek Tembalang dalam keadaan aman dan terkendali.",
+    rencanaHari: "",
+    rencanaTanggal: "",
+    rencanaUnras: "NIHIL",
+    rencanaGiatMenonjol: "NIHIL",
+    rencanaPolitik: "NIHIL",
+    rencanaGiatMasyarakat: "NIHIL",
+    rencanaPersonil1: "Melaksanakan pam dan monitoring giat masyarakat di wilayah hukum Polsek Tembalang.",
+    rencanaPersonil2: "Melaksanakan monitoring distribusi BBM, LPG serta Bahan kebutuhan pokok di wilayah hukum Polsek Tembalang.",
+    rencanaPersonil3: "Melaksanakan Kegiatan Rutin dengan target yang dioptimalkan di wilayah hukum Polsek Tembalang dalam rangka menciptakan sitkamtibmas yang aman dan kondusif."
+  });
 
   // Processing states
   const [isProcessing, setIsProcessing] = useState(false);
@@ -72,6 +137,21 @@ export default function Dashboard() {
 
   // Custom Toast notification states
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Initialize dates for Laporan Harian
+  useEffect(() => {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    setLaporanHarianForm((prev) => ({
+      ...prev,
+      hari: getIndoDayName(today),
+      tanggal: getIndoFormattedDate(today),
+      rencanaHari: getIndoDayName(tomorrow),
+      rencanaTanggal: getIndoFormattedDate(tomorrow),
+    }));
+  }, []);
 
   // Detect and initialize theme on mount
   useEffect(() => {
@@ -270,6 +350,7 @@ export default function Dashboard() {
           pdfText: pdfText,
           userInput: userInput,
           templateType: templateType,
+          laporanHarianForm: templateType === "laporan-harian" ? laporanHarianForm : null,
         }),
       });
 
@@ -466,8 +547,427 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              {/* Template Select Section */}
               <TemplateSelector selected={templateType} onChange={setTemplateType} />
+
+              {/* Laporan Harian Form Section */}
+              {templateType === "laporan-harian" && (
+                <div className="space-y-6 rounded-3xl p-6 sm:p-8 border border-neutral-200/50 dark:border-neutral-800/40 bg-white/40 dark:bg-neutral-950/20 glassmorphism shadow-md transition-all duration-300">
+                  <div>
+                    <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wide">
+                      Form Isian Laporan Harian Situasi
+                    </h3>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                      Lengkapi data harga komoditas pasar, jadwal patroli, dan status tahanan hari ini. AI akan memformulasikan laporan akhir secara utuh dan padu berdasarkan form ini serta berkas pendukung yang Anda unggah.
+                    </p>
+                  </div>
+
+                  {/* Form Tabs Navigation */}
+                  <div className="flex border-b border-neutral-200 dark:border-neutral-800 overflow-x-auto whitespace-nowrap">
+                    {[
+                      { id: "umum", label: "Umum & Tahanan" },
+                      { id: "ekonomi", label: "Ekonomi (Harga)" },
+                      { id: "patroli", label: "Patroli BLP" },
+                      { id: "rencana", label: "Rencana Esok" },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setFormTab(tab.id as any)}
+                        className={`px-4 py-2 text-xs font-bold border-b-2 transition-all duration-200 -mb-[1px] ${
+                          formTab === tab.id
+                            ? "border-neutral-900 dark:border-white text-neutral-950 dark:text-white"
+                            : "border-transparent text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Tab Contents */}
+                  <div className="pt-2">
+                    {formTab === "umum" && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Hari</label>
+                            <input
+                              type="text"
+                              value={laporanHarianForm.hari}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, hari: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Tanggal</label>
+                            <input
+                              type="text"
+                              value={laporanHarianForm.tanggal}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, tanggal: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Waktu</label>
+                            <input
+                              type="text"
+                              value={laporanHarianForm.waktu}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, waktu: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Tahanan Laki-laki</label>
+                            <input
+                              type="text"
+                              value={laporanHarianForm.tahananL}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, tahananL: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Tahanan Perempuan</label>
+                            <input
+                              type="text"
+                              value={laporanHarianForm.tahananP}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, tahananP: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Kriminalitas</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.kriminalitas}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, kriminalitas: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Laka Lantas</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.lakaLantas}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, lakaLantas: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Bencana Alam</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.bencanaAlam}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, bencanaAlam: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Kegiatan VVIP / VIP</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.vvip}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, vvip: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {formTab === "ekonomi" && (
+                      <div className="space-y-4">
+                        <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase bg-emerald-500/10 dark:bg-emerald-500/5 px-2 py-1 rounded-md inline-block">
+                          Pantauan Harga Pasar Tradisional Kedungmundu & Meteseh
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3.5 max-h-[300px] overflow-y-auto pr-2">
+                          {[
+                            { label: "Beras Medium", minKey: "berasMin", maxKey: "berasMax", unit: "Kg" },
+                            { label: "Kedelai", minKey: "kedelaiMin", maxKey: "kedelaiMax", unit: "Kg" },
+                            { label: "Cabai Merah Besar", minKey: "cabaiBesarMin", maxKey: "cabaiBesarMax", unit: "Kg" },
+                            { label: "Cabai Rawit Merah", minKey: "cabaiRawitMin", maxKey: "cabaiRawitMax", unit: "Kg" },
+                            { label: "Cabai Tampar", minKey: "cabaiTamparMin", maxKey: "cabaiTamparMax", unit: "Kg" },
+                            { label: "Bawang Merah", minKey: "bawangMerahMin", maxKey: "bawangMerahMax", unit: "Kg" },
+                            { label: "Bawang Putih", minKey: "bawangPutihMin", maxKey: "bawangPutihMax", unit: "Kg" },
+                            { label: "Jagung Kering", minKey: "jagungMin", maxKey: "jagungMax", unit: "Kg" },
+                            { label: "Gula Pasir", minKey: "gulaMin", maxKey: "gulaMax", unit: "Kg" },
+                            { label: "Minyakita", minKey: "minyakMin", maxKey: "minyakMax", unit: "Ltr" },
+                            { label: "Tepung Terigu", minKey: "teriguMin", maxKey: "teriguMax", unit: "Kg" },
+                            { label: "Daging Sapi", minKey: "dagingSapiMin", maxKey: "dagingSapiMax", unit: "Kg" },
+                            { label: "Daging Ayam Ras", minKey: "dagingAyamMin", maxKey: "dagingAyamMax", unit: "Kg" },
+                            { label: "Telur Ayam Ras", minKey: "telurMin", maxKey: "telurMax", unit: "Kg" },
+                            { label: "Garam (250g)", minKey: "garamMin", maxKey: "garamMax", unit: "bks" },
+                            { label: "LPG 3 Kg", minKey: "lpgMin", maxKey: "lpgMax", unit: "tabung" },
+                          ].map((item) => (
+                            <div key={item.label} className="border border-neutral-100 dark:border-neutral-900 rounded-xl p-3 bg-neutral-50/50 dark:bg-neutral-950/20 space-y-2 shadow-sm">
+                              <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">{item.label} ({item.unit})</span>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <span className="text-[9px] font-bold text-neutral-400 block">MIN (Rp)</span>
+                                  <input
+                                    type="text"
+                                    value={(laporanHarianForm as any)[item.minKey]}
+                                    onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, [item.minKey]: e.target.value })}
+                                    className="mt-0.5 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-1.5 text-[11px] text-neutral-900 dark:text-white text-right focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                                  />
+                                </div>
+                                <div>
+                                  <span className="text-[9px] font-bold text-neutral-400 block">MAX (Rp)</span>
+                                  <input
+                                    type="text"
+                                    value={(laporanHarianForm as any)[item.maxKey]}
+                                    onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, [item.maxKey]: e.target.value })}
+                                    className="mt-0.5 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-1.5 text-[11px] text-neutral-900 dark:text-white text-right focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {formTab === "patroli" && (
+                      <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2">
+                        {/* Patroli Siang */}
+                        <div className="border border-neutral-100 dark:border-neutral-900 rounded-2xl p-4 bg-neutral-50/50 dark:bg-neutral-955/20 space-y-3">
+                          <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200 block border-b border-neutral-100 dark:border-neutral-900 pb-1.5">
+                            1. Patroli Siang Hari (BLP Siang)
+                          </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[9px] font-bold text-neutral-400 uppercase">Waktu Patroli Siang</label>
+                              <input
+                                type="text"
+                                value={laporanHarianForm.patroliSiangWaktu}
+                                onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangWaktu: e.target.value })}
+                                className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-neutral-400 uppercase">Cuaca Siang</label>
+                              <input
+                                type="text"
+                                value={laporanHarianForm.patroliSiangCuaca}
+                                onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangCuaca: e.target.value })}
+                                className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Personil Patroli Siang</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.patroliSiangPersonil}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangPersonil: e.target.value })}
+                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white font-mono"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Sasaran Patroli Siang</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.patroliSiangSasaran}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangSasaran: e.target.value })}
+                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Rute Patroli Siang</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.patroliSiangRute}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangRute: e.target.value })}
+                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Hasil Giat Patroli Siang</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.patroliSiangHasil}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangHasil: e.target.value })}
+                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Patroli Malam */}
+                        <div className="border border-neutral-100 dark:border-neutral-900 rounded-2xl p-4 bg-neutral-50/50 dark:bg-neutral-955/20 space-y-3">
+                          <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200 block border-b border-neutral-100 dark:border-neutral-900 pb-1.5">
+                            2. Patroli Malam Hari (BLP Malam)
+                          </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[9px] font-bold text-neutral-400 uppercase">Waktu Patroli Malam</label>
+                              <input
+                                type="text"
+                                value={laporanHarianForm.patroliMalamWaktu}
+                                onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamWaktu: e.target.value })}
+                                className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-neutral-400 uppercase">Cuaca Malam</label>
+                              <input
+                                type="text"
+                                value={laporanHarianForm.patroliMalamCuaca}
+                                onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamCuaca: e.target.value })}
+                                className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Personil Patroli Malam</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.patroliMalamPersonil}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamPersonil: e.target.value })}
+                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white font-mono"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Sasaran Patroli Malam</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.patroliMalamSasaran}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamSasaran: e.target.value })}
+                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Rute Patroli Malam</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.patroliMalamRute}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamRute: e.target.value })}
+                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Hasil Giat Patroli Malam</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.patroliMalamHasil}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamHasil: e.target.value })}
+                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {formTab === "rencana" && (
+                      <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Hari Rencana Esok</label>
+                            <input
+                              type="text"
+                              value={laporanHarianForm.rencanaHari}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, rencanaHari: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Tanggal Rencana Esok</label>
+                            <input
+                              type="text"
+                              value={laporanHarianForm.rencanaTanggal}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, rencanaTanggal: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Rencana Unras (Unjuk Rasa)</label>
+                            <input
+                              type="text"
+                              value={laporanHarianForm.rencanaUnras}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, rencanaUnras: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Rencana Kegiatan Menonjol</label>
+                            <input
+                              type="text"
+                              value={laporanHarianForm.rencanaGiatMenonjol}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, rencanaGiatMenonjol: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Rencana Kegiatan Politik</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.rencanaPolitik}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, rencanaPolitik: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Rencana Giat Kemasyarakatan</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.rencanaGiatMasyarakat}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, rencanaGiatMasyarakat: e.target.value })}
+                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold text-neutral-400 uppercase block">Rencana Kegiatan Personel</label>
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              value={laporanHarianForm.rencanaPersonil1}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, rencanaPersonil1: e.target.value })}
+                              className="block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2 text-xs text-neutral-900 dark:text-white"
+                            />
+                            <input
+                              type="text"
+                              value={laporanHarianForm.rencanaPersonil2}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, rencanaPersonil2: e.target.value })}
+                              className="block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2 text-xs text-neutral-900 dark:text-white"
+                            />
+                            <input
+                              type="text"
+                              value={laporanHarianForm.rencanaPersonil3}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, rencanaPersonil3: e.target.value })}
+                              className="block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2 text-xs text-neutral-900 dark:text-white"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-[10px] font-bold text-neutral-400 uppercase">Catatan Tambahan Kamtibmas</label>
+                          <textarea
+                            rows={2}
+                            value={laporanHarianForm.catatan}
+                            onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, catatan: e.target.value })}
+                            className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Multi-Input Upload Grid Layout */}
               <div className="space-y-4">

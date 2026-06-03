@@ -1,0 +1,166 @@
+# BAGIAN YANG PASTI BERUBAH SETIAP HARI
+
+## 1. Header Waktu
+
+Hari         : {{HARI}}
+Tanggal  : {{TANGGAL}}
+Waktu     : {{WAKTU}}
+
+---
+
+## 2. Bidang Ekonomi → Harga-harga
+
+{{NAMA_BAHAN}}
+Harga terendah per Kg: Rp. {{HARGA_MIN}},-
+Harga tertinggi per Kg: Rp. {{HARGA_MAX}},-
+
+Contoh:
+
+* Beras
+* Kedelai
+* Cabai
+* Minyak
+* LPG
+* dll
+
+---
+
+## 3. Keamanan Umum
+
+*a. Kriminalitas:*
+{{ISI_KRIMINALITAS}}
+
+*b. Laka Lantas :*
+{{ISI_LAKA_LANTAS}}
+
+Karena tiap hari bisa:
+
+* nihil
+* ada curat
+* laka tunggal
+* laka fatal
+* dll
+
+---
+
+## 4. Keamanan Khusus
+
+*2. Keamanan Khusus:*
+Jumlah tahanan di Rutan Polsek Tembalang {{JUMLAH_TAHANAN}}.
+
+atau:
+
+Jumlah tahanan di Rutan Polsek Tembalang:
+
+* Tahanan laki-laki : {{TAHANAN_L}}
+* Tahanan perempuan : {{TAHANAN_P}}
+* Total : {{TOTAL_TAHANAN}}
+
+---
+
+## 5. Bencana Alam
+
+*F. Bencana Alam:*
+
+{{ISI_BENCANA_ALAM}}
+
+Karena bisa:
+
+* nihil
+* banjir
+* pohon tumbang
+* longsor
+* kebakaran
+* dll
+
+---
+
+## 6. G. Lain-lain → Patroli
+
+Format tetap, isi berubah:
+
+* personil
+* rute
+* jam
+* hasil
+
+*1. {{JUDUL_PATROLI_1}}*
+
+a. {{PEMBUKA_PATROLI_1}}
+
+b. Personil :
+{{PERSONIL_PATROLI_1}}
+
+c. Sasaran:
+{{SASARAN_PATROLI_1}}
+
+d. Rute:
+{{RUTE_PATROLI_1}}
+
+e. Cara Bertindak:
+{{CARA_BERTINDAK_PATROLI_1}}
+
+f. Hasil Giat Yang Dicapai:
+{{HASIL_PATROLI_1}}
+
+g. {{KESIMPULAN_PATROLI_1}}
+
+Dan untuk patroli malam tinggal:
+
+{{PATROLI_2}}
+
+---
+
+## 7. Kegiatan VVIP / VIP
+
+Format kegiatan tetap, isi berubah sesuai kegiatan.
+
+*II. KEGIATAN VVIP / VIP:*
+
+{{JUDUL_KEGIATAN_VVIP}}
+
+A. {{ISI_VVIP_A}}
+
+B. {{ISI_VVIP_B}}
+
+C. {{ISI_VVIP_C}}
+
+D. {{ISI_VVIP_D}}
+
+E. {{ISI_VVIP_E}}
+
+Karena bisa:
+
+* kunjungan menteri
+* gubernur
+* walikota
+* pejabat TNI/Polri
+* atau nihil
+
+---
+
+## 8. Rencana Kegiatan
+
+*IV. RENCANA KEGIATAN:*
+
+Hari    : {{RENCANA_HARI}}
+
+Tanggal : {{RENCANA_TANGGAL}}
+
+*A. Unras : {{RENCANA_UNRAS}}*
+
+*B. Giat Menonjol : {{RENCANA_GIAT_MENONJOL}}*
+
+*C. Politik :*
+{{RENCANA_POLITIK}}
+
+*D. Giat Masyarakat:*
+{{RENCANA_GIAT_MASYARAKAT}}
+
+*E. Kegiatan Personil:*
+
+1. {{RENCANA_PERSONIL_1}}
+
+2. {{RENCANA_PERSONIL_2}}
+
+3. {{RENCANA_PERSONIL_3}}

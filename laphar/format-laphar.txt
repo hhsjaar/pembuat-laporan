@@ -1,0 +1,280 @@
+POLRESTABES SEMARANG
+POLSEK TEMBALANG
+================
+
+Kepada Yth :
+KAPOLRESTABES SEMARANG
+
+Dari :
+KAPOLSEK TEMBALANG
+
+Perihal :
+LAPORAN SITUASI DI WILAYAH HUKUM POLSEK TEMBALANG
+
+Hari         : {{HARI}}
+Tanggal  : {{TANGGAL}}
+Waktu     : {{WAKTU}}
+
+*SITUASI POLEKSOSBUDKAM*
+
+*I. SITUASI / KEGIATAN:*
+
+*A. Politik:*
+
+{{ISI_POLITIK}}
+
+---
+
+*B. Ekonomi:*
+
+1. Distribusi BBM, LPG dan Minyak goreng berjalan lancar tidak terjadi kelangkaan di wilayah hukum Polsek Tembalang.
+
+2. Adapun hasil pantauan harga Bahan Kebutuhan Pokok di Pasar Tradisional Kedungmundu dan Pasar Meteseh dapat dilaporkan sbb :
+
+a. BERAS MEDIUM
+Harga terendah per Kg: Rp. {{BERAS_MIN}},-
+Harga tertinggi per Kg: Rp. {{BERAS_MAX}},-
+
+b. KEDELAI
+Harga terendah per Kg: Rp. {{KEDELAI_MIN}},-
+Harga tertinggi per Kg: Rp. {{KEDELAI_MAX}},-
+
+c. CABAI MERAH BESAR
+Harga terendah per Kg: Rp. {{CABAI_BESAR_MIN}},-
+Harga tertinggi per Kg: Rp. {{CABAI_BESAR_MAX}},-
+
+d. CABAI RAWIT MERAH
+Harga terendah per Kg: Rp. {{CABAI_RAWIT_MIN}},-
+Harga tertinggi per Kg: Rp. {{CABAI_RAWIT_MAX}},-
+
+e. CABAI TAMPAR
+Harga terendah per Kg: Rp. {{CABAI_TAMPAR_MIN}},-
+Harga tertinggi per Kg: Rp. {{CABAI_TAMPAR_MAX}},-
+
+f. BAWANG MERAH
+Harga terendah per Kg: Rp. {{BAWANG_MERAH_MIN}},-
+Harga tertinggi per Kg: Rp. {{BAWANG_MERAH_MAX}},-
+
+g. BAWANG PUTIH
+Harga terendah per Kg: Rp. {{BAWANG_PUTIH_MIN}},-
+Harga tertinggi per Kg: Rp. {{BAWANG_PUTIH_MAX}},-
+
+h. JAGUNG (Pipilan Kering)
+Harga terendah per Kg: Rp. {{JAGUNG_MIN}},-
+Harga tertinggi per Kg: Rp. {{JAGUNG_MAX}},-
+
+i. GULA PASIR
+Harga terendah per Kg: Rp. {{GULA_MIN}},-
+Harga tertinggi per Kg: Rp. {{GULA_MAX}},-
+
+j. MINYAK GORENG (MINYAK KITA)
+Harga terendah per Liter: Rp. {{MINYAK_MIN}},-
+Harga tertinggi per Liter: Rp. {{MINYAK_MAX}},-
+
+k. TEPUNG TERIGU
+Harga terendah per Kg: Rp. {{TERIGU_MIN}},-
+Harga tertinggi per Kg: Rp. {{TERIGU_MAX}},-
+
+l. DAGING SAPI
+Harga terendah per Kg: Rp. {{DAGING_SAPI_MIN}},-
+Harga tertinggi per Kg: Rp. {{DAGING_SAPI_MAX}},-
+
+m. DAGING AYAM RAS
+Harga terendah per Kg: Rp. {{DAGING_AYAM_MIN}},-
+Harga tertinggi per Kg: Rp. {{DAGING_AYAM_MAX}},-
+
+n. TELUR AYAM RAS
+Harga terendah per Kg: Rp. {{TELUR_MIN}},-
+Harga tertinggi per Kg: Rp. {{TELUR_MAX}},-
+
+o. GARAM
+Harga terendah: Rp. {{GARAM_MIN}},- / 250 Gram
+Harga tertinggi: Rp. {{GARAM_MAX}},- / 250 Gram
+
+p. Gas LPG 3 Kg
+Harga terendah: Rp. {{LPG_MIN}},- (pangkalan)
+Harga tertinggi: Rp. {{LPG_MAX}},- (pengecer)
+
+---
+
+*C. Sosial Budaya:*
+
+{{KEGIATAN_SOSBUD}}
+
+Format kegiatan:
+
+1. {{JUDUL_KEGIATAN_1}}
+
+a. {{ISI_KEGIATAN_1A}}
+
+b. {{ISI_KEGIATAN_1B}}
+
+c. {{ISI_KEGIATAN_1C}}
+
+d. {{ISI_KEGIATAN_1D}}
+
+e. {{ISI_KEGIATAN_1E}}
+
+2. {{JUDUL_KEGIATAN_2}}
+
+a. {{ISI_KEGIATAN_2A}}
+
+b. {{ISI_KEGIATAN_2B}}
+
+c. {{ISI_KEGIATAN_2C}}
+
+d. {{ISI_KEGIATAN_2D}}
+
+---
+
+*D. Sosial Keamanan:*
+
+{{ISI_SOSIAL_KEAMANAN}}
+
+---
+
+*E. Keamanan Negara:*
+
+*1. Keamanan umum:*
+
+a. Kriminalitas:
+{{ISI_KRIMINALITAS}}
+
+b. Laka Lantas :
+{{ISI_LAKA_LANTAS}}
+
+*2. Keamanan Khusus:*
+
+Jumlah tahanan di Rutan Polsek Tembalang {{JUMLAH_TAHANAN}}.
+
+atau:
+
+Tahanan laki-laki : {{TAHANAN_L}}
+Tahanan perempuan : {{TAHANAN_P}}
+Total : {{TOTAL_TAHANAN}}
+
+---
+
+*F. Bencana Alam:*
+
+{{ISI_BENCANA_ALAM}}
+
+---
+
+*G. Lain-lain:*
+
+*1. {{JUDUL_PATROLI_SIANG}}*
+
+a. {{PEMBUKA_PATROLI_SIANG}}
+
+b. Personil :
+
+{{PERSONIL_PATROLI_SIANG}}
+
+c. Sasaran:
+
+{{SASARAN_PATROLI_SIANG}}
+
+d. Rute:
+
+{{RUTE_PATROLI_SIANG}}
+
+e. Cara Bertindak:
+
+{{CARA_BERTINDAK_PATROLI_SIANG}}
+
+f. Hasil Giat Yang Dicapai:
+
+{{HASIL_PATROLI_SIANG}}
+
+g. {{KESIMPULAN_PATROLI_SIANG}}
+
+---
+
+*2. {{JUDUL_PATROLI_MALAM}}*
+
+a. {{PEMBUKA_PATROLI_MALAM}}
+
+b. Personil :
+
+{{PERSONIL_PATROLI_MALAM}}
+
+c. Sasaran:
+
+{{SASARAN_PATROLI_MALAM}}
+
+d. Rute:
+
+{{RUTE_PATROLI_MALAM}}
+
+e. Cara Bertindak:
+
+{{CARA_BERTINDAK_PATROLI_MALAM}}
+
+f. Hasil Giat Yang Dicapai:
+
+{{HASIL_PATROLI_MALAM}}
+
+g. {{KESIMPULAN_PATROLI_MALAM}}
+
+---
+
+*II. KEGIATAN VVIP / VIP:*
+
+{{JUDUL_KEGIATAN_VVIP}}
+
+A. {{ISI_VVIP_A}}
+
+B. {{ISI_VVIP_B}}
+
+C. {{ISI_VVIP_C}}
+
+D. {{ISI_VVIP_D}}
+
+E. {{ISI_VVIP_E}}
+
+atau:
+
+Tidak ada kegiatan untuk dilaporkan.
+
+---
+
+*III. CATATAN:*
+
+{{CATATAN}}
+
+---
+
+*IV. RENCANA KEGIATAN:*
+
+Hari    : {{RENCANA_HARI}}
+
+Tanggal : {{RENCANA_TANGGAL}}
+
+*A. Unras : {{RENCANA_UNRAS}}*
+
+*B. Giat Menonjol : {{RENCANA_GIAT_MENONJOL}}*
+
+*C. Politik :*
+
+{{RENCANA_POLITIK}}
+
+*D. Giat Masyarakat:*
+
+{{RENCANA_GIAT_MASYARAKAT}}
+
+*E. Kegiatan Personil:*
+
+1. {{RENCANA_PERSONIL_1}}
+
+2. {{RENCANA_PERSONIL_2}}
+
+3. {{RENCANA_PERSONIL_3}}
+
+DUMP
+
+Hormat kami
+
+Kapolsek Tembalang
+
+*KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H.*

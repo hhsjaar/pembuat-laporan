@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { FileText, Calendar, Shield, CheckCircle2 } from "lucide-react";
 
-export type TemplateType = "laporan-informasi" | "laporan-kegiatan" | "laporan-harian-khusus" | "laporan-khusus-3";
+export type TemplateType = "laporan-informasi" | "laporan-kegiatan" | "laporan-harian-khusus" | "laporan-khusus-3" | "laporan-harian";
 
 interface TemplateSelectorProps {
   selected: TemplateType;
@@ -29,6 +29,14 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
       borderColor: "hover:border-amber-500/30 selected:border-amber-500",
     },
     {
+      id: "laporan-harian" as TemplateType,
+      title: "Laporan Harian Situasi",
+      description: "Format Laporan Situasi Harian Kamtibmas Polsek Tembalang dengan isian harga ekonomi & patroli BLP.",
+      icon: Calendar,
+      color: "from-rose-500/10 to-red-500/10 text-rose-500 dark:text-rose-400",
+      borderColor: "hover:border-rose-500/30 selected:border-rose-500",
+    },
+    {
       id: "laporan-harian-khusus" as TemplateType,
       title: "Laporan Harian Khusus",
       description: "Format LHK resmi untuk mendokumentasikan kejadian penting harian atau situasi darurat di TKP.",
@@ -36,14 +44,14 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
       color: "from-emerald-500/10 to-teal-500/10 text-emerald-500 dark:text-emerald-400",
       borderColor: "hover:border-emerald-500/30 selected:border-emerald-500",
     },
-    {
-      id: "laporan-khusus-3" as TemplateType,
-      title: "Laporan Khusus 3",
-      description: "Dokumen pengawasan strategis level tinggi untuk koordinasi lintas sektoral dan pimpinan.",
-      icon: Shield,
-      color: "from-purple-500/10 to-pink-500/10 text-purple-500 dark:text-purple-400",
-      borderColor: "hover:border-purple-500/30 selected:border-purple-500",
-    },
+    // {
+    //   id: "laporan-khusus-3" as TemplateType,
+    //   title: "Laporan Khusus 3",
+    //   description: "Dokumen pengawasan strategis level tinggi untuk koordinasi lintas sektoral dan pimpinan.",
+    //   icon: Shield,
+    //   color: "from-purple-500/10 to-pink-500/10 text-purple-500 dark:text-purple-400",
+    //   borderColor: "hover:border-purple-500/30 selected:border-purple-500",
+    // },
   ];
 
   return (
@@ -66,11 +74,10 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
             <div
               key={temp.id}
               onClick={() => onChange(temp.id)}
-              className={`relative cursor-pointer rounded-2xl p-5 glassmorphism transition-all duration-300 group overflow-hidden ${
-                isSelected
+              className={`relative cursor-pointer rounded-2xl p-5 glassmorphism transition-all duration-300 group overflow-hidden ${isSelected
                   ? "border-neutral-900/10 dark:border-white/10 ring-2 ring-neutral-900 dark:ring-white bg-white dark:bg-neutral-900/60 shadow-lg"
                   : "border-neutral-200/50 dark:border-neutral-800/40 hover:bg-white dark:hover:bg-neutral-900/20 hover:shadow-md"
-              }`}
+                }`}
             >
               {/* Highlight background glow */}
               <div

@@ -76,6 +76,7 @@ export default function ReportPreview({
     "laporan-kegiatan": "LAPORAN KEGIATAN POLSEK TEMBALANG",
     "laporan-harian-khusus": "LAPORAN HARIAN KHUSUS (LHK)",
     "laporan-khusus-3": "LAPORAN KHUSUS - TIPE 3",
+    "laporan-harian": "LAPORAN HARIAN SITUASI KAMTIBMAS",
   };
 
   const currentTemplateTitle = templateTitles[templateType] || "DOKUMEN DOKUMENTASI LAPORAN";
@@ -88,6 +89,10 @@ export default function ReportPreview({
   };
 
   const getPlainReportText = () => {
+    if (templateType === "laporan-harian") {
+      return reportData.isi_laporan || "";
+    }
+
     let mainBody = "";
     if (reportData.isi_laporan) {
       mainBody = reportData.isi_laporan;
@@ -154,14 +159,14 @@ Tembusan:
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `laporan-kegiatan-${Date.now()}.txt`);
+    link.setAttribute("download", `laporan-${templateType === "laporan-harian" ? "harian" : "kegiatan"}-${Date.now()}.txt`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  const isLaporanKegiatan = templateType === "laporan-kegiatan";
+  const isLaporanKegiatan = templateType === "laporan-kegiatan" || templateType === "laporan-harian";
 
   return (
     <motion.div
@@ -182,7 +187,7 @@ Tembusan:
             </h3>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
               {isLaporanKegiatan 
-                ? "Teks laporan kegiatan siap disalin langsung untuk dibagikan ke WhatsApp/Telegram." 
+                ? `Teks ${templateType === "laporan-harian" ? "laporan harian" : "laporan kegiatan"} siap disalin langsung untuk dibagikan ke WhatsApp/Telegram.` 
                 : "Dokumen Anda telah siap diunduh dalam format Microsoft Word (.docx)."}
             </p>
           </div>

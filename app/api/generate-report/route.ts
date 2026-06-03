@@ -80,7 +80,7 @@ function correctWeekdaysInObject(obj: any): any {
 
 export async function POST(req: NextRequest) {
   try {
-    const { transcript, imageAnalysis, pdfText, userInput, templateType } = await req.json();
+    const { transcript, imageAnalysis, pdfText, userInput, templateType, laporanHarianForm } = await req.json();
 
     console.log(`[Gemini Mode] Generating report narrative for template: ${templateType}...`);
 
@@ -139,7 +139,7 @@ PANDUAN EKSTRAPOLASI KREATIF & SIMULASI LOGIS (JIKA DATA MASUKAN TIDAK LENGKAP):
 Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {
   "bidang": "Kategori bidang laporan (Kapital penuh, misal: KEAMANAN, POLITIK, IDEOLOGI / SOSIAL POLITIK, SOSIAL BUDAYA)",
-  "perihal": "Informasi kejadian/kegiatan secara KAPITAL PENUH dan sangat deskriptif dimulai dengan kata 'INFORMASI KEGIATAN...' (sesuaikan dengan kegiatan nyata di masukan pengguna)",
+  "perihal": "Informasi kejadian/kegiatan secara KAPITAL PENUH and sangat deskriptif dimulai dengan kata 'INFORMASI KEGIATAN...' (sesuaikan dengan kegiatan nyata di masukan pengguna)",
   "cara-mendapatkan-informasi": "Bagaimana data/informasi didapatkan (misal: Observasi lapangan dan koordinasi dengan pihak panitia., Monitoring dan wawancara., dsb.)",
   "waktu-mendapatkan-informasi": "Hari dan tanggal mendapatkan informasi (misal: Sabtu tanggal 16 Mei 2026 atau sesuai dokumen masukan)",
   "isi_laporan": "Teks rincian fakta lapangan yang SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF. Anda WAJIB membaginya ke dalam poin-poin terstruktur menggunakan urutan alfabet kapital (A., B., C., D., E., F., dst.). Jangan pernah terpatok hanya pada poin A sampai D saja; jika pembahasan dari masukan data bersifat panjang, kompleks, atau membutuhkan penjelasan multi-dimensi, silakan eksekusi poin-poin selanjutnya (seperti E., F., G., dst.) secara dinamis sesuai kebutuhan. Judul atau fokus dari masing-masing poin alfabet ini bersifat dinamis (menyesuaikan dengan jenis kegiatan/peristiwa yang dilaporkan, misalnya: A. Fakta-fakta Pelaksanaan Kegiatan, B. Rincian Susunan Acara/Rundown secara Detail, C. Aspek Keamanan dan Pengamanan, D. Informasi Tambahan/Lain-lain). Setiap poin wajib dijabarkan dengan deskripsi/narasi yang sangat mendalam dan tidak boleh disingkat-singkat. Pisahkan antar poin menggunakan baris baru ganda (\\n\\n). Gunakan bahasa dinas intelkam resmi kepolisian yang baku dan berwibawa, namun kemaslah diksi tersebut secara luwes, variatif, mengalir alami, dan tidak kaku (jangan monoton atau seperti tulisan robot/template mati).",
@@ -231,6 +231,267 @@ BERIKUT ADALAH 4 PILIHAN ACUAN GAYA BAHASA, STRUKTUR FORMAT, DAN DIKSI LAPORAN K
 Aturan Tambahan:
 1. Pastikan seluruh isi laporan bebas dari kosakata kasual. Ubah kosakata sehari-hari dari transkrip audio menjadi bahasa intelkam resmi yang baku, terstruktur, sopan, objektif, dan formal. Namun, kemaslah diksi tersebut secara luwes, variatif, mengalir alami, dan tidak monoton. Hindari pengulangan kata/frasa pembuka yang sama secara terus-menerus (seperti 'bahwa', 'kemudian', 'dapat dilaporkan bahwa') di awal kalimat/paragraf agar tulisan tidak terasa kaku atau robotik.
 2. Jika ada tanggal/waktu spesifik yang terdeteksi dari transkrip atau catatan user/rundown, wajib digunakan. Jika tidak terdeteksi, gunakan tanggal hari ini: ${currentDate}.`;
+    } else if (templateType === "laporan-harian") {
+      const form = laporanHarianForm || {};
+      const totalTahanan = (parseInt(form.tahananL || "0") + parseInt(form.tahananP || "0")) || 0;
+      let keamananKhususText = "Tidak ada hal yang dapat dilaporkan.";
+      if (totalTahanan > 0) {
+        keamananKhususText = `Jumlah tahanan di Rutan Polsek Tembalang:
+Tahanan laki-laki : ${form.tahananL || "0"}
+Tahanan perempuan : ${form.tahananP || "0"}
+Total : ${totalTahanan}`;
+      }
+
+      systemPrompt = `Anda adalah asisten AI profesional pembuat Laporan Harian Situasi Kamtibmas (Laporan Harian) resmi untuk Polsek Tembalang, Polrestabes Semarang, Jawa Tengah.
+Tugas Anda adalah merangkai dan menghasilkan teks laporan harian lengkap (isi_laporan) berbahasa Indonesia berdasarkan formulir masukan terstruktur yang disediakan dan data tidak terstruktur yang diunggah pengguna (transkrip, analisa gambar rundown, teks PDF, catatan user).
+
+Anda wajib mempertahankan struktur format teks persis seperti yang tertulis dalam panduan format berikut, termasuk spasi, tanda pagar/bintang, dan tanda hubung pemisah:
+
+POLRESTABES SEMARANG
+POLSEK TEMBALANG
+================
+
+Kepada Yth :
+KAPOLRESTABES SEMARANG
+
+Dari :
+KAPOLSEK TEMBALANG
+
+Perihal :
+LAPORAN SITUASI DI WILAYAH HUKUM POLSEK TEMBALANG
+
+Hari         : ${form.hari || ""}
+Tanggal  : ${form.tanggal || ""}
+Waktu     : ${form.waktu || "08.00 s.d. 08.00 WIB"}
+
+*SITUASI POLEKSOSBUDKAM*
+
+*I. SITUASI / KEGIATAN:*
+
+*A. Politik:*
+[ISI_POLITIK]
+
+---
+
+*B. Ekonomi:*
+
+1. Distribusi BBM, LPG dan Minyak goreng berjalan lancar tidak terjadi kelangkaan di wilayah hukum polsek Tembalang. 
+
+2. Adapun hasil pantauan harga Bahan Kebutuhan Pokok di pasar tradisional Kedungmundu dan Pasar Meteseh dapat dilaporkan sbb :
+
+*1) BERAS MEDIUM*
+Harga terendah per Kg: Rp. ${form.berasMin || "15.000"},-
+Harga tertinggi per Kg:  Rp. ${form.berasMax || "17.000"},-
+
+*2) KEDELAI*
+Harga terendah per Kg: Rp. ${form.kedelaiMin || "9.000"},-
+Harga tertinggi per Kg:  Rp. ${form.kedelaiMax || "13.000"},-
+
+*3) CABAI MERAH BESAR*
+Harga terendah per Kg: Rp. ${form.cabaiBesarMin || "40.000"},-
+Harga tertinggi per Kg: Rp. ${form.cabaiBesarMax || "45.000"},-
+
+*4) CABAI RAWIT MERAH*
+Harga terendah per Kg: Rp. ${form.cabaiRawitMin || "90.000"},-
+Harga tertinggi per Kg:  Rp. ${form.cabaiRawitMax || "95.000"},-
+
+*5) CABAI TAMPAR*
+Harga terendah per Kg: Rp. ${form.cabaiTamparMin || "35.000"},-
+Harga tertinggi per Kg:  Rp. ${form.cabaiTamparMax || "40.000"},-
+
+*6) BAWANG MERAH*
+Harga terendah per Kg: Rp. ${form.bawangMerahMin || "45.000"},-
+Harga tertinggi per Kg:  Rp. ${form.bawangMerahMax || "50.000"},-
+
+*7) BAWANG PUTIH*
+Harga terendah per Kg: Rp. ${form.bawangPutihMin || "35.000"},-
+Harga tertinggi per Kg:  Rp. ${form.bawangPutihMax || "40.000"},-
+
+*8) JAGUNG (Pipilan Kering)*
+Harga terendah per Kg: Rp.   ${form.jagungMin || "8.000"},-
+Harga tertinggi per Kg:  Rp. ${form.jagungMax || "11.000"},-
+
+*9) GULA PASIR*
+Harga terendah per Kg: Rp. ${form.gulaMin || "17.500"},-
+Harga tertinggi per Kg:  Rp. ${form.gulaMax || "18.500"},-
+
+*10) MINYAK GORENG (MINYAK KITA)*
+Harga terendah per Liter: Rp. ${form.minyakMin || "15.700"},-
+Harga tertinggi per Liter:  Rp. ${form.minyakMax || "19.000"},-
+
+*11) TEPUNG TERIGU*
+Harga terendah per Kg: Rp.${form.teriguMin || "10.000"},-
+Harga tertinggi per Kg:  Rp. ${form.teriguMax || "12.500"},-
+
+*12) DAGING SAPI*
+Harga terendah per Kg: Rp. ${form.dagingSapiMin || "120.000"},-
+Harga tertinggi per Kg:  Rp. ${form.dagingSapiMax || "130.000"},-
+
+*13) DAGING AYAM RAS*
+Harga terendah per Kg: Rp. ${form.dagingAyamMin || "40.000"},-
+Harga tertinggi per Kg: Rp. ${form.dagingAyamMax || "48.000"},-
+
+*14) TELUR AYAM RAS*
+Harga terendah per Kg: Rp. ${form.telurMin || "29.000"},-
+Harga tertinggi per Kg: Rp. ${form.telurMax || "31.000"},-
+
+*15) GARAM*
+Harga terendah: Rp. ${form.garamMin || "2.500"},- / 250 Gram
+Harga tertinggi: Rp. ${form.garamMax || "3.500"},- / 250 Gram
+
+*16) Gas LPG 3 Kg*
+Harga terendah: Rp. ${form.lpgMin || "18.000"},- (pangkalan)
+Harga tertinggi: Rp. ${form.lpgMax || "23.000"},- (pengecer)
+
+---
+
+*C. Sosial Budaya:*
+[KEGIATAN_SOSBUD]
+
+---
+
+*D. Sosial Keamanan:*
+[ISI_SOSIAL_KEAMANAN]
+
+---
+
+*E. Keamanan Negara:*
+
+*1. Keamanan umum:*
+
+a. Kriminalitas:
+${form.kriminalitas || "Tidak ada hal yang dapat dilaporkan."}
+
+b. Laka Lantas :
+${form.lakaLantas || "Tidak ada hal yang dapat dilaporkan."}
+
+*2. Keamanan Khusus:*
+${keamananKhususText}
+
+---
+
+*F. Bencana Alam:*
+${form.bencanaAlam || "Tidak ada hal yang dapat dilaporkan."}
+
+---
+
+*G. Lain-lain:*
+
+1. PATROLI BLP ( BLUE LIGHT PATROL ) / POLISI SIAGA SIANG HARI
+
+Kegiatan rutin Patroli BLP (Blue Light Patrol) Siang hari dalam rangka antisipasi gangguan kamtibmas di Wilayah Hukum Polsek Tembalang, yang dilaksanakan pada :
+ 
+Pukul     : ${form.patroliSiangWaktu || "11.00 Wib s/d Selesai."}
+Cuaca    : ${form.patroliSiangCuaca || "CERAH"}
+
+Personil :
+${form.patroliSiangPersonil || ""}
+
+I. SASARAN :
+${form.patroliSiangSasaran || ""}
+
+II. ROUTE
+${form.patroliSiangRute || ""}
+
+III. CARA BERTINDAK :
+1.  Unit Patroli Memberikan himbauan kamtibmas kepada masyarakat untuk antisipasi tindak pidana C3.
+2.  Melaksanakan Patroli obyek-obyek vital, SPBU, Kantor/ATM Perbankan, Tempat ibadah, patroli ke pemukiman penduduk/perumahan.
+3.  Patroli antisipasi C3, balap liar, tawuran and pengendara sepeda motor yang menggunakan knalpot yang tidak sesuai dengan spesifikasi teknis di wilayah hukum Polsek Tembalang
+
+IV. HASIL GIAT YANG DICAPAI :
+${form.patroliSiangHasil || ""}
+
+Selama kegiatan Patroli BLP berlangsung situasi dan kondisi berjalan aman, tertib dan lancar kejadian menonjol NIHIL
+
+---
+
+2. *PATROLI BLP ( BLUE LIGHT PATROL ) / POLISI SIAGA MALAM HARI*
+                
+Kegiatan rutin Patroli *BLP (Blue Light Patrol)* Malam hari dalam rangka antisipasi gangguan kamtibmas di Wilayah Hukum Polsek Tembalang, yang dilaksanakan pada :
+Pukul     : ${form.patroliMalamWaktu || "22.00 Wib s/d selesai"}
+Cuaca    : ${form.patroliMalamCuaca || "Cerah"}
+
+Personil :
+${form.patroliMalamPersonil || ""}
+
+*Sasaran*
+${form.patroliMalamSasaran || ""}
+
+*II. ROUTE*
+${form.patroliMalamRute || ""}
+
+*III. CARA BERTINDAK :*
+*1.* Unit Patroli Memberikan himbauan kamtibmas kepada masyarakat untuk antisipasi tindak pidana C3.
+*2.* Melaksanakan Patroli obyek-obyek vital, SPBU, Kantor/ATM Perbankan, Tempat ibadah/Gereja, patroli ke pemukiman penduduk/perumahan.
+*3.* Patroli antisipasi C3, balap liar, tawuran and pengendara sepeda motor yang menggunakan knalpot yang tidak sesuai dengan spesifikasi teknis di wilayah hukum Polsek Tembalang
+
+*IV. HASIL GIAT YANG DICAPAI :*
+${form.patroliMalamHasil || ""}
+
+Selama kegiatan Patroli BLP berlangsung situasi berjalan aman, tertib dan lancar kejadian menonjol *_NIHIL_*
+
+---
+
+*II. KEGIATAN VVIP / VIP:*
+[KEGIATAN_VVIP]
+
+---
+
+*III. CATATAN:*
+${form.catatan || "Secara umum situasi di wilayah Hukum Polsek Tembalang dalam keadaan aman dan terkendali."}
+
+---
+
+*IV. RENCANA KEGIATAN:*
+
+Hari    : ${form.rencanaHari || ""}
+
+Tanggal : ${form.rencanaTanggal || ""}
+
+*A. Unras : ${form.rencanaUnras || "NIHIL"}*
+
+*B. Giat Menonjol : ${form.rencanaGiatMenonjol || "NIHIL"}*
+
+*C. Politik : ${form.rencanaPolitik || "NIHIL"}*
+
+*D. Giat Masyarakat: ${form.rencanaGiatMasyarakat || "NIHIL"}*
+
+*E. Kegiatan Personil:*
+1. ${form.rencanaPersonil1 || "Melaksanakan pam dan monitoring giat masyarakat di wilayah hukum Polsek Tembalang."}
+2. ${form.rencanaPersonil2 || "Melaksanakan monitoring distribusi BBM, LPG serta Bahan kebutuhan pokok di wilayah hukum Polsek Tembalang."}
+3. ${form.rencanaPersonil3 || "Melaksanakan Kegiatan Rutin dengan target yang dioptimalkan di wilayah hukum Polsek Tembalang dalam rangka menciptakan sitkamtibmas yang aman dan kondusif."}
+
+DUMP
+
+Hormat kami
+Kapolsek Tembalang
+
+[KAPOLSEK_NAMA]
+
+${calendarContext}
+
+Aturan Penulisan & Pengisian:
+1. Pastikan Anda menyalin data dari formulir masukan persis seperti di atas.
+2. Untuk [ISI_POLITIK], [KEGIATAN_SOSBUD], [ISI_SOSIAL_KEAMANAN], [KEGIATAN_VVIP], analisis unggahan transkrip/berkas dari user. Jika tidak ada yang terdeteksi, default-kan ke 'Tidak ada hal yang dapat dilaporkan' atau 'Tidak ada kegiatan untuk dilaporkan' atau 'NIHIL'.
+3. Jika ADA peristiwa politik, sosial budaya (perayaan ibadah, misa, haul), sosial keamanan (eksekusi lahan, unras), kegiatan VVIP (kunjungan walikota, gubernur), jelaskan secara detail dan komprehensif memakai diksi intelkam resmi yang luwes dan dinamis (tidak monoton/stiff/robotik).
+4. Untuk [KAPOLSEK_NAMA], gunakan:
+   - "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H." jika tanggal laporan sebelum 25 Mei 2026.
+   - "KOMPOL WAHDAH M., S.H., S.I.K." jika tanggal laporan pada atau setelah 25 Mei 2026.
+   (Gunakan tanggal laporan: "${form.tanggal || ""}" untuk mengidentifikasi tanggal tersebut).
+5. Untuk bagian *C. Sosial Budaya*, jika ada kegiatan, gunakan format penomoran:
+   1. [JUDUL KEGIATAN INDIKATIF] (dimulai dengan *_Monitoring Dan Pengamanan Kegiatan..._* atau sejenisnya, tebal dan miring menggunakan *_ dan _*)
+   a. Rincian pelaksanaan, hari, tanggal, waktu, tempat, penyelenggara, pemateri/tokoh, jumlah jemaat/peserta.
+   b. Dasar pengamanan (Undang-Undang No 2 Tahun 2002, surat perintah/sprin jika terdeteksi atau simulasikan nomor sprin logis yang valid).
+   c. Jalannya pengamanan, situasi akhir, dan nihil kejadian menonjol.
+   d. Dan seterusnya. Jika ada hal yang panjang dan kompleks yang mengharuskan ada poin E, F, dan seterusnya, eksekusilah, jangan terpatok pada poin A-D saja.
+
+Kembalikan respons JSON:
+{
+  "perihal": "LAPORAN SITUASI DI WILAYAH HUKUM POLSEK TEMBALANG",
+  "isi_laporan": "Teks lengkap laporan harian yang sudah di-merge dengan format persis di atas (termasuk header POLRESTABES SEMARANG sampai dengan tanda tangan Kapolsek di paling bawah).",
+  "kapolsek_nama": "Nama Kapolsek yang menandatangani"
+}
+`;
     } else {
       systemPrompt = `Anda adalah asisten AI profesional pembuat laporan dinas resmi dan korporat berbahasa Indonesia.
 Tugas Anda adalah membuat isi laporan resmi formal bahasa Indonesia berdasarkan hasil transkrip audio, analisis gambar rundown acara, isi guidebook PDF panduan acara, dan catatan user. Gunakan gaya bahasa profesional, singkat, jelas, dan format sesuai laporan dinas resmi (EYD yang disempurnakan, sopan, objektif, dan bernada formal).
@@ -257,7 +518,30 @@ Aturan Tambahan:
 3. Tulis isi laporan dan kesimpulan dengan detail yang memadai agar laporan terlihat berbobot, kredibel, dan profesional.`;
     }
 
-    const userPrompt = `
+    let userPrompt = "";
+    if (templateType === "laporan-harian") {
+      userPrompt = `
+Template Laporan yang Dipilih: ${templateType}
+
+FORMULIR MASUKAN TERSTRUKTUR DARI PENGGUNA (Wajib di-merge ke dalam template):
+${JSON.stringify(laporanHarianForm, null, 2)}
+
+DOKUMEN DAN UNGGAHAN BERKAS DARI USER (Untuk ekstraksi event dinamis):
+1. Hasil Transkrip Rekaman Suara / Sambutan:
+"${transcript || "(Tidak ada unggahan suara)"}"
+
+2. Hasil Analisa Gambar Rundown Acara:
+"${imageAnalysis || "(Tidak ada unggahan gambar rundown)"}"
+
+3. Teks Ekstraksi dari Guidebook PDF Panduan Acara:
+"${pdfText || "(Tidak ada unggahan PDF guidebook)"}"
+
+4. Catatan Teks Tambahan:
+"${userInput || "(Tidak ada catatan tambahan)"}"
+
+Silakan susun Laporan Harian Situasi Kamtibmas Polsek Tembalang lengkap sesuai format dan merging rules.`;
+    } else {
+      userPrompt = `
 Template Laporan yang Dipilih: ${templateType}
 
 MASUKAN DARI USER (KATA KUNCI & RINCIANNYA):
@@ -274,6 +558,7 @@ MASUKAN DARI USER (KATA KUNCI & RINCIANNYA):
 "${userInput || "(Tidak ada catatan tambahan)"}"
 
 Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli di atas. Masukkan hasilnya ke dalam skema JSON yang diminta.`;
+    }
 
     let response;
     const retries = 3;
