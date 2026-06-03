@@ -474,10 +474,7 @@ Aturan Penulisan & Pengisian:
 1. Pastikan Anda menyalin data dari formulir masukan persis seperti di atas.
 2. Untuk [ISI_POLITIK], [KEGIATAN_SOSBUD], [ISI_SOSIAL_KEAMANAN], [KEGIATAN_VVIP], analisis unggahan transkrip/berkas dari user. Jika tidak ada yang terdeteksi, default-kan ke 'Tidak ada hal yang dapat dilaporkan' atau 'Tidak ada kegiatan untuk dilaporkan' atau 'NIHIL'.
 3. Jika ADA peristiwa politik, sosial budaya (perayaan ibadah, misa, haul), sosial keamanan (eksekusi lahan, unras), kegiatan VVIP (kunjungan walikota, gubernur), jelaskan secara detail dan komprehensif memakai diksi intelkam resmi yang luwes dan dinamis (tidak monoton/stiff/robotik).
-4. Untuk [KAPOLSEK_NAMA], gunakan:
-   - "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H." jika tanggal laporan sebelum 25 Mei 2026.
-   - "KOMPOL WAHDAH M., S.H., S.I.K." jika tanggal laporan pada atau setelah 25 Mei 2026.
-   (Gunakan tanggal laporan: "${form.tanggal || ""}" untuk mengidentifikasi tanggal tersebut).
+4. Untuk [KAPOLSEK_NAMA], selalu gunakan nama "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H." (Jangan pernah menggunakan nama KOMPOL WAHDAH M., S.H., S.I.K. untuk template Laporan Harian ini).
 5. Untuk bagian *C. Sosial Budaya*, jika ada kegiatan, gunakan format penomoran:
    1. [JUDUL KEGIATAN INDIKATIF] (dimulai dengan *_Monitoring Dan Pengamanan Kegiatan..._* atau sejenisnya, tebal dan miring menggunakan *_ dan _*)
    a. Rincian pelaksanaan, hari, tanggal, waktu, tempat, penyelenggara, pemateri/tokoh, jumlah jemaat/peserta.

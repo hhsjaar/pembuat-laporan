@@ -191,8 +191,8 @@ export default function Dashboard() {
 
   // The sequential execution engine
   const handleGenerateReport = async () => {
-    // Validation check: must have at least one upload or input
-    if (images.length === 0 && !pdfFile && !audioFile && !userInput.trim()) {
+    // Validation check: must have at least one upload or input (bypassed for laporan-harian)
+    if (templateType !== "laporan-harian" && images.length === 0 && !pdfFile && !audioFile && !userInput.trim()) {
       addToast("Harap masukkan setidaknya satu input: gambar rundown, berkas PDF guidebook, rekaman suara, atau catatan teks.", "error");
       return;
     }
@@ -557,7 +557,7 @@ export default function Dashboard() {
                       Form Isian Laporan Harian Situasi
                     </h3>
                     <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                      Lengkapi data harga komoditas pasar, jadwal patroli, dan status tahanan hari ini. AI akan memformulasikan laporan akhir secara utuh dan padu berdasarkan form ini serta berkas pendukung yang Anda unggah.
+                      Lengkapi data harga komoditas pasar, jadwal patroli, dan status tahanan hari ini. AI akan memformulasikan laporan akhir secara utuh dan padu berdasarkan form ini.
                     </p>
                   </div>
 
@@ -969,63 +969,65 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Multi-Input Upload Grid Layout */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
-                  2. Masukkan Data Fakta Lapangan (Minimal Salah Satu)
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Panel 1: Rundown Acara (Gambar) */}
-                  <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
-                    <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
-                      <ImageIcon className="w-4.5 h-4.5 text-neutral-500" />
-                      <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Gambar Dokumen (Rundown, Detail & Latar Belakang)</span>
+              {/* Multi-Input Upload Grid Layout (Hidden for laporan-harian) */}
+              {templateType !== "laporan-harian" && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
+                    2. Masukkan Data Fakta Lapangan (Minimal Salah Satu)
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Panel 1: Rundown Acara (Gambar) */}
+                    <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
+                      <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
+                        <ImageIcon className="w-4.5 h-4.5 text-neutral-500" />
+                        <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Gambar Dokumen (Rundown, Detail & Latar Belakang)</span>
+                      </div>
+                      <div className="flex-grow">
+                        <ImageUploader images={images} onChange={setImages} onError={(msg) => addToast(msg, "error")} />
+                      </div>
                     </div>
-                    <div className="flex-grow">
-                      <ImageUploader images={images} onChange={setImages} onError={(msg) => addToast(msg, "error")} />
-                    </div>
-                  </div>
 
-                  {/* Panel 2: Guidebook Acara (PDF) */}
-                  <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
-                    <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
-                      <FileText className="w-4.5 h-4.5 text-neutral-500" />
-                      <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Guidebook / Panduan Acara (PDF)</span>
+                    {/* Panel 2: Guidebook Acara (PDF) */}
+                    <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
+                      <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
+                        <FileText className="w-4.5 h-4.5 text-neutral-500" />
+                        <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Guidebook / Panduan Acara (PDF)</span>
+                      </div>
+                      <div className="flex-grow">
+                        <PdfUploader pdfFile={pdfFile} onChange={setPdfFile} onError={(msg) => addToast(msg, "error")} />
+                      </div>
                     </div>
-                    <div className="flex-grow">
-                      <PdfUploader pdfFile={pdfFile} onChange={setPdfFile} onError={(msg) => addToast(msg, "error")} />
-                    </div>
-                  </div>
 
-                  {/* Panel 3: Rekaman Suara / Sambutan (Audio) */}
-                  <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15 md:col-span-1">
-                    <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
-                      <Volume2 className="w-4.5 h-4.5 text-neutral-500" />
-                      <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Rekaman Suara / Sambutan (Audio)</span>
+                    {/* Panel 3: Rekaman Suara / Sambutan (Audio) */}
+                    <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15 md:col-span-1">
+                      <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
+                        <Volume2 className="w-4.5 h-4.5 text-neutral-500" />
+                        <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Rekaman Suara / Sambutan (Audio)</span>
+                      </div>
+                      <div className="flex-grow">
+                        <AudioUploader audioFile={audioFile} onChange={setAudioFile} onError={(msg) => addToast(msg, "error")} />
+                      </div>
                     </div>
-                    <div className="flex-grow">
-                      <AudioUploader audioFile={audioFile} onChange={setAudioFile} onError={(msg) => addToast(msg, "error")} />
-                    </div>
-                  </div>
 
-                  {/* Panel 4: Catatan Teks Tambahan */}
-                  <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15 md:col-span-1">
-                    <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
-                      <PenTool className="w-4.5 h-4.5 text-neutral-500" />
-                      <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Catatan Teks / Informasi Tambahan</span>
-                    </div>
-                    <div className="flex flex-col flex-grow space-y-3">
-                      <textarea
-                        value={userInput}
-                        onChange={(e) => setUserInput(e.target.value)}
-                        placeholder="Tambahkan catatan khusus, nama narasumber tambahan, lokasi geografis, panitia pelaksana, atau kronologi extra jika diperlukan..."
-                        className="w-full flex-grow rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/40 dark:bg-neutral-950/20 p-4 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 outline-none hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-neutral-900 dark:focus:border-white focus:ring-1 focus:ring-neutral-900 dark:focus:ring-white transition-all resize-none min-h-[140px]"
-                      />
+                    {/* Panel 4: Catatan Teks Tambahan */}
+                    <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15 md:col-span-1">
+                      <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
+                        <PenTool className="w-4.5 h-4.5 text-neutral-500" />
+                        <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Catatan Teks / Informasi Tambahan</span>
+                      </div>
+                      <div className="flex flex-col flex-grow space-y-3">
+                        <textarea
+                          value={userInput}
+                          onChange={(e) => setUserInput(e.target.value)}
+                          placeholder="Tambahkan catatan khusus, nama narasumber tambahan, lokasi geografis, panitia pelaksana, atau kronologi extra jika diperlukan..."
+                          className="w-full flex-grow rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/40 dark:bg-neutral-950/20 p-4 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 outline-none hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-neutral-900 dark:focus:border-white focus:ring-1 focus:ring-neutral-900 dark:focus:ring-white transition-all resize-none min-h-[140px]"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Grand Action Button */}
               <div className="flex justify-center pt-2">
