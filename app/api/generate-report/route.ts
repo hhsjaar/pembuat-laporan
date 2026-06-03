@@ -198,7 +198,7 @@ PENTING:
 {
   "perihal": "Informasi kejadian/kegiatan secara ringkas namun deskriptif (misal: Monitoring Giat Nobar Pesta Babi... di Beranda FH Undip Kec. Tembalang)",
   "isi_laporan": "Teks lengkap rincian fakta lapangan. Susun dalam alfabet penomoran (A., B., C., D... dst.) secara dinamis dan fleksibel (tidak dipatok harus A s.d F, sesuaikan dengan kompleksitas masukan pengguna). Setiap poin dipisahkan baris baru ganda (\\n\\n). Gunakan bahasa baku resmi Indonesia yang dinamis, tidak monoton, luwes, dan mengalir secara alami (tidak kaku seperti tulisan robot/template mati). Pelajari dan tiru susunan format dari 4 contoh referensi di bawah.",
-  "kapolsek_nama": "Nama dan gelar Kapolsek Tembalang yang menandatangani laporan. PENTING: Untuk tanggal sebelum 25 Mei 2026, gunakan nama 'KOMPOL KRISTIYASTUTI HANDAYANI, SH, MH.'. Untuk tanggal pada atau setelah 25 Mei 2026, gunakan nama 'KOMPOL WAHDAH M., S.H., S.I.K.'."
+  "kapolsek_nama": "Nama dan gelar Kapolsek Tembalang yang menandatangani laporan. PENTING: Selalu gunakan nama 'KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H.'."
 }
 
 PANDUAN EKSTRAPOLASI KREATIF & SIMULASI LOGIS (JIKA DATA MASUKAN TIDAK LENGKAP):
