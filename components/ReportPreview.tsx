@@ -28,6 +28,7 @@ interface ReportData {
   // Custom template fields for Laporan Harian
   E?: string;
   F?: string;
+  kapolsek_nama?: string;
 }
 
 interface ReportPreviewProps {
@@ -87,12 +88,28 @@ export default function ReportPreview({
   };
 
   const getPlainReportText = () => {
-    const cleanA = stripPrefix(reportData.A, "A\\.");
-    const cleanB = stripPrefix(reportData.B, "B\\.");
-    const cleanC = stripPrefix(reportData.C, "C\\.");
-    const cleanD = stripPrefix(reportData.D, "D\\.");
-    const cleanE = stripPrefix(reportData.E, "E\\.");
-    const cleanF = stripPrefix(reportData.F, "F\\.");
+    let mainBody = "";
+    if (reportData.isi_laporan) {
+      mainBody = reportData.isi_laporan;
+    } else {
+      const cleanA = stripPrefix(reportData.A, "A\\.");
+      const cleanB = stripPrefix(reportData.B, "B\\.");
+      const cleanC = stripPrefix(reportData.C, "C\\.");
+      const cleanD = stripPrefix(reportData.D, "D\\.");
+      const cleanE = stripPrefix(reportData.E, "E\\.");
+      const cleanF = stripPrefix(reportData.F, "F\\.");
+      
+      const parts = [];
+      if (cleanA) parts.push(`A. ${cleanA}`);
+      if (cleanB) parts.push(`B. ${cleanB}`);
+      if (cleanC) parts.push(`C. ${cleanC}`);
+      if (cleanD) parts.push(`D. ${cleanD}`);
+      if (cleanE) parts.push(`E. ${cleanE}`);
+      if (cleanF) parts.push(`F. ${cleanF}`);
+      mainBody = parts.join("\n\n");
+    }
+
+    const kapolsekNama = reportData.kapolsek_nama || "KOMPOL KRISTIYASTUTI HANDAYANI, SH, MH.";
 
     return `POLRESTABES SEMARANG
 POLSEK TEMBALANG
@@ -106,23 +123,13 @@ Dari :
 
 Perihal : *${reportData.perihal || ""}*
 
-A. ${cleanA}
-
-B. ${cleanB}
-
-C. ${cleanC}
-
-D. ${cleanD}
-
-E. ${cleanE}
-
-F. ${cleanF}
+${mainBody}
 
 
 *DUMP*
 
 Kapolsek Tembalang
-*KOMPOL KRISTIYASTUTI HANDAYANI, SH, MH.*
+*${kapolsekNama}*
 
 Tembusan:
 
