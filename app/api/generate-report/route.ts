@@ -41,14 +41,14 @@ function getCorrectWeekdayIndo(dayNameMatched: string, dateNum: number, monthNam
 
 function correctWeekdaysInString(text: string): string {
   if (typeof text !== "string") return text;
-  
+
   const regex = /(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Jum'at|Sabtu)(,\s*|\s+)(tanggal\s+)?(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember|Jan|Feb|Mar|Apr|Jun|Jul|Agt|Agust|Sep|Sept|Okt|Nov|Nop|Des|Pebruari|Nopember)\s+(\d{4})/gi;
-  
+
   return text.replace(regex, (match, dayGroup, separatorGroup, tanggalGroup, dateGroup, monthGroup, yearGroup) => {
     const dateNum = parseInt(dateGroup, 10);
     const yearNum = parseInt(yearGroup, 10);
     const correctDay = getCorrectWeekdayIndo(dayGroup, dateNum, monthGroup, yearNum);
-    
+
     const optionalTanggal = tanggalGroup || "";
     return `${correctDay}${separatorGroup}${optionalTanggal}${dateGroup} ${monthGroup} ${yearGroup}`;
   });
@@ -56,15 +56,15 @@ function correctWeekdaysInString(text: string): string {
 
 function correctWeekdaysInObject(obj: any): any {
   if (obj === null || obj === undefined) return obj;
-  
+
   if (typeof obj === "string") {
     return correctWeekdaysInString(obj);
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(item => correctWeekdaysInObject(item));
   }
-  
+
   if (typeof obj === "object") {
     const result: any = {};
     for (const key in obj) {
@@ -74,7 +74,7 @@ function correctWeekdaysInObject(obj: any): any {
     }
     return result;
   }
-  
+
   return obj;
 }
 
@@ -560,7 +560,7 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
     let response;
     const retries = 3;
     let delay = 2000;
-    
+
     for (let i = 0; i < retries; i++) {
       try {
         response = await geminiClient.chat.completions.create({
@@ -598,22 +598,22 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
     return NextResponse.json(reportData);
   } catch (error: any) {
     console.error("Generate Report API Error:", error);
-    
+
     // Custom error handling for rate limit (429)
     if (error.status === 429) {
       return NextResponse.json(
-        { 
-          error: "Batas kuota panggilan (Rate Limit 429) pada API Key Gemini Anda telah terlampaui. Mohon tunggu sekitar 1 menit sebelum mencoba kembali, atau pastikan akun Gemini Anda memiliki saldo kuota yang cukup di Google AI Studio." 
+        {
+          error: "Batas kuota panggilan (Rate Limit 429) pada API Key Gemini Anda telah terlampaui. Mohon tunggu sekitar 1 menit sebelum mencoba kembali, atau pastikan akun Gemini Anda memiliki saldo kuota yang cukup di Google AI Studio."
         },
         { status: 429 }
       );
     }
-    
+
     // Custom error handling for invalid/missing API key (404/401)
     if (error.status === 404 || error.status === 401) {
       return NextResponse.json(
-        { 
-          error: "Kunci API Gemini (GEMINI_API_KEY) tidak valid atau belum terdeteksi. Pastikan Anda sudah memasukkan API Key yang benar di berkas .env.local dan MERESTART server Next.js Anda (tekan Ctrl+C pada terminal, lalu jalankan kembali 'npm run dev') agar perubahan dibaca oleh server Next.js." 
+        {
+          error: "Kunci API Gemini (GEMINI_API_KEY) tidak valid atau belum terdeteksi. Pastikan Anda sudah memasukkan API Key yang benar di berkas .env.local dan MERESTART server Next.js Anda (tekan Ctrl+C pada terminal, lalu jalankan kembali 'npm run dev') agar perubahan dibaca oleh server Next.js."
         },
         { status: error.status }
       );
