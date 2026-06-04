@@ -80,7 +80,7 @@ function correctWeekdaysInObject(obj: any): any {
 
 export async function POST(req: NextRequest) {
   try {
-    const { transcript, imageAnalysis, pdfText, userInput, templateType, laporanHarianForm } = await req.json();
+    const { transcript, imageAnalysis, pdfText, userInput, userPreference = "", templateType, laporanHarianForm } = await req.json();
 
     console.log(`[Gemini Mode] Generating report narrative for template: ${templateType}...`);
 
@@ -536,6 +536,11 @@ DOKUMEN DAN UNGGAHAN BERKAS DARI USER (Untuk ekstraksi event dinamis):
 4. Catatan Teks Tambahan:
 "${userInput || "(Tidak ada catatan tambahan)"}"
 
+5. Instruksi / Preferensi Khusus untuk AI (Arahkan Fokus Laporan):
+"${userPreference || "(Tidak ada instruksi khusus)"}"
+
+PENTING: Jika pengguna memberikan instruksi khusus pada bagian ke-5 di atas, Anda WAJIB memprioritaskan dan mematuhi instruksi tersebut dalam merancang konten, struktur, maupun detail teknis dari laporan yang dihasilkan.
+
 Silakan susun Laporan Harian Situasi Kamtibmas Polsek Tembalang lengkap sesuai format dan merging rules.`;
     } else {
       userPrompt = `
@@ -553,6 +558,11 @@ MASUKAN DARI USER (KATA KUNCI & RINCIANNYA):
 
 4. Catatan Teks Tambahan:
 "${userInput || "(Tidak ada catatan tambahan)"}"
+
+5. Instruksi / Preferensi Khusus untuk AI (Arahkan Fokus Laporan):
+"${userPreference || "(Tidak ada instruksi khusus)"}"
+
+PENTING: Jika pengguna memberikan instruksi khusus pada bagian ke-5 di atas, Anda WAJIB memprioritaskan dan mematuhi instruksi tersebut dalam merancang konten, struktur, maupun detail teknis dari laporan yang dihasilkan.
 
 Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli di atas. Masukkan hasilnya ke dalam skema JSON yang diminta.`;
     }

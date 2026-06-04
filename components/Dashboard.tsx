@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye } from "lucide-react";
+import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders } from "lucide-react";
 import TemplateSelector, { TemplateType } from "./TemplateSelector";
 import ImageUploader from "./ImageUploader";
 import AudioUploader from "./AudioUploader";
@@ -73,6 +73,7 @@ export default function Dashboard() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [userInput, setUserInput] = useState("");
+  const [userPreference, setUserPreference] = useState("");
 
   // History tab states
   const [activeTab, setActiveTab] = useState<"generator" | "history">("generator");
@@ -609,6 +610,7 @@ Tembusan:
           imageAnalysis: imageAnalysisText,
           pdfText: pdfText,
           userInput: userInput,
+          userPreference: userPreference,
           templateType: templateType,
           laporanHarianForm: templateType === "laporan-harian" ? laporanHarianForm : null,
         }),
@@ -747,6 +749,7 @@ Tembusan:
     setPdfFile(null);
     setImages([]);
     setUserInput("");
+    setUserPreference("");
     setSteps(INITIAL_STEPS);
     addToast("Formulir masukan berhasil dikosongkan.", "info");
   };
@@ -1330,6 +1333,27 @@ Tembusan:
                 </div>
               )}
 
+              {/* Box: Preferensi & Arahan Khusus (Opsional) */}
+              <div className="space-y-4 pt-2">
+                <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
+                  {templateType === "laporan-harian" ? "2. Preferensi & Arahan Khusus AI (Opsional)" : "3. Preferensi & Arahan Khusus AI (Opsional)"}
+                </h3>
+                <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
+                  <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
+                    <Sliders className="w-4.5 h-4.5 text-neutral-500" />
+                    <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">
+                      Instruksi Khusus untuk AI (Arahkan Fokus Laporan)
+                    </span>
+                  </div>
+                  <textarea
+                    value={userPreference}
+                    onChange={(e) => setUserPreference(e.target.value)}
+                    placeholder="Contoh: Arahkan poin B untuk lebih teknis membahas rundown acara. Gunakan gaya penulisan yang formal tapi detail..."
+                    className="w-full rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/40 dark:bg-neutral-950/20 p-4 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 outline-none hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-neutral-900 dark:focus:border-white focus:ring-1 focus:ring-neutral-900 dark:focus:ring-white transition-all resize-none min-h-[80px]"
+                  />
+                </div>
+              </div>
+
               {/* Grand Action Button */}
               <div className="flex justify-center pt-2">
                 <button
@@ -1511,7 +1535,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badgeStyles}`}>
                             {badgeLabel}
                           </span>
-                          <div className="flex items-center space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center space-x-1.5">
                             <button
                               onClick={() => setSelectedHistoryItem(item)}
                               className="p-1.5 rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 bg-white/50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
