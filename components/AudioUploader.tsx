@@ -52,12 +52,24 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
       setIsDragActive(false);
     }
   };
-
   const processFile = (file: File) => {
-    const validTypes = ["audio/mp3", "audio/mpeg", "audio/wav", "audio/x-wav", "audio/m4a", "audio/x-m4a", "audio/mp4"];
-    if (validTypes.includes(file.type) || file.name.endsWith(".m4a") || file.name.endsWith(".mp3") || file.name.endsWith(".wav")) {
-      if (file.size > 4 * 1024 * 1024) {
-        const errMsg = "Ukuran berkas audio melebihi batas 4MB untuk hosting Vercel. Silakan kompres audio atau unggah berkas yang lebih kecil.";
+    const validTypes = [
+      "audio/mp3", "audio/mpeg", "audio/wav", "audio/x-wav", 
+      "audio/m4a", "audio/x-m4a", "audio/mp4", "audio/ogg", 
+      "audio/opus", "audio/aac", "audio/x-aac",
+      "video/mpeg", "video/mp4", "video/webm"
+    ];
+    const fileExt = file.name.toLowerCase();
+    const hasValidExt = 
+      fileExt.endsWith(".m4a") || fileExt.endsWith(".mp3") || 
+      fileExt.endsWith(".wav") || fileExt.endsWith(".mpeg") || 
+      fileExt.endsWith(".ogg") || fileExt.endsWith(".opus") || 
+      fileExt.endsWith(".aac") || fileExt.endsWith(".mpg") ||
+      fileExt.endsWith(".mp4") || fileExt.endsWith(".webm");
+
+    if (validTypes.includes(file.type) || hasValidExt) {
+      if (file.size > 150 * 1024 * 1024) {
+        const errMsg = "Ukuran berkas audio melebihi batas 150MB. Silakan unggah berkas yang lebih kecil.";
         if (onError) {
           onError(errMsg);
         } else {
@@ -68,7 +80,6 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
       onChange(file);
     }
   };
-
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -102,8 +113,8 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/mp3" });
         const file = new File([audioBlob], `rekaman-${Date.now()}.mp3`, { type: "audio/mp3" });
         
-        if (file.size > 4 * 1024 * 1024) {
-          const errMsg = "Ukuran rekaman suara melebihi batas 4MB untuk hosting Vercel. Harap rekam dalam durasi yang lebih singkat.";
+        if (file.size > 150 * 1024 * 1024) {
+          const errMsg = "Ukuran rekaman suara melebihi batas 150MB. Harap rekam dalam durasi yang lebih singkat.";
           if (onError) {
             onError(errMsg);
           } else {
@@ -199,7 +210,7 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
           <input
             ref={fileInputRef}
             type="file"
-            accept="audio/mp3, audio/wav, audio/m4a, audio/x-m4a, audio/mpeg"
+            accept="audio/*, video/mpeg, video/mp4, video/webm, .mp3, .wav, .m4a, .mpeg, .ogg, .opus, .aac, .mpg, .mp4, .webm"
             onChange={handleFileInputChange}
             className="hidden"
             disabled={!!audioFile}
@@ -213,7 +224,7 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
                 Unggah Berkas Audio
               </p>
               <p className="text-xs text-neutral-400 dark:text-neutral-500">
-                Format MP3, M4A, WAV hingga 25MB
+                Format MP3, M4A, WAV, MPEG, OPUS hingga 150MB
               </p>
             </div>
           </div>

@@ -458,8 +458,8 @@ Tembusan:
     }
 
     // Safety checks for file size limits to prevent Vercel 413 Payload Too Large
-    if (audioFile && audioFile.size > 4.2 * 1024 * 1024) {
-      addToast("Ukuran berkas audio melebihi batas 4.2MB untuk hosting Vercel. Silakan gunakan berkas audio yang lebih kecil.", "error");
+    if (audioFile && audioFile.size > 150 * 1024 * 1024) {
+      addToast("Ukuran berkas audio melebihi batas 150MB. Silakan gunakan berkas audio yang lebih kecil.", "error");
       return;
     }
 
