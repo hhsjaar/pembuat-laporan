@@ -238,9 +238,9 @@ Tembusan:
       className="space-y-6 max-w-4xl mx-auto"
     >
       {/* Top Action Header Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 glassmorphism rounded-2xl">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 glassmorphism rounded-2xl border border-neutral-200/40 dark:border-neutral-800/40 bg-white/40 dark:bg-neutral-900/35">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+          <div className="p-2.5 rounded-xl bg-accent/10 text-accent">
             <FileSpreadsheet className="w-5 h-5" />
           </div>
           <div>
@@ -259,7 +259,7 @@ Tembusan:
           <button
             type="button"
             onClick={onReset}
-            className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-xs font-semibold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-900 active:scale-95 transition-all w-full sm:w-auto"
+            className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-xs font-semibold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-900 active:scale-95 transition-all w-full sm:w-auto shadow-sm"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Generate Ulang</span>
@@ -270,11 +270,11 @@ Tembusan:
               <button
                 type="button"
                 onClick={handleCopyText}
-                className="flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shadow-lg w-full sm:w-auto"
+                className="flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-accent text-white hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shadow-lg shadow-accent/20 w-full sm:w-auto font-bold"
               >
                 {copied ? (
                   <>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-white fill-white/20" />
                     <span>Tersalin!</span>
                   </>
                 ) : (
@@ -299,7 +299,7 @@ Tembusan:
               type="button"
               onClick={onDownload}
               disabled={isDownloading}
-              className="flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all text-xs font-semibold shadow-lg shadow-neutral-950/10 dark:shadow-white/10 w-full sm:w-auto"
+              className="flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-accent text-white hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all text-xs font-semibold shadow-lg shadow-accent/20 w-full sm:w-auto font-bold"
             >
               {isDownloading ? (
                 <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -313,9 +313,9 @@ Tembusan:
       </div>
 
       {/* Realistic Paper Document Sheet Preview (Light Mode Styling mimics A4 document) */}
-      <div className="relative mx-auto rounded-2xl shadow-xl bg-white text-neutral-900 border border-neutral-200/80 p-8 sm:p-12 overflow-hidden select-text">
+      <div className="realistic-paper relative mx-auto rounded-2xl shadow-xl bg-white text-neutral-900 border border-neutral-200/80 p-8 sm:p-12 overflow-hidden select-text">
         {/* Document watermarking/top lines */}
-        <div className="absolute top-0 inset-x-0 h-1.5 bg-neutral-900" />
+        <div className="absolute top-0 inset-x-0 h-1.5 bg-accent" />
         
         {templateType === "laporan-informasi" ? (
           /* High-Fidelity Police Laporan Informasi Preview matching Calibri spacing, font, and sizes */
@@ -451,17 +451,17 @@ Tembusan:
         ) : isLaporanKegiatan ? (
           /* Sleek Mono Space Plain Text Preview with Copy to Clipboard Integration */
           <div className="space-y-6 max-w-2xl mx-auto text-neutral-900 select-text">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800">
               <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest font-sans">Pratinjau Teks (WhatsApp / Telegram)</span>
               <button
                 type="button"
                 onClick={handleCopyText}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-[11px] font-bold text-neutral-800 transition-colors"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 text-[11px] font-bold text-accent transition-colors"
               >
                 {copied ? (
                   <>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="text-emerald-700">Tersalin!</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
+                    <span>Tersalin!</span>
                   </>
                 ) : (
                   <>
@@ -472,7 +472,7 @@ Tembusan:
               </button>
             </div>
             
-            <div className="relative rounded-2xl border border-neutral-200/60 bg-neutral-50 p-6 sm:p-8 font-mono text-xs leading-relaxed overflow-x-auto text-neutral-800 shadow-inner select-text">
+            <div className="relative rounded-2xl border border-neutral-200/40 dark:border-purple-950/40 bg-neutral-950 p-6 sm:p-8 font-mono text-xs leading-relaxed overflow-x-auto text-purple-300 dark:text-purple-300 shadow-xl shadow-purple-500/5 select-text">
               <pre className="whitespace-pre-wrap font-mono text-[11.5px] select-text">
                 {getPlainReportText()}
               </pre>

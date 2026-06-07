@@ -1,7 +1,7 @@
 "use client";
-
+import React from "react";
 import { motion } from "framer-motion";
-import { FileText, Calendar, Shield, CheckCircle2 } from "lucide-react";
+import { Terminal, Activity, Radar, Shield, CheckCircle2 } from "lucide-react";
 
 export type TemplateType = "laporan-informasi" | "laporan-kegiatan" | "laporan-harian-khusus" | "laporan-khusus-3" | "laporan-harian";
 
@@ -15,44 +15,48 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
     {
       id: "laporan-informasi" as TemplateType,
       title: "Laporan Informasi",
-      description: "Untuk publikasi informasi umum, dokumentasi berkala, atau laporan kegiatan rutin lapangan.",
-      icon: FileText,
-      color: "from-blue-500/10 to-indigo-500/10 text-blue-500 dark:text-blue-400",
-      borderColor: "hover:border-blue-500/30 selected:border-blue-500",
+      icon: Terminal,
+      color: "from-purple-500/10 to-indigo-500/10 text-purple-500 dark:text-purple-400",
+      borderColor: "hover:border-purple-500/30 selected:border-purple-500",
     },
     {
       id: "laporan-kegiatan" as TemplateType,
       title: "Laporan Kegiatan",
-      description: "Format laporan kegiatan Polsek Tembalang yang ringkas untuk disalin langsung ke WhatsApp/Telegram.",
-      icon: FileText,
-      color: "from-amber-500/10 to-orange-500/10 text-amber-500 dark:text-amber-400",
-      borderColor: "hover:border-amber-500/30 selected:border-amber-500",
+      icon: Activity,
+      color: "from-purple-500/10 to-indigo-500/10 text-purple-500 dark:text-purple-400",
+      borderColor: "hover:border-purple-500/30 selected:border-purple-500",
     },
     {
       id: "laporan-harian" as TemplateType,
       title: "Laporan Harian Situasi",
-      description: "Format Laporan Situasi Harian Kamtibmas Polsek Tembalang dengan isian harga ekonomi & patroli BLP.",
-      icon: Calendar,
-      color: "from-rose-500/10 to-red-500/10 text-rose-500 dark:text-rose-400",
-      borderColor: "hover:border-rose-500/30 selected:border-rose-500",
+      icon: Radar,
+      color: "from-purple-500/10 to-indigo-500/10 text-purple-500 dark:text-purple-400",
+      borderColor: "hover:border-purple-500/30 selected:border-purple-500",
     },
     {
       id: "laporan-harian-khusus" as TemplateType,
       title: "Laporan Harian Khusus",
-      description: "Format LHK resmi untuk mendokumentasikan kejadian penting harian atau situasi darurat di TKP.",
-      icon: Calendar,
-      color: "from-emerald-500/10 to-teal-500/10 text-emerald-500 dark:text-emerald-400",
-      borderColor: "hover:border-emerald-500/30 selected:border-emerald-500",
+      icon: Shield,
+      color: "from-purple-500/10 to-indigo-500/10 text-purple-500 dark:text-purple-400",
+      borderColor: "hover:border-purple-500/30 selected:border-purple-500",
     },
-    // {
-    //   id: "laporan-khusus-3" as TemplateType,
-    //   title: "Laporan Khusus 3",
-    //   description: "Dokumen pengawasan strategis level tinggi untuk koordinasi lintas sektoral dan pimpinan.",
-    //   icon: Shield,
-    //   color: "from-purple-500/10 to-pink-500/10 text-purple-500 dark:text-purple-400",
-    //   borderColor: "hover:border-purple-500/30 selected:border-purple-500",
-    // },
   ];
+
+  const selectedStyles: Record<TemplateType, string> = {
+    "laporan-informasi": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
+    "laporan-kegiatan": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
+    "laporan-harian": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
+    "laporan-harian-khusus": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
+    "laporan-khusus-3": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
+  };
+
+  const checkColor: Record<TemplateType, string> = {
+    "laporan-informasi": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
+    "laporan-kegiatan": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
+    "laporan-harian": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
+    "laporan-harian-khusus": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
+    "laporan-khusus-3": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
+  };
 
   return (
     <div className="space-y-4">
@@ -60,12 +64,9 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
         <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
           1. Pilih Jenis Template Laporan
         </h3>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          Setiap template memiliki struktur formal, tata letak, dan gaya bahasa resmi yang disesuaikan secara khusus.
-        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 pb-0 md:pb-4.5">
         {templates.map((temp) => {
           const Icon = temp.icon;
           const isSelected = selected === temp.id;
@@ -74,10 +75,11 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
             <div
               key={temp.id}
               onClick={() => onChange(temp.id)}
-              className={`relative cursor-pointer rounded-2xl p-5 glassmorphism transition-all duration-300 group overflow-hidden ${isSelected
-                  ? "border-neutral-900/10 dark:border-white/10 ring-2 ring-neutral-900 dark:ring-white bg-white dark:bg-neutral-900/60 shadow-lg"
+              className={`relative cursor-pointer rounded-2xl p-3.5 sm:p-5 glassmorphism transition-all duration-300 group overflow-hidden w-full ${
+                isSelected
+                  ? selectedStyles[temp.id]
                   : "border-neutral-200/50 dark:border-neutral-800/40 hover:bg-white dark:hover:bg-neutral-900/20 hover:shadow-md"
-                }`}
+              }`}
             >
               {/* Highlight background glow */}
               <div
@@ -85,8 +87,8 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
               />
 
               <div className="flex items-start justify-between">
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${temp.color}`}>
-                  <Icon className="w-6 h-6" />
+                <div className={`p-2 sm:p-3 rounded-xl bg-gradient-to-br ${temp.color}`}>
+                  <Icon className="w-4 h-4 sm:w-6 sm:h-6" />
                 </div>
                 {isSelected && (
                   <motion.div
@@ -95,18 +97,15 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
-                    <CheckCircle2 className="w-5 h-5 text-neutral-900 dark:text-white fill-neutral-900 dark:fill-white text-white dark:text-neutral-900" />
+                    <CheckCircle2 className={`w-4 h-4 sm:w-5 sm:h-5 ${checkColor[temp.id]}`} />
                   </motion.div>
                 )}
               </div>
 
-              <div className="mt-5 space-y-2">
-                <h4 className="font-semibold text-base text-neutral-950 dark:text-white group-hover:translate-x-0.5 transition-transform duration-300">
+              <div className="mt-3 sm:mt-5">
+                <h4 className="font-bold text-xs sm:text-base text-neutral-950 dark:text-white group-hover:translate-x-0.5 transition-transform duration-300">
                   {temp.title}
                 </h4>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                  {temp.description}
-                </p>
               </div>
             </div>
           );

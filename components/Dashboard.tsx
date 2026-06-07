@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders } from "lucide-react";
+import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders, FileSpreadsheet } from "lucide-react";
 import TemplateSelector, { TemplateType } from "./TemplateSelector";
 import ImageUploader from "./ImageUploader";
 import AudioUploader from "./AudioUploader";
@@ -66,6 +66,11 @@ const getIndoFormattedDate = (date: Date): string => {
 export default function Dashboard() {
   // Theme state (system default fallback to light mode)
   const [darkMode, setDarkMode] = useState(false);
+  
+
+  
+  // Mobile upload tab selection state
+  const [activeUploadTab, setActiveUploadTab] = useState<"image" | "pdf" | "audio" | "text">("image");
 
   // Form input states
   const [templateType, setTemplateType] = useState<TemplateType>("laporan-informasi");
@@ -414,7 +419,7 @@ Tembusan:
     }));
   }, []);
 
-  // Detect and initialize theme on mount
+  // Detect and initialize theme & text scale on mount
   useEffect(() => {
     const isDark = localStorage.getItem("theme") === "dark" || 
       (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -755,9 +760,19 @@ Tembusan:
   };
 
   return (
-    <div className="relative min-h-screen dot-grid flex flex-col font-sans selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900 pb-20">
+    <div className={`relative min-h-screen cyber-grid flex flex-col font-sans selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900 pb-20 theme-${templateType}`}>
       {/* Background radial glowing gradients (Apple style blur spots) */}
-      {darkMode ? <div className="bg-glow-dark" /> : <div className="bg-glow-light" />}
+      {darkMode ? (
+        <>
+          <div className="bg-glow-dark-1" />
+          <div className="bg-glow-dark-2" />
+        </>
+      ) : (
+        <>
+          <div className="bg-glow-light-1" />
+          <div className="bg-glow-light-2" />
+        </>
+      )}
 
       {/* Main Navigation Header */}
       <header className="sticky top-0 z-40 w-full bg-white/70 dark:bg-neutral-950/70 backdrop-blur-md border-b border-neutral-200/40 dark:border-neutral-800/40">
@@ -771,12 +786,13 @@ Tembusan:
                 AI Report Generator
               </h1>
               <p className="text-[10px] text-neutral-400 dark:text-neutral-500 font-semibold tracking-wider uppercase">
-                Premium Apple Style Dashboard
+                Sistem Pembuat Laporan Resmi
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
+            {/* Dark Mode Toggle */}
             <button
               onClick={toggleTheme}
               className="p-2.5 rounded-xl border border-neutral-200/50 dark:border-neutral-800/50 bg-white/40 dark:bg-neutral-900/30 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/40 transition-colors shadow-sm"
@@ -789,19 +805,19 @@ Tembusan:
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 pt-10">
+      <main className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 pt-4 md:pt-10 pb-24 md:pb-6">
         {/* Apple Style Segmented Tab Controls */}
-        <div className="flex items-center justify-between mb-8 border-b border-neutral-200/40 dark:border-neutral-800/40 pb-4">
-          <div className="flex space-x-1 p-0.5 bg-neutral-100/80 dark:bg-neutral-900/80 rounded-xl border border-neutral-200/30 dark:border-neutral-800/30 backdrop-blur-md">
+        <div className="hidden md:flex items-center justify-between mb-8 border-b border-neutral-200/40 dark:border-neutral-800/40 pb-4">
+          <div className="flex space-x-1.5 p-1 bg-neutral-100/80 dark:bg-neutral-900/80 rounded-xl border border-neutral-200/30 dark:border-neutral-800/30 backdrop-blur-md">
             <button
               onClick={() => setActiveTab("generator")}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
                 activeTab === "generator"
-                  ? "bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm"
-                  : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300"
+                  ? "bg-white dark:bg-neutral-800 text-accent dark:text-white shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 fill-current" />
+              <Sparkles className="w-4 h-4 fill-current" />
               <span>Generator Laporan</span>
             </button>
             <button
@@ -809,13 +825,13 @@ Tembusan:
                 setActiveTab("history");
                 fetchHistory();
               }}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
                 activeTab === "history"
-                  ? "bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm"
-                  : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300"
+                  ? "bg-white dark:bg-neutral-800 text-accent dark:text-white shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200"
               }`}
             >
-              <History className="w-3.5 h-3.5" />
+              <History className="w-4 h-4" />
               <span>Riwayat Laporan</span>
             </button>
           </div>
@@ -841,12 +857,11 @@ Tembusan:
               transition={{ duration: 0.3 }}
               className="space-y-8"
             >
-              {/* Top Intro Section */}
-              <div className="text-center sm:text-left space-y-2">
-                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-950 dark:text-white">
+              <div className="text-center sm:text-left space-y-1.5 sm:space-y-2">
+                <h2 className="text-xl sm:text-4xl font-extrabold tracking-tight text-neutral-950 dark:text-white">
                   Buat Laporan Otomatis dengan AI
                 </h2>
-                <p className="text-sm sm:text-base text-neutral-500 dark:text-neutral-400 max-w-2xl leading-relaxed">
+                <p className="hidden sm:block text-sm sm:text-base text-neutral-500 dark:text-neutral-400 max-w-2xl leading-relaxed">
                   Unggah rundown gambar, guidebook PDF panduan, rekaman sambutan suara, dan catatan teks. AI akan memformulasikan laporan resmi dinas yang dinamis, akurat, dan terstruktur ke format Microsoft Word (.docx).
                 </p>
               </div>
@@ -855,12 +870,12 @@ Tembusan:
 
               {/* Laporan Harian Form Section */}
               {templateType === "laporan-harian" && (
-                <div className="space-y-6 rounded-3xl p-6 sm:p-8 border border-neutral-200/50 dark:border-neutral-800/40 bg-white/40 dark:bg-neutral-950/20 glassmorphism shadow-md transition-all duration-300">
+                <div className="space-y-4 md:space-y-6 rounded-2xl md:rounded-3xl p-4 md:p-8 border border-neutral-200/50 dark:border-neutral-800/40 bg-white/40 dark:bg-neutral-950/20 glassmorphism shadow-md transition-all duration-300">
                   <div>
-                    <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wide">
+                    <h3 className="text-xs md:text-sm font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wide">
                       Form Isian Laporan Harian Situasi
                     </h3>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                    <p className="hidden md:block text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                       Lengkapi data harga komoditas pasar, jadwal patroli, dan status tahanan hari ini. AI akan memformulasikan laporan akhir secara utuh dan padu berdasarkan form ini.
                     </p>
                   </div>
@@ -877,7 +892,7 @@ Tembusan:
                         key={tab.id}
                         type="button"
                         onClick={() => setFormTab(tab.id as any)}
-                        className={`px-4 py-2 text-xs font-bold border-b-2 transition-all duration-200 -mb-[1px] ${
+                        className={`px-2.5 py-1.5 text-[11px] md:px-4 md:py-2 md:text-xs font-bold border-b-2 transition-all duration-200 -mb-[1px] ${
                           formTab === tab.id
                             ? "border-neutral-900 dark:border-white text-neutral-950 dark:text-white"
                             : "border-transparent text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
@@ -894,93 +909,93 @@ Tembusan:
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Hari</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Hari</label>
                             <input
                               type="text"
                               value={laporanHarianForm.hari}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, hari: e.target.value })}
-                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Tanggal</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Tanggal</label>
                             <input
                               type="text"
                               value={laporanHarianForm.tanggal}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, tanggal: e.target.value })}
-                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Waktu</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Waktu</label>
                             <input
                               type="text"
                               value={laporanHarianForm.waktu}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, waktu: e.target.value })}
-                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Tahanan Laki-laki</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Tahanan Laki-laki</label>
                             <input
                               type="text"
                               value={laporanHarianForm.tahananL}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, tahananL: e.target.value })}
-                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Tahanan Perempuan</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Tahanan Perempuan</label>
                             <input
                               type="text"
                               value={laporanHarianForm.tahananP}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, tahananP: e.target.value })}
-                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Kriminalitas</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Kriminalitas</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.kriminalitas}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, kriminalitas: e.target.value })}
-                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Laka Lantas</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Laka Lantas</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.lakaLantas}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, lakaLantas: e.target.value })}
-                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Bencana Alam</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Bencana Alam</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.bencanaAlam}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, bencanaAlam: e.target.value })}
-                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Kegiatan VVIP / VIP</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Kegiatan VVIP / VIP</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.vvip}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, vvip: e.target.value })}
-                              className="mt-1 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                         </div>
@@ -989,7 +1004,7 @@ Tembusan:
 
                     {formTab === "ekonomi" && (
                       <div className="space-y-4">
-                        <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase bg-emerald-500/10 dark:bg-emerald-500/5 px-2 py-1 rounded-md inline-block">
+                        <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase bg-purple-500/10 dark:bg-purple-500/5 px-2 py-1 rounded-md inline-block">
                           Pantauan Harga Pasar Tradisional Kedungmundu & Meteseh
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3.5 max-h-[300px] overflow-y-auto pr-2">
@@ -1015,21 +1030,21 @@ Tembusan:
                               <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">{item.label} ({item.unit})</span>
                               <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                  <span className="text-[9px] font-bold text-neutral-400 block">MIN (Rp)</span>
+                                  <span className="text-[10px] font-semibold text-neutral-500 dark:text-neutral-400 block tracking-wider">MIN (Rp)</span>
                                   <input
                                     type="text"
                                     value={(laporanHarianForm as any)[item.minKey]}
                                     onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, [item.minKey]: e.target.value })}
-                                    className="mt-0.5 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-1.5 text-[11px] text-neutral-900 dark:text-white text-right focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                                    className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white text-right focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                                   />
                                 </div>
                                 <div>
-                                  <span className="text-[9px] font-bold text-neutral-400 block">MAX (Rp)</span>
+                                  <span className="text-[10px] font-semibold text-neutral-500 dark:text-neutral-400 block tracking-wider">MAX (Rp)</span>
                                   <input
                                     type="text"
                                     value={(laporanHarianForm as any)[item.maxKey]}
                                     onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, [item.maxKey]: e.target.value })}
-                                    className="mt-0.5 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-1.5 text-[11px] text-neutral-900 dark:text-white text-right focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                                    className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white text-right focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                                   />
                                 </div>
                               </div>
@@ -1048,58 +1063,58 @@ Tembusan:
                           </span>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                              <label className="text-[9px] font-bold text-neutral-400 uppercase">Waktu Patroli Siang</label>
+                              <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Waktu Patroli Siang</label>
                               <input
                                 type="text"
                                 value={laporanHarianForm.patroliSiangWaktu}
                                 onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangWaktu: e.target.value })}
-                                className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                                className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                               />
                             </div>
                             <div>
-                              <label className="text-[9px] font-bold text-neutral-400 uppercase">Cuaca Siang</label>
+                              <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Cuaca Siang</label>
                               <input
                                 type="text"
                                 value={laporanHarianForm.patroliSiangCuaca}
                                 onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangCuaca: e.target.value })}
-                                className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                                className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                               />
                             </div>
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Personil Patroli Siang</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Personil Patroli Siang</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.patroliSiangPersonil}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangPersonil: e.target.value })}
-                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white font-mono"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all font-mono"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Sasaran Patroli Siang</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Sasaran Patroli Siang</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.patroliSiangSasaran}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangSasaran: e.target.value })}
-                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Rute Patroli Siang</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Rute Patroli Siang</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.patroliSiangRute}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangRute: e.target.value })}
-                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Hasil Giat Patroli Siang</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Hasil Giat Patroli Siang</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.patroliSiangHasil}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangHasil: e.target.value })}
-                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                         </div>
@@ -1111,58 +1126,58 @@ Tembusan:
                           </span>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                              <label className="text-[9px] font-bold text-neutral-400 uppercase">Waktu Patroli Malam</label>
+                              <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Waktu Patroli Malam</label>
                               <input
                                 type="text"
                                 value={laporanHarianForm.patroliMalamWaktu}
                                 onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamWaktu: e.target.value })}
-                                className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                                className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                               />
                             </div>
                             <div>
-                              <label className="text-[9px] font-bold text-neutral-400 uppercase">Cuaca Malam</label>
+                              <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Cuaca Malam</label>
                               <input
                                 type="text"
                                 value={laporanHarianForm.patroliMalamCuaca}
                                 onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamCuaca: e.target.value })}
-                                className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                                className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                               />
                             </div>
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Personil Patroli Malam</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Personil Patroli Malam</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.patroliMalamPersonil}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamPersonil: e.target.value })}
-                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white font-mono"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all font-mono"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Sasaran Patroli Malam</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Sasaran Patroli Malam</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.patroliMalamSasaran}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamSasaran: e.target.value })}
-                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Rute Patroli Malam</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Rute Patroli Malam</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.patroliMalamRute}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamRute: e.target.value })}
-                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
-                            <label className="text-[9px] font-bold text-neutral-400 uppercase">Hasil Giat Patroli Malam</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Hasil Giat Patroli Malam</label>
                             <textarea
                               rows={2}
                               value={laporanHarianForm.patroliMalamHasil}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamHasil: e.target.value })}
-                              className="mt-1 block w-full rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-xs text-neutral-900 dark:text-white"
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                         </div>
@@ -1173,7 +1188,7 @@ Tembusan:
                       <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Hari Rencana Esok</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Hari Rencana Esok</label>
                             <input
                               type="text"
                               value={laporanHarianForm.rencanaHari}
@@ -1182,7 +1197,7 @@ Tembusan:
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Tanggal Rencana Esok</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Tanggal Rencana Esok</label>
                             <input
                               type="text"
                               value={laporanHarianForm.rencanaTanggal}
@@ -1194,7 +1209,7 @@ Tembusan:
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Rencana Unras (Unjuk Rasa)</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Rencana Unras (Unjuk Rasa)</label>
                             <input
                               type="text"
                               value={laporanHarianForm.rencanaUnras}
@@ -1203,7 +1218,7 @@ Tembusan:
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase">Rencana Kegiatan Menonjol</label>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Rencana Kegiatan Menonjol</label>
                             <input
                               type="text"
                               value={laporanHarianForm.rencanaGiatMenonjol}
@@ -1279,8 +1294,40 @@ Tembusan:
                   <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
                     2. Masukkan Data Fakta Lapangan (Minimal Salah Satu)
                   </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  {/* Mobile Tab Swapper Header - Compact 4-column layout */}
+                  <div className="grid grid-cols-4 md:hidden border-b border-neutral-200/40 dark:border-neutral-800/40 gap-1.5 pb-2.5">
+                    {[
+                      { id: "image", label: "Gambar", icon: ImageIcon, hasData: images.length > 0 },
+                      { id: "pdf", label: "PDF", icon: FileText, hasData: !!pdfFile },
+                      { id: "audio", label: "Audio", icon: Volume2, hasData: !!audioFile },
+                      { id: "text", label: "Teks", icon: PenTool, hasData: userInput.trim().length > 0 },
+                    ].map((tab) => {
+                      const Icon = tab.icon;
+                      const isActive = activeUploadTab === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setActiveUploadTab(tab.id as any)}
+                          className={`flex items-center justify-center space-x-1 px-1 py-2 rounded-xl text-[10px] font-extrabold transition-all truncate ${
+                            isActive
+                              ? "bg-accent/15 text-accent border border-accent/25 shadow-sm"
+                              : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 bg-neutral-100/50 dark:bg-neutral-900/30 border border-transparent"
+                          }`}
+                        >
+                          <Icon className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{tab.label}</span>
+                          {tab.hasData && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse flex-shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Desktop Grid Layout */}
+                  <div className="hidden md:grid md:grid-cols-2 gap-6">
                     {/* Panel 1: Rundown Acara (Gambar) */}
                     <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
                       <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
@@ -1325,10 +1372,88 @@ Tembusan:
                           value={userInput}
                           onChange={(e) => setUserInput(e.target.value)}
                           placeholder="Tambahkan catatan khusus, nama narasumber tambahan, lokasi geografis, panitia pelaksana, atau kronologi extra jika diperlukan..."
-                          className="w-full flex-grow rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/40 dark:bg-neutral-950/20 p-4 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 outline-none hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-neutral-900 dark:focus:border-white focus:ring-1 focus:ring-neutral-900 dark:focus:ring-white transition-all resize-none min-h-[140px]"
+                          className="w-full flex-grow rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/40 dark:bg-neutral-950/20 p-4 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 outline-none hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-accent dark:focus:border-accent focus:ring-2 focus:ring-accent transition-all resize-none min-h-[140px]"
                         />
                       </div>
                     </div>
+                  </div>
+
+                  {/* Mobile Single Panel Layout */}
+                  <div className="block md:hidden">
+                    <AnimatePresence mode="wait">
+                      {activeUploadTab === "image" && (
+                        <motion.div
+                          key="image-upload-tab"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.15 }}
+                          className="flex flex-col space-y-3 rounded-2xl p-4 glassmorphism border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15"
+                        >
+                          <div className="flex items-center space-x-2 pb-3 border-b border-neutral-100 dark:border-neutral-800/60">
+                            <ImageIcon className="w-4 h-4 text-neutral-500" />
+                            <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Gambar Dokumen (Rundown, Detail)</span>
+                          </div>
+                          <ImageUploader images={images} onChange={setImages} onError={(msg) => addToast(msg, "error")} />
+                        </motion.div>
+                      )}
+
+                      {activeUploadTab === "pdf" && (
+                        <motion.div
+                          key="pdf-upload-tab"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.15 }}
+                          className="flex flex-col space-y-3 rounded-2xl p-4 glassmorphism border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15"
+                        >
+                          <div className="flex items-center space-x-2 pb-3 border-b border-neutral-100 dark:border-neutral-800/60">
+                            <FileText className="w-4 h-4 text-neutral-500" />
+                            <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Guidebook / Panduan Acara (PDF)</span>
+                          </div>
+                          <PdfUploader pdfFile={pdfFile} onChange={setPdfFile} onError={(msg) => addToast(msg, "error")} />
+                        </motion.div>
+                      )}
+
+                      {activeUploadTab === "audio" && (
+                        <motion.div
+                          key="audio-upload-tab"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.15 }}
+                          className="flex flex-col space-y-3 rounded-2xl p-4 glassmorphism border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15"
+                        >
+                          <div className="flex items-center space-x-2 pb-3 border-b border-neutral-100 dark:border-neutral-800/60">
+                            <Volume2 className="w-4 h-4 text-neutral-500" />
+                            <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Rekaman Suara / Sambutan (Audio)</span>
+                          </div>
+                          <AudioUploader audioFile={audioFile} onChange={setAudioFile} onError={(msg) => addToast(msg, "error")} />
+                        </motion.div>
+                      )}
+
+                      {activeUploadTab === "text" && (
+                        <motion.div
+                          key="text-upload-tab"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.15 }}
+                          className="flex flex-col space-y-3 rounded-2xl p-4 glassmorphism border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15"
+                        >
+                          <div className="flex items-center space-x-2 pb-3 border-b border-neutral-100 dark:border-neutral-800/60">
+                            <PenTool className="w-4 h-4 text-neutral-500" />
+                            <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Catatan Teks / Informasi Tambahan</span>
+                          </div>
+                          <textarea
+                            value={userInput}
+                            onChange={(e) => setUserInput(e.target.value)}
+                            placeholder="Tambahkan catatan khusus, nama narasumber tambahan, lokasi geografis, panitia pelaksana..."
+                            className="w-full rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/40 dark:bg-neutral-950/20 p-4 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 outline-none focus:border-accent dark:focus:border-accent focus:ring-2 focus:ring-accent transition-all resize-none min-h-[100px] sm:min-h-[140px]"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
               )}
@@ -1338,7 +1463,7 @@ Tembusan:
                 <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
                   {templateType === "laporan-harian" ? "2. Preferensi & Arahan Khusus AI (Opsional)" : "3. Preferensi & Arahan Khusus AI (Opsional)"}
                 </h3>
-                <div className="flex flex-col space-y-4 rounded-3xl p-6 sm:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
+                <div className="flex flex-col space-y-3 rounded-2xl md:rounded-3xl p-4 md:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
                   <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
                     <Sliders className="w-4.5 h-4.5 text-neutral-500" />
                     <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">
@@ -1349,7 +1474,7 @@ Tembusan:
                     value={userPreference}
                     onChange={(e) => setUserPreference(e.target.value)}
                     placeholder="Contoh: Arahkan poin B untuk lebih teknis membahas rundown acara. Gunakan gaya penulisan yang formal tapi detail..."
-                    className="w-full rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/40 dark:bg-neutral-950/20 p-4 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 outline-none hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-neutral-900 dark:focus:border-white focus:ring-1 focus:ring-neutral-900 dark:focus:ring-white transition-all resize-none min-h-[80px]"
+                    className="w-full rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/40 dark:bg-neutral-950/20 p-4 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 outline-none hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-accent dark:focus:border-accent focus:ring-2 focus:ring-accent transition-all resize-none min-h-[60px] sm:min-h-[80px]"
                   />
                 </div>
               </div>
@@ -1359,11 +1484,11 @@ Tembusan:
                 <button
                   type="button"
                   onClick={handleGenerateReport}
-                  className="flex items-center justify-center space-x-2 px-8 py-4 rounded-2xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:opacity-90 active:scale-98 transition-all font-bold text-sm shadow-xl shadow-neutral-950/10 dark:shadow-white/5 group"
+                  className="flex items-center justify-center space-x-2.5 px-10 py-4.5 rounded-2xl bg-accent text-white hover:opacity-95 active:scale-[0.98] transition-all font-extrabold text-base shadow-xl shadow-accent/25 dark:shadow-accent/15 group"
                 >
-                  <Sparkles className="w-4.5 h-4.5 fill-current group-hover:rotate-12 transition-transform" />
+                  <Sparkles className="w-5 h-5 fill-current group-hover:rotate-12 transition-transform" />
                   <span>Mulai Generate Laporan AI</span>
-                  <ChevronRight className="w-4 h-4 ml-1 opacity-60 group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight className="w-4.5 h-4.5 ml-1 opacity-80 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </motion.div>
@@ -1424,16 +1549,16 @@ Tembusan:
 
           {!supabaseConfigured ? (
             /* Warning Panel for Missing Supabase Configuration */
-            <div className="rounded-3xl p-6 sm:p-8 border border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10 backdrop-blur-md space-y-5">
+            <div className="rounded-3xl p-6 sm:p-8 border border-purple-500/20 bg-purple-50/5 dark:bg-purple-950/10 backdrop-blur-md space-y-5">
               <div className="flex items-start space-x-3.5">
-                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                <div className="p-2 rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400">
                   <AlertCircle className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-amber-900 dark:text-amber-200">
+                  <h3 className="text-base font-bold text-neutral-900 dark:text-white">
                     Supabase Belum Dikonfigurasi
                   </h3>
-                  <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mt-1">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed mt-1">
                     Fitur riwayat memerlukan database Supabase. Silakan ikuti langkah-langkah di bawah ini untuk mengonfigurasinya:
                   </p>
                 </div>
@@ -1460,8 +1585,8 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
 
                 <div className="bg-neutral-900 text-neutral-100 rounded-2xl p-4 font-mono select-all border border-neutral-800">
                   <p className="text-neutral-500 mb-2"># 2. Tambahkan variabel ini di file .env.local Anda:</p>
-                  <p className="text-emerald-400">NEXT_PUBLIC_SUPABASE_URL=<span className="text-white">URL_PROJEK_SUPABASE_ANDA</span></p>
-                  <p className="text-emerald-400">NEXT_PUBLIC_SUPABASE_ANON_KEY=<span className="text-white">ANON_KEY_SUPABASE_ANDA</span></p>
+                  <p className="text-purple-400">NEXT_PUBLIC_SUPABASE_URL=<span className="text-white">URL_PROJEK_SUPABASE_ANDA</span></p>
+                  <p className="text-purple-400">NEXT_PUBLIC_SUPABASE_ANON_KEY=<span className="text-white">ANON_KEY_SUPABASE_ANDA</span></p>
                 </div>
 
                 <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
@@ -1510,19 +1635,15 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
 
                   // Badge colors & label mapping
                   let badgeLabel = "";
-                  let badgeStyles = "";
+                  const badgeStyles = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
                   if (item.template_type === "laporan-informasi") {
                     badgeLabel = "Laporan Informasi";
-                    badgeStyles = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
                   } else if (item.template_type === "laporan-kegiatan") {
                     badgeLabel = "Laporan Kegiatan";
-                    badgeStyles = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
                   } else if (item.template_type === "laporan-harian") {
                     badgeLabel = "Laporan Harian";
-                    badgeStyles = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
                   } else {
                     badgeLabel = "Laporan Lainnya";
-                    badgeStyles = "bg-neutral-500/10 text-neutral-600 dark:text-neutral-400 border-neutral-500/20";
                   }
 
                   return (
@@ -1601,13 +1722,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
               <div className="flex items-center justify-between p-6 border-b border-neutral-100 dark:border-neutral-800/60">
                 <div>
                   <div className="flex items-center space-x-2.5">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                      selectedHistoryItem.template_type === "laporan-informasi"
-                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
-                        : selectedHistoryItem.template_type === "laporan-kegiatan"
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                        : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
-                    }`}>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
                       {selectedHistoryItem.template_type === "laporan-informasi"
                         ? "Laporan Informasi"
                         : selectedHistoryItem.template_type === "laporan-kegiatan"
@@ -1652,7 +1767,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                 >
                   {isCopiedHistoryId === selectedHistoryItem.id ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      <Check className="w-3.5 h-3.5 text-purple-500" />
                       <span>Tersalin</span>
                     </>
                   ) : (
@@ -1727,6 +1842,40 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
           ))}
         </AnimatePresence>
       </div>
+
+
+
+    {/* Mobile Bottom Navigation Bar */}
+    <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/90 dark:bg-neutral-950/90 border-t border-neutral-200/40 dark:border-neutral-800/40 backdrop-blur-md px-6 py-2 flex justify-around items-center">
+      <button
+        onClick={() => {
+          setActiveTab("generator");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        className={`flex flex-col items-center space-y-1 py-1.5 px-4 rounded-xl transition-all ${
+          activeTab === "generator"
+            ? "text-accent font-bold"
+            : "text-neutral-400 dark:text-neutral-500"
+        }`}
+      >
+        <FileSpreadsheet className="w-5 h-5" />
+        <span className="text-[10px]">Generator</span>
+      </button>
+      <button
+        onClick={() => {
+          setActiveTab("history");
+          fetchHistory();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        className={`flex flex-col items-center space-y-1 py-1.5 px-4 rounded-xl transition-all ${
+          activeTab === "history"
+            ? "text-accent font-bold"
+            : "text-neutral-400 dark:text-neutral-500"
+        }`}
+      >
+        <History className="w-5 h-5" />
+        <span className="text-[10px]">Riwayat</span>
+      </button>
     </div>
-  );
-}
+  </div>
+); }
