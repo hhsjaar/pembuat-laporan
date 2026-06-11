@@ -156,7 +156,7 @@ export default function Dashboard() {
 
   const handleDownloadHistoryDocx = async (item: any) => {
     const rawReport = item.meta_data?.raw_report;
-    if (item.template_type !== "laporan-informasi" || !rawReport) {
+    if ((item.template_type !== "laporan-informasi" && item.template_type !== "laporan-harian-khusus") || !rawReport) {
       handleDownloadHistoryTxt(item);
       return;
     }
@@ -214,6 +214,9 @@ export default function Dashboard() {
           if (report.F) parts.push(`F. ${report.F}`);
           body = parts.join("\n\n");
         }
+      } else if (type === "laporan-harian-khusus") {
+        title = report.perihal || "LAPORAN HARIAN KHUSUS";
+        body = report.isi_laporan || "";
       } else if (type === "laporan-kegiatan") {
         title = report.perihal || "LAPORAN KEGIATAN";
         body = report.isi_laporan || "";
@@ -292,6 +295,64 @@ III. PENDAPAT PELAPOR
 
 Semarang, ${report.tanggal || ""}
 PELAPOR`;
+      } else if (type === "laporan-harian-khusus") {
+        formattedContent = `KEPOLISIAN NEGARA REPUBLIK INDONESIA
+DAERAH JAWA TENGAH
+RESOR KOTA BESAR SEMARANG
+SEKTOR TEMBALANG
+Jalan Turus Asri No. 9 Tembalang Semarang
+Nomor : R / LHK / / / / Intelkam
+
+LAPORAN HARIAN KHUSUS
+
+TENTANG
+
+${(report.judul || "").toUpperCase()}
+
+======================================
+
+COPY KE :			DARI  :		COPIES
+
+Semarang, ${report.tanggal || ""}
+KEPOLISIAN NEGARA REPUBLIK INDONESIA
+DAERAH JAWA TENGAH
+RESOR KOTA BESAR SEMARANG
+SEKTOR TEMBALANG
+Jalan Turus Asri No. 9 Tembalang Semarang
+Nomor : R / LHK / / / / Intelkam
+
+LAPORAN HARIAN KHUSUS
+
+Tanggal     :   ${report.tanggal || ""}
+Bidang      :   ${report.bidang || ""}
+Perihal     :   ${report.perihal || ""}
+
+I. FAKTA – FAKTA :
+
+${body}
+
+II. CATATAN :
+
+Analisis
+${report.analisa || ""}
+
+Prediksi Intelijen
+${report.prediksi || ""}
+
+Langkah – Langkah
+${report.langkah || ""}
+
+Rekomendasi
+${report.rekomendasi || ""}
+
+Semarang, ${report.tanggal || ""}
+SATUAN INTELIJEN KEAMANAN
+
+Distribusi :
+Dir Intelkam Polda Jateng.
+Kapolrestabes Semarang.
+Kabag Ops Polrestabes Semarang.
+Kasat Intelkam Polrestabes Semarang.`;
       } else if (type !== "laporan-harian") {
         formattedContent = `POLRESTABES SEMARANG
 POLSEK TEMBALANG
@@ -1638,6 +1699,8 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                   const badgeStyles = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
                   if (item.template_type === "laporan-informasi") {
                     badgeLabel = "Laporan Informasi";
+                  } else if (item.template_type === "laporan-harian-khusus") {
+                    badgeLabel = "Laporan Harian Khusus";
                   } else if (item.template_type === "laporan-kegiatan") {
                     badgeLabel = "Laporan Kegiatan";
                   } else if (item.template_type === "laporan-harian") {
@@ -1725,6 +1788,8 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
                       {selectedHistoryItem.template_type === "laporan-informasi"
                         ? "Laporan Informasi"
+                        : selectedHistoryItem.template_type === "laporan-harian-khusus"
+                        ? "Laporan Harian Khusus"
                         : selectedHistoryItem.template_type === "laporan-kegiatan"
                         ? "Laporan Kegiatan"
                         : "Laporan Harian"}
@@ -1790,7 +1855,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                   <span>
                     {isDownloading 
                       ? "Mengunduh..." 
-                      : selectedHistoryItem.template_type === "laporan-informasi" && selectedHistoryItem.meta_data?.raw_report
+                      : (selectedHistoryItem.template_type === "laporan-informasi" || selectedHistoryItem.template_type === "laporan-harian-khusus") && selectedHistoryItem.meta_data?.raw_report
                       ? "Unduh (.docx)" 
                       : "Unduh (.txt)"}
                   </span>

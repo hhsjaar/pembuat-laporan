@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     const zip = new PizZip(content);
 
     // Helper to convert multiline text into high-fidelity, self-contained OpenXML paragraphs
-    const convertTextToOpenXml = (text: string, prefix: string = "", leftIndent: number = 1440): string => {
+    const convertTextToOpenXml = (text: string, prefix: string = "", leftIndent: number = 1134): string => {
       if (!text) return "";
       
       const lines = text.split(/\r?\n/);
@@ -57,9 +57,7 @@ export async function POST(req: NextRequest) {
         return line
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&apos;");
+          .replace(/>/g, "&gt;");
       });
       
       let xml = "";
@@ -68,14 +66,14 @@ export async function POST(req: NextRequest) {
         const line = escapedLines[i];
         
         if (i === 0 && prefix) {
-          // First line with bullet prefix and tab, matching police report margins
-          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}" w:hanging="720"/><w:jc w:val="both"/><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="23"/><w:szCs w:val="23"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="23"/><w:szCs w:val="23"/></w:rPr><w:t xml:space="preserve">${prefix}</w:t><w:tab/><w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
+          // First line with bullet prefix and tab, matching police report margins (Arial, inheriting size)
+          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}" w:hanging="567"/><w:jc w:val="both"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr><w:t xml:space="preserve">${prefix}</w:t><w:tab/><w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
         } else if (line.trim() === "") {
           // Empty paragraph spacing
-          xml += `<w:p><w:pPr><w:spacing w:after="120"/><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t xml:space="preserve"></w:t></w:r></w:p>`;
+          xml += `<w:p><w:pPr><w:spacing w:after="120"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr></w:pPr></w:p>`;
         } else {
-          // Regular paragraph matching police report indentation (1.25cm / 1440 dxa) and Calibri font
-          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}"/><w:jc w:val="both"/><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="23"/><w:szCs w:val="23"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="23"/><w:szCs w:val="23"/></w:rPr><w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
+          // Regular paragraph matching police report indentation and Arial font
+          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}"/><w:jc w:val="both"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr><w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
         }
       }
       return xml;
@@ -119,8 +117,8 @@ export async function POST(req: NextRequest) {
       return result;
     };
 
-    // Preprocess template if it's "Laporan Informasi" to enable raw XML parsing for multiline paragraphs
-    if (templateType === "laporan-informasi") {
+    // Preprocess template if it's "Laporan Informasi" or "Laporan Harian Khusus" to enable raw XML parsing for multiline paragraphs
+    if (templateType === "laporan-informasi" || templateType === "laporan-harian-khusus") {
       let docXml = zip.files["word/document.xml"].asText();
       
       // 1. Clean up any split runs inside the placeholders
@@ -146,7 +144,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const isLaporanInformasi = templateType === "laporan-informasi";
+    const isXmlTemplate = templateType === "laporan-informasi" || templateType === "laporan-harian-khusus";
 
     // Backward compatibility helper to combine old A, B, C, D fields if isi_laporan is missing
     let finalIsiLaporan = reportData.isi_laporan;
@@ -172,19 +170,19 @@ export async function POST(req: NextRequest) {
       tanggal: reportData.tanggal || "",
       lokasi: reportData.lokasi || "",
       judul: reportData.judul || "",
-      isi_laporan: isLaporanInformasi ? convertTextToOpenXml(finalIsiLaporan || "") : (reportData.isi_laporan || ""),
+      isi_laporan: isXmlTemplate ? convertTextToOpenXml(finalIsiLaporan || "") : (reportData.isi_laporan || ""),
       kesimpulan: reportData.kesimpulan || "",
       
-      // Laporan Informasi placeholders
+      // Laporan Informasi / LHK placeholders
       bidang: reportData.bidang || "",
       perihal: reportData.perihal || "",
       "cara-mendapatkan-informasi": reportData["cara-mendapatkan-informasi"] || "",
       "waktu-mendapatkan-informasi": reportData["waktu-mendapatkan-informasi"] || "",
       isi_laporan_raw: finalIsiLaporan || "", // raw string fallback if needed
-      analisa: isLaporanInformasi ? convertTextToOpenXml(reportData.analisa || "") : (reportData.analisa || ""),
-      prediksi: isLaporanInformasi ? convertTextToOpenXml(reportData.prediksi || "") : (reportData.prediksi || ""),
-      langkah: isLaporanInformasi ? convertTextToOpenXml(reportData.langkah || "") : (reportData.langkah || ""),
-      rekomendasi: isLaporanInformasi ? convertTextToOpenXml(reportData.rekomendasi || "") : (reportData.rekomendasi || ""),
+      analisa: isXmlTemplate ? convertTextToOpenXml(reportData.analisa || "") : (reportData.analisa || ""),
+      prediksi: isXmlTemplate ? convertTextToOpenXml(reportData.prediksi || "") : (reportData.prediksi || ""),
+      langkah: isXmlTemplate ? convertTextToOpenXml(reportData.langkah || "") : (reportData.langkah || ""),
+      rekomendasi: isXmlTemplate ? convertTextToOpenXml(reportData.rekomendasi || "") : (reportData.rekomendasi || ""),
     };
 
     doc.render(renderData);
@@ -195,14 +193,23 @@ export async function POST(req: NextRequest) {
       compression: "DEFLATE",
     });
 
-    console.log(`Document exported successfully: ${templateName} populated.`);
+    console.log(`Document exported successfully: ${templateName} populated. Buffer size: ${buffer.length} bytes.`);
+
+    // Write to a temporary file on the server to compare with client-downloaded file
+    try {
+      fs.writeFileSync(path.join(process.cwd(), "scratch", "api_generated.docx"), buffer);
+      console.log("Successfully cached API generated document to scratch/api_generated.docx");
+    } catch (err) {
+      console.error("Failed to cache API generated document:", err);
+    }
 
     // Set headers to trigger a browser download
     const headers = new Headers();
     headers.set("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
     headers.set("Content-Disposition", `attachment; filename="${templateType}-${Date.now()}.docx"`);
+    headers.set("Content-Length", buffer.length.toString());
 
-    return new NextResponse(new Uint8Array(buffer), {
+    return new NextResponse(buffer, {
       status: 200,
       headers,
     });

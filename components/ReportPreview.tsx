@@ -155,6 +155,85 @@ Semarang, ${reportData.tanggal || ""}
 PELAPOR`;
     }
 
+    if (templateType === "laporan-harian-khusus") {
+      let mainBody = reportData.isi_laporan || "";
+      if (!mainBody) {
+        const parts = [];
+        if (reportData.A) parts.push(reportData.A);
+        if (reportData.B) {
+          const cleanB = reportData.B.trim();
+          parts.push(cleanB.match(/^[B]\./i) ? cleanB : `B. ${cleanB}`);
+        }
+        if (reportData.C) {
+          const cleanC = reportData.C.trim();
+          parts.push(cleanC.match(/^[C]\./i) ? cleanC : `C. ${cleanC}`);
+        }
+        if (reportData.D) {
+          const cleanD = reportData.D.trim();
+          parts.push(cleanD.match(/^[D]\./i) ? cleanD : `D. ${cleanD}`);
+        }
+        mainBody = parts.join("\n\n");
+      }
+
+      return `KEPOLISIAN NEGARA REPUBLIK INDONESIA
+DAERAH JAWA TENGAH
+RESOR KOTA BESAR SEMARANG
+SEKTOR TEMBALANG
+Jalan Turus Asri No. 9 Tembalang Semarang
+Nomor : R / LHK / / / / Intelkam
+
+LAPORAN HARIAN KHUSUS
+
+TENTANG
+
+${(reportData.judul || "").toUpperCase()}
+
+======================================
+
+COPY KE :			DARI  :		COPIES
+
+Semarang, ${reportData.tanggal || ""}
+KEPOLISIAN NEGARA REPUBLIK INDONESIA
+DAERAH JAWA TENGAH
+RESOR KOTA BESAR SEMARANG
+SEKTOR TEMBALANG
+Jalan Turus Asri No. 9 Tembalang Semarang
+Nomor : R / LHK / / / / Intelkam
+
+LAPORAN HARIAN KHUSUS
+
+Tanggal     :   ${reportData.tanggal || ""}
+Bidang      :   ${reportData.bidang || ""}
+Perihal     :   ${reportData.perihal || ""}
+
+I. FAKTA – FAKTA :
+
+${mainBody}
+
+II. CATATAN :
+
+Analisis
+${reportData.analisa || ""}
+
+Prediksi Intelijen
+${reportData.prediksi || ""}
+
+Langkah – Langkah
+${reportData.langkah || ""}
+
+Rekomendasi
+${reportData.rekomendasi || ""}
+
+Semarang, ${reportData.tanggal || ""}
+SATUAN INTELIJEN KEAMANAN
+
+Distribusi :
+Dir Intelkam Polda Jateng.
+Kapolrestabes Semarang.
+Kabag Ops Polrestabes Semarang.
+Kasat Intelkam Polrestabes Semarang.`;
+    }
+
     let mainBody = "";
     if (reportData.isi_laporan) {
       mainBody = reportData.isi_laporan;
@@ -317,8 +396,8 @@ Tembusan:
         {/* Document watermarking/top lines */}
         <div className="absolute top-0 inset-x-0 h-1.5 bg-accent" />
         
-        {templateType === "laporan-informasi" ? (
-          /* High-Fidelity Police Laporan Informasi Preview matching Calibri spacing, font, and sizes */
+        {templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" ? (
+          /* High-Fidelity Police Laporan Informasi / LHK Preview matching Calibri spacing, font, and sizes */
           <div 
             className="space-y-6 max-w-2xl mx-auto text-neutral-900 select-text" 
             style={{ 
@@ -338,10 +417,21 @@ Tembusan:
 
             {/* Document Title Header */}
             <div className="text-center space-y-1 my-6" style={{ fontFamily: "Calibri, Arial, sans-serif" }}>
-              <p className="font-semibold text-neutral-600 font-sans" style={{ fontSize: "11pt" }}>Nomor :  R  / LI / / /  / Intelkam</p>
-              <h2 className="font-bold tracking-wide border-b-2 border-neutral-900 inline-block pb-0.5 text-neutral-950" style={{ fontSize: "14pt" }}>
-                LAPORAN – INFORMASI
-              </h2>
+              {templateType === "laporan-harian-khusus" ? (
+                <>
+                  <p className="font-semibold text-neutral-600 font-sans" style={{ fontSize: "11pt" }}>Nomor : R / LHK / / / / Intelkam</p>
+                  <h2 className="font-bold tracking-wide border-b-2 border-neutral-900 inline-block pb-0.5 text-neutral-950" style={{ fontSize: "14pt" }}>
+                    LAPORAN HARIAN KHUSUS
+                  </h2>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold text-neutral-600 font-sans" style={{ fontSize: "11pt" }}>Nomor :  R  / LI / / /  / Intelkam</p>
+                  <h2 className="font-bold tracking-wide border-b-2 border-neutral-900 inline-block pb-0.5 text-neutral-950" style={{ fontSize: "14pt" }}>
+                    LAPORAN – INFORMASI
+                  </h2>
+                </>
+              )}
             </div>
 
             {/* Bidang and Perihal Metadata Table */}
@@ -355,38 +445,40 @@ Tembusan:
               <span className="font-bold text-neutral-950 uppercase" style={{ fontFamily: "Calibri, sans-serif", fontSize: "11.5pt", lineHeight: "1.4" }}>{reportData.perihal}</span>
             </div>
 
-            {/* PENDAHULUAN Section */}
-            <div className="space-y-3">
-              <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
-                PENDAHULUAN
-              </h3>
-              <div className="grid grid-cols-[180px_10px_1fr] gap-x-2 gap-y-1.5 pl-3 font-sans text-neutral-800" style={{ fontSize: "11pt", fontFamily: "Calibri, sans-serif" }}>
-                <span className="text-neutral-500">1. Sumber Informasi</span>
-                <span className="text-neutral-400">:</span>
-                <span className="font-semibold text-neutral-950">Pelapor.</span>
+            {/* PENDAHULUAN Section (Only for Laporan Informasi) */}
+            {templateType === "laporan-informasi" && (
+              <div className="space-y-3">
+                <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
+                  PENDAHULUAN
+                </h3>
+                <div className="grid grid-cols-[180px_10px_1fr] gap-x-2 gap-y-1.5 pl-3 font-sans text-neutral-800" style={{ fontSize: "11pt", fontFamily: "Calibri, sans-serif" }}>
+                  <span className="text-neutral-500">1. Sumber Informasi</span>
+                  <span className="text-neutral-400">:</span>
+                  <span className="font-semibold text-neutral-950">Pelapor.</span>
 
-                <span className="text-neutral-500">2. Hubungan Sumber dengan sasaran</span>
-                <span className="text-neutral-400">:</span>
-                <span className="font-semibold text-neutral-950">-</span>
+                  <span className="text-neutral-500">2. Hubungan Sumber dengan sasaran</span>
+                  <span className="text-neutral-400">:</span>
+                  <span className="font-semibold text-neutral-950">-</span>
 
-                <span className="text-neutral-500">3. Cara mendapatkan Informasi</span>
-                <span className="text-neutral-400">:</span>
-                <span className="font-semibold text-neutral-950">{reportData["cara-mendapatkan-informasi"]}</span>
+                  <span className="text-neutral-500">3. Cara mendapatkan Informasi</span>
+                  <span className="text-neutral-400">:</span>
+                  <span className="font-semibold text-neutral-950">{reportData["cara-mendapatkan-informasi"]}</span>
 
-                <span className="text-neutral-500">4. Waktu mendapatkan Informasi</span>
-                <span className="text-neutral-400">:</span>
-                <span className="font-semibold text-neutral-950">{reportData["waktu-mendapatkan-informasi"]}</span>
+                  <span className="text-neutral-500">4. Waktu mendapatkan Informasi</span>
+                  <span className="text-neutral-400">:</span>
+                  <span className="font-semibold text-neutral-950">{reportData["waktu-mendapatkan-informasi"]}</span>
 
-                <span className="text-neutral-500">5. Nilai Informasi</span>
-                <span className="text-neutral-400">:</span>
-                <span className="font-semibold text-neutral-950">A – 1</span>
+                  <span className="text-neutral-500">5. Nilai Informasi</span>
+                  <span className="text-neutral-400">:</span>
+                  <span className="font-semibold text-neutral-950">A – 1</span>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* HAL-HAL YANG DILAPORKAN Section */}
+            {/* HAL-HAL YANG DILAPORKAN / FAKTA-FAKTA Section */}
             <div className="space-y-4">
               <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
-                HAL-HAL YANG DILAPORKAN
+                {templateType === "laporan-harian-khusus" ? "I. FAKTA – FAKTA :" : "HAL-HAL YANG DILAPORKAN"}
               </h3>
               
               <div className="whitespace-pre-line text-neutral-900 pl-3 text-justify leading-relaxed" style={{ textIndent: "0.25in" }}>
@@ -394,58 +486,86 @@ Tembusan:
               </div>
             </div>
 
-            {/* PENDAPAT PELAPOR Section */}
+            {/* PENDAPAT PELAPOR / CATATAN Section */}
             <div className="space-y-4">
               <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
-                PENDAPAT PELAPOR
+                {templateType === "laporan-harian-khusus" ? "II. CATATAN :" : "PENDAPAT PELAPOR"}
               </h3>
               
               <div className="space-y-4 pl-3 text-neutral-900 text-justify">
                 <div className="space-y-1">
                   <div className="flex items-center space-x-1.5">
-                    <span className="font-bold text-neutral-950">A. Analisa</span>
+                    <span className="font-bold text-neutral-950">
+                      {templateType === "laporan-harian-khusus" ? "Analisis" : "A. Analisa"}
+                    </span>
                   </div>
                   <p className="pl-4" style={{ textIndent: "0.25in" }}>{reportData.analisa}</p>
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex items-center space-x-1.5">
-                    <span className="font-bold text-neutral-950">B. Prediksi</span>
+                    <span className="font-bold text-neutral-950">
+                      {templateType === "laporan-harian-khusus" ? "Prediksi Intelijen" : "B. Prediksi"}
+                    </span>
                   </div>
                   <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.prediksi}</div>
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex items-center space-x-1.5">
-                    <span className="font-bold text-neutral-950">C. Langkah-langkah</span>
+                    <span className="font-bold text-neutral-950">
+                      {templateType === "laporan-harian-khusus" ? "Langkah – Langkah" : "C. Langkah-langkah"}
+                    </span>
                   </div>
                   <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.langkah}</div>
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex items-center space-x-1.5">
-                    <span className="font-bold text-neutral-950">D. Rekomendasi</span>
+                    <span className="font-bold text-neutral-950">
+                      {templateType === "laporan-harian-khusus" ? "Rekomendasi" : "D. Rekomendasi"}
+                    </span>
                   </div>
                   <p className="pl-4" style={{ textIndent: "0.25in" }}>{reportData.rekomendasi}</p>
                 </div>
               </div>
             </div>
 
-            {/* Semarang date and Pelapor signoff */}
+            {/* Semarang date and Pelapor/Sat intelkam signoff */}
             <div className="pt-8 pl-3 flex justify-between items-start font-sans" style={{ fontSize: "11pt" }}>
-              <div className="text-neutral-500 leading-relaxed" style={{ fontSize: "10pt" }}>
-                <p className="font-bold uppercase tracking-wider text-neutral-600" style={{ fontSize: "9pt" }}>DISTRIBUSI :</p>
-                <p>1. Kasat Intelkam Polrestabes Semarang.</p>
-                <p>2. Kapolsek Tembalang.</p>
-                <p className="font-mono mt-1" style={{ fontSize: "9pt" }}>Li_TBLG</p>
-              </div>
-              <div className="text-right space-y-12">
-                <div style={{ fontFamily: "Calibri, sans-serif" }}>
-                  <p className="text-neutral-800">Semarang , {reportData.tanggal}</p>
-                  <p className="font-bold tracking-wide text-neutral-900">Pelapor</p>
-                </div>
-                <div className="w-32 border-b border-neutral-900 ml-auto" />
-              </div>
+              {templateType === "laporan-harian-khusus" ? (
+                <>
+                  <div className="text-neutral-500 leading-relaxed" style={{ fontSize: "10pt" }}>
+                    <p className="font-bold uppercase tracking-wider text-neutral-600" style={{ fontSize: "9pt" }}>DISTRIBUSI :</p>
+                    <p>Dir Intelkam Polda Jateng.</p>
+                    <p>Kapolrestabes Semarang.</p>
+                    <p>Kabag Ops Polrestabes Semarang.</p>
+                    <p>Kasat Intelkam Polrestabes Semarang.</p>
+                  </div>
+                  <div className="text-right space-y-12">
+                    <div style={{ fontFamily: "Calibri, sans-serif" }}>
+                      <p className="text-neutral-800">Semarang , {reportData.tanggal}</p>
+                      <p className="font-bold tracking-wide text-neutral-900">SATUAN INTELIJEN KEAMANAN</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-neutral-500 leading-relaxed" style={{ fontSize: "10pt" }}>
+                    <p className="font-bold uppercase tracking-wider text-neutral-600" style={{ fontSize: "9pt" }}>DISTRIBUSI :</p>
+                    <p>1. Kasat Intelkam Polrestabes Semarang.</p>
+                    <p>2. Kapolsek Tembalang.</p>
+                    <p className="font-mono mt-1" style={{ fontSize: "9pt" }}>Li_TBLG</p>
+                  </div>
+                  <div className="text-right space-y-12">
+                    <div style={{ fontFamily: "Calibri, sans-serif" }}>
+                      <p className="text-neutral-800">Semarang , {reportData.tanggal}</p>
+                      <p className="font-bold tracking-wide text-neutral-900">Pelapor</p>
+                    </div>
+                    <div className="w-32 border-b border-neutral-900 ml-auto" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         ) : isLaporanKegiatan ? (
