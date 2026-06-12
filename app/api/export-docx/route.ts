@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
     headers.set("Content-Disposition", `attachment; filename="${templateType}-${Date.now()}.docx"`);
     headers.set("Content-Length", buffer.length.toString());
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers,
     });
