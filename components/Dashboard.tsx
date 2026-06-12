@@ -348,11 +348,12 @@ ${report.rekomendasi || ""}
 Semarang, ${report.tanggal || ""}
 SATUAN INTELIJEN KEAMANAN
 
-Distribusi :
-Dir Intelkam Polda Jateng.
-Kapolrestabes Semarang.
-Kabag Ops Polrestabes Semarang.
-Kasat Intelkam Polrestabes Semarang.`;
+Authentikasi :.......................
+
+Distribusi:
+
+Kasatintelkam Polrestabes Semarang
+Kapolsek Tembalang`;
       } else if (type !== "laporan-harian") {
         formattedContent = `POLRESTABES SEMARANG
 POLSEK TEMBALANG

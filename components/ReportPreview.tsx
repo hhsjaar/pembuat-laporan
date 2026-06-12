@@ -227,11 +227,12 @@ ${reportData.rekomendasi || ""}
 Semarang, ${reportData.tanggal || ""}
 SATUAN INTELIJEN KEAMANAN
 
-Distribusi :
-Dir Intelkam Polda Jateng.
-Kapolrestabes Semarang.
-Kabag Ops Polrestabes Semarang.
-Kasat Intelkam Polrestabes Semarang.`;
+Authentikasi :.......................
+
+Distribusi:
+
+Kasatintelkam Polrestabes Semarang
+Kapolsek Tembalang`;
     }
 
     let mainBody = "";
@@ -536,11 +537,10 @@ Tembusan:
               {templateType === "laporan-harian-khusus" ? (
                 <>
                   <div className="text-neutral-500 leading-relaxed" style={{ fontSize: "10pt" }}>
-                    <p className="font-bold uppercase tracking-wider text-neutral-600" style={{ fontSize: "9pt" }}>DISTRIBUSI :</p>
-                    <p>Dir Intelkam Polda Jateng.</p>
-                    <p>Kapolrestabes Semarang.</p>
-                    <p>Kabag Ops Polrestabes Semarang.</p>
-                    <p>Kasat Intelkam Polrestabes Semarang.</p>
+                    <p className="mb-2">Authentikasi :.......................</p>
+                    <p className="font-bold uppercase tracking-wider text-neutral-600 mt-2" style={{ fontSize: "9pt" }}>Distribusi:</p>
+                    <p>Kasatintelkam Polrestabes Semarang</p>
+                    <p>Kapolsek Tembalang</p>
                   </div>
                   <div className="text-right space-y-12">
                     <div style={{ fontFamily: "Calibri, sans-serif" }}>
