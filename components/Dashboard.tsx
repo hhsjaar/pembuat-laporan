@@ -359,7 +359,7 @@ Kapolsek Tembalang`;
       } else if (type !== "laporan-harian") {
         formattedContent = `POLRESTABES SEMARANG
 POLSEK TEMBALANG
-================================
+=======================
 
 Kepada Yth.
 *KAPOLRESTABES SEMARANG*
@@ -370,6 +370,7 @@ Dari :
 Perihal : *${title}*
 
 Dilaporkan dengan hormat kepada Ka bahwa :
+
 ${body}
 
 

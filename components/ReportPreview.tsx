@@ -262,7 +262,7 @@ Kapolsek Tembalang`;
 
     return `POLRESTABES SEMARANG
 POLSEK TEMBALANG
-================================
+=======================
 
 Kepada Yth.
 *KAPOLRESTABES SEMARANG*
@@ -273,6 +273,7 @@ Dari :
 Perihal : *${reportData.perihal || ""}*
 
 Dilaporkan dengan hormat kepada Ka bahwa :
+
 ${mainBody}
 
 
@@ -558,7 +559,7 @@ Tembusan:
                     <p className="font-bold uppercase tracking-wider text-neutral-600" style={{ fontSize: "9pt" }}>DISTRIBUSI :</p>
                     <p>1. Kasat Intelkam Polrestabes Semarang.</p>
                     <p>2. Kapolsek Tembalang.</p>
-                    <p className="font-mono mt-1" style={{ fontSize: "9pt" }}>Li_TBLG</p>
+                    <p className="italic mt-1" style={{ fontSize: "9pt" }}>LI Cengli</p>
                   </div>
                   <div className="text-right space-y-12">
                     <div style={{ fontFamily: "Calibri, sans-serif" }}>
