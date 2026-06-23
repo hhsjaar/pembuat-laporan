@@ -152,7 +152,9 @@ III. PENDAPAT PELAPOR
       ${reportData.rekomendasi || ""}
 
 Semarang, ${reportData.tanggal || ""}
-PELAPOR`;
+PELAPOR
+
+LI CENGLI`;
     }
 
     if (templateType === "laporan-harian-khusus") {
@@ -225,7 +227,7 @@ Rekomendasi
 ${reportData.rekomendasi || ""}
 
 Semarang, ${reportData.tanggal || ""}
-SATUAN INTELIJEN KEAMANAN
+Unit IK
 
 Authentikasi :.......................
 
@@ -260,7 +262,7 @@ Kapolsek Tembalang`;
 
     return `POLRESTABES SEMARANG
 POLSEK TEMBALANG
-================
+================================
 
 Kepada Yth.
 *KAPOLRESTABES SEMARANG*
@@ -270,6 +272,7 @@ Dari :
 
 Perihal : *${reportData.perihal || ""}*
 
+Dilaporkan dengan hormat kepada Ka bahwa :
 ${mainBody}
 
 
@@ -545,7 +548,7 @@ Tembusan:
                   <div className="text-right space-y-12">
                     <div style={{ fontFamily: "Calibri, sans-serif" }}>
                       <p className="text-neutral-800">Semarang , {reportData.tanggal}</p>
-                      <p className="font-bold tracking-wide text-neutral-900">SATUAN INTELIJEN KEAMANAN</p>
+                      <p className="font-bold tracking-wide text-neutral-900">Unit IK</p>
                     </div>
                   </div>
                 </>
@@ -562,7 +565,9 @@ Tembusan:
                       <p className="text-neutral-800">Semarang , {reportData.tanggal}</p>
                       <p className="font-bold tracking-wide text-neutral-900">Pelapor</p>
                     </div>
-                    <div className="w-32 border-b border-neutral-900 ml-auto" />
+                    <div className="text-neutral-900 font-bold ml-auto text-center w-32 border-b border-neutral-900 pb-1">
+                      LI Cengli
+                    </div>
                   </div>
                 </>
               )}

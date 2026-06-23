@@ -294,7 +294,9 @@ III. PENDAPAT PELAPOR
       ${report.rekomendasi || ""}
 
 Semarang, ${report.tanggal || ""}
-PELAPOR`;
+PELAPOR
+
+LI CENGLI`;
       } else if (type === "laporan-harian-khusus") {
         formattedContent = `KEPOLISIAN NEGARA REPUBLIK INDONESIA
 DAERAH JAWA TENGAH
@@ -346,7 +348,7 @@ Rekomendasi
 ${report.rekomendasi || ""}
 
 Semarang, ${report.tanggal || ""}
-SATUAN INTELIJEN KEAMANAN
+Unit IK
 
 Authentikasi :.......................
 
@@ -357,7 +359,7 @@ Kapolsek Tembalang`;
       } else if (type !== "laporan-harian") {
         formattedContent = `POLRESTABES SEMARANG
 POLSEK TEMBALANG
-================
+================================
 
 Kepada Yth.
 *KAPOLRESTABES SEMARANG*
@@ -367,6 +369,7 @@ Dari :
 
 Perihal : *${title}*
 
+Dilaporkan dengan hormat kepada Ka bahwa :
 ${body}
 
 
