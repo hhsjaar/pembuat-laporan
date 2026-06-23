@@ -10,7 +10,7 @@ interface ReportData {
   lokasi?: string;
   isi_laporan?: string;
   kesimpulan?: string;
-  
+
   // Custom template fields for Laporan Informasi
   bidang?: string;
   perihal?: string;
@@ -24,7 +24,7 @@ interface ReportData {
   prediksi?: string;
   langkah?: string;
   rekomendasi?: string;
-  
+
   // Custom template fields for Laporan Harian
   E?: string;
   F?: string;
@@ -104,7 +104,7 @@ export default function ReportPreview({
         const cleanD = stripPrefix(reportData.D, "D\\.");
         const cleanE = stripPrefix(reportData.E, "E\\.");
         const cleanF = stripPrefix(reportData.F, "F\\.");
-        
+
         const parts = [];
         if (cleanA) parts.push(`A. ${cleanA}`);
         if (cleanB) parts.push(`B. ${cleanB}`);
@@ -152,9 +152,7 @@ III. PENDAPAT PELAPOR
       ${reportData.rekomendasi || ""}
 
 Semarang, ${reportData.tanggal || ""}
-PELAPOR
-
-LI CENGLI`;
+PELAPOR`;
     }
 
     if (templateType === "laporan-harian-khusus") {
@@ -247,7 +245,7 @@ Kapolsek Tembalang`;
       const cleanD = stripPrefix(reportData.D, "D\\.");
       const cleanE = stripPrefix(reportData.E, "E\\.");
       const cleanF = stripPrefix(reportData.F, "F\\.");
-      
+
       const parts = [];
       if (cleanA) parts.push(`A. ${cleanA}`);
       if (cleanB) parts.push(`B. ${cleanB}`);
@@ -332,8 +330,8 @@ Tembusan:
               Pratinjau Laporan Sukses Dibuat
             </h3>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              {isLaporanKegiatan 
-                ? `Teks ${templateType === "laporan-harian" ? "laporan harian" : "laporan kegiatan"} siap disalin langsung untuk dibagikan ke WhatsApp/Telegram.` 
+              {isLaporanKegiatan
+                ? `Teks ${templateType === "laporan-harian" ? "laporan harian" : "laporan kegiatan"} siap disalin langsung untuk dibagikan ke WhatsApp/Telegram.`
                 : "Dokumen Anda telah siap diunduh dalam format Microsoft Word (.docx)."}
             </p>
           </div>
@@ -348,7 +346,7 @@ Tembusan:
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Generate Ulang</span>
           </button>
-          
+
           {isLaporanKegiatan ? (
             <>
               <button
@@ -368,7 +366,7 @@ Tembusan:
                   </>
                 )}
               </button>
-              
+
               <button
                 type="button"
                 onClick={handleTextDownload}
@@ -400,14 +398,14 @@ Tembusan:
       <div className="realistic-paper relative mx-auto rounded-2xl shadow-xl bg-white text-neutral-900 border border-neutral-200/80 p-8 sm:p-12 overflow-hidden select-text">
         {/* Document watermarking/top lines */}
         <div className="absolute top-0 inset-x-0 h-1.5 bg-accent" />
-        
+
         {templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" ? (
           /* High-Fidelity Police Laporan Informasi / LHK Preview matching Calibri spacing, font, and sizes */
-          <div 
-            className="space-y-6 max-w-2xl mx-auto text-neutral-900 select-text" 
-            style={{ 
-              fontFamily: "Calibri, 'Helvetica Neue', Arial, sans-serif", 
-              fontSize: "11.5pt", 
+          <div
+            className="space-y-6 max-w-2xl mx-auto text-neutral-900 select-text"
+            style={{
+              fontFamily: "Calibri, 'Helvetica Neue', Arial, sans-serif",
+              fontSize: "11.5pt",
               lineHeight: "1.5",
               textAlign: "justify"
             }}
@@ -485,7 +483,7 @@ Tembusan:
               <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
                 {templateType === "laporan-harian-khusus" ? "I. FAKTA – FAKTA :" : "HAL-HAL YANG DILAPORKAN"}
               </h3>
-              
+
               <div className="whitespace-pre-line text-neutral-900 pl-3 text-justify leading-relaxed" style={{ textIndent: "0.25in" }}>
                 {getDisplayIsiLaporan()}
               </div>
@@ -496,7 +494,7 @@ Tembusan:
               <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
                 {templateType === "laporan-harian-khusus" ? "II. CATATAN :" : "PENDAPAT PELAPOR"}
               </h3>
-              
+
               <div className="space-y-4 pl-3 text-neutral-900 text-justify">
                 <div className="space-y-1">
                   <div className="flex items-center space-x-1.5">
@@ -566,9 +564,7 @@ Tembusan:
                       <p className="text-neutral-800">Semarang , {reportData.tanggal}</p>
                       <p className="font-bold tracking-wide text-neutral-900">Pelapor</p>
                     </div>
-                    <div className="text-neutral-900 font-bold ml-auto text-center w-32 border-b border-neutral-900 pb-1">
-                      LI Cengli
-                    </div>
+
                   </div>
                 </>
               )}
@@ -597,7 +593,7 @@ Tembusan:
                 )}
               </button>
             </div>
-            
+
             <div className="relative rounded-2xl border border-neutral-200/40 dark:border-purple-950/40 bg-neutral-950 p-6 sm:p-8 font-mono text-xs leading-relaxed overflow-x-auto text-purple-300 dark:text-purple-300 shadow-xl shadow-purple-500/5 select-text">
               <pre className="whitespace-pre-wrap font-mono text-[11.5px] select-text">
                 {getPlainReportText()}
@@ -626,7 +622,7 @@ Tembusan:
                   <p className="font-semibold text-neutral-950">{reportData.tanggal}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                 <div>

@@ -294,9 +294,7 @@ III. PENDAPAT PELAPOR
       ${report.rekomendasi || ""}
 
 Semarang, ${report.tanggal || ""}
-PELAPOR
-
-LI CENGLI`;
+PELAPOR`;
       } else if (type === "laporan-harian-khusus") {
         formattedContent = `KEPOLISIAN NEGARA REPUBLIK INDONESIA
 DAERAH JAWA TENGAH
