@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       "laporan-informasi": "laporan-informasi.docx",
       "laporan-harian-khusus": "laporan-harian-khusus.docx",
       "laporan-khusus-3": "laporan-khusus-3.docx",
+      "infosus": "infosus.docx",
     };
 
     const templateName = templateFilenameMap[templateType];
@@ -117,15 +118,17 @@ export async function POST(req: NextRequest) {
       return result;
     };
 
-    // Preprocess template if it's "Laporan Informasi" or "Laporan Harian Khusus" to enable raw XML parsing for multiline paragraphs
-    if (templateType === "laporan-informasi" || templateType === "laporan-harian-khusus") {
+    // Preprocess template if it's "Laporan Informasi", "Laporan Harian Khusus", or "Infosus" to enable raw XML parsing for multiline paragraphs
+    if (templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" || templateType === "infosus") {
       let docXml = zip.files["word/document.xml"].asText();
       
       // 1. Clean up any split runs inside the placeholders
       docXml = cleanXmlTags(docXml);
 
       // 2. Replace multiline fields with raw XML tags using double curly delimiters
-      const otherFields = ["isi_laporan", "analisa", "prediksi", "langkah", "rekomendasi"];
+      const otherFields = templateType === "infosus"
+        ? ["fakta_fakta", "analisa", "prediksi", "langkah", "rekomendasi"]
+        : ["isi_laporan", "analisa", "prediksi", "langkah", "rekomendasi"];
       otherFields.forEach((field) => {
         const regex = new RegExp(`\\{\\{${field}\\}\\}`, "g");
         docXml = docXml.replace(regex, `{{@${field}}}`);
@@ -144,7 +147,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const isXmlTemplate = templateType === "laporan-informasi" || templateType === "laporan-harian-khusus";
+    const isXmlTemplate = templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" || templateType === "infosus";
 
     // Backward compatibility helper to combine old A, B, C, D fields if isi_laporan is missing
     let finalIsiLaporan = reportData.isi_laporan;
@@ -183,6 +186,10 @@ export async function POST(req: NextRequest) {
       prediksi: isXmlTemplate ? convertTextToOpenXml(reportData.prediksi || "") : (reportData.prediksi || ""),
       langkah: isXmlTemplate ? convertTextToOpenXml(reportData.langkah || "") : (reportData.langkah || ""),
       rekomendasi: isXmlTemplate ? convertTextToOpenXml(reportData.rekomendasi || "") : (reportData.rekomendasi || ""),
+
+      // Infosus-specific placeholders
+      perihal_judul: reportData.perihal_judul || "",
+      fakta_fakta: isXmlTemplate ? convertTextToOpenXml(reportData.fakta_fakta || "") : (reportData.fakta_fakta || ""),
     };
 
     doc.render(renderData);

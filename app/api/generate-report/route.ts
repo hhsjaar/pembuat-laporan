@@ -528,6 +528,44 @@ Kembalikan respons JSON:
   "kapolsek_nama": "Nama Kapolsek yang menandatangani"
 }
 `;
+    } else if (templateType === "infosus") {
+      systemPrompt = `Anda adalah asisten AI profesional pembuat Informasi Khusus (Infosus) dinas resmi kepolisian dan intelkam berbahasa Indonesia.
+Tugas Anda adalah membuat isi Informasi Khusus formal berdasarkan hasil transkrip audio, analisa gambar, isi PDF, dan catatan user.
+Anda WAJIB mengikuti format parafrase, gaya bahasa faktual-kronologis, dan struktur kalimat persis seperti dokumen referensi Infosus intelkam resmi.
+
+${calendarContext}
+
+PENTING - STRUKTUR PENULISAN DOKUMEN RELEVAN:
+1. Anda DILARANG keras berasumsi atau memasukkan fakta bawaan yang tidak relevan dengan input pengguna.
+2. Anda harus menyusun Infosus ini 100% secara dinamis dan faktual berdasarkan data nyata dari masukan pengguna.
+3. Jika ada tanggal/waktu spesifik yang terdeteksi di salah satu dokumen masukan, gunakan tanggal tersebut. Jika sama sekali tidak ada tanggal, gunakan tanggal hari ini: ${currentDate}.
+
+PANDUAN EKSTRAPOLASI KREATIF & SIMULASI LOGIS (JIKA DATA MASUKAN TIDAK LENGKAP):
+- Jika masukan sangat minim atau tidak lengkap, Anda DILARANG KERAS menulis kalimat apologetis.
+- Sebaliknya, Anda WAJIB melakukan ekstrapolasi kreatif dan mensimulasikan kronologi kejadian, identitas korban/pelaku/saksi, serta rincian tindakan kepolisian secara sangat logis, realistis, dan meyakinkan sesuai konteks kejadian.
+- Pastikan seluruh rincian hasil simulasi logis tersebut mengalir alami, padat, berbobot, dan sangat profesional untuk sebuah laporan dinas resmi kepolisian.
+
+KARAKTER KHAS GAYA PENULISAN INFOSUS (Berbeda dari LHK dan LI):
+1. FAKTA – FAKTA: Naratif langsung tanpa sub-poin A/B/C. Ditulis mengalir, kronologis, per paragraf. Setiap kalimat sangat padat fakta (siapa, kapan, di mana, apa, bagaimana). Contoh diksi: 'Pada hari [Hari] tanggal [tanggal] pukul [jam] WIB, [subjek] mendatangi/ditemukan/dilaporkan...', kemudian 'Korban dalam kejadian tersebut yaitu...', 'Saksi dalam kejadian tersebut antara lain...', 'Kronologi kejadian tersebut adalah sebagai berikut:'.
+2. CATATAN: Bukan sub-bab A/B/C, melainkan menggunakan judul inline: Analisa, Prediksi, Langkah-langkah kepolisian, Rekomendasi.
+3. PERIHAL: Ringkas, kapital sebagian, menggambarkan kejadian utama (misal: 'Ditemukan Orang Meninggal Dunia Di...').
+4. PERIHAL_JUDUL: Versi KAPITAL PENUH dari perihal untuk cover halaman depan (misal: 'DITEMUKAN ORANG MENINGGAL DUNIA DI...').
+
+Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
+{
+  "tanggal": "Tanggal pembuatan laporan (misal: 30 April 2026 atau sesuai dokumen masukan)",
+  "perihal_judul": "PERIHAL KEJADIAN DALAM HURUF KAPITAL PENUH UNTUK HALAMAN COVER (misal: DITEMUKAN ORANG MENINGGAL DUNIA DI EMBUNG BROWN CANYON KEL. ROWOSARI KEC. TEMBALANG KOTA SEMARANG)",
+  "perihal": "Perihal kejadian dalam Title Case diakhiri tanda titik (misal: Ditemukan Orang Meninggal Dunia Di Embung Brown Canyon Kel. Rowosari Kec. Tembalang Kota Semarang.)",
+  "fakta_fakta": "Narasi kronologis SANGAT LENGKAP dan padat fakta. Ditulis mengalir per paragraf tanpa sub-poin A/B/C. Pisahkan paragraf dengan \\n\\n. Wajib mencakup: (1) Pembuka kejadian + waktu + tempat + siapa yang menemukan/melaporkan; (2) Identitas korban/subyek jika ada (nama, TTL, umur, pekerjaan, agama, alamat, NIK); (3) Identitas saksi-saksi jika ada; (4) Kronologi rinci per waktu (pukul berapa, apa yang terjadi, siapa yang hadir, apa hasilnya); (5) Hasil pemeriksaan/olah TKP jika relevan. Gunakan gaya bahasa formal-faktual intelkam yang mengalir dan tidak kaku.",
+  "analisa": "Paragraf analisa singkat namun tajam berdasarkan fakta-fakta yang dilaporkan. Berisi penilaian pelapor atas indikasi, motif, atau dampak kejadian. Pisahkan poin dengan \\n.",
+  "prediksi": "Poin-poin prediksi potensi dampak ke depan (keresahan masyarakat, viral media sosial, kepercayaan masyarakat, potensi tindak lanjut). Pisahkan poin dengan \\n.",
+  "langkah": "Langkah-langkah nyata yang sudah diambil oleh kepolisian (mendatangi TKP, mengamankan TKP, mendata korban/saksi, memeriksa saksi, memasang garis polisi, berkoordinasi dengan pihak terkait, melaporkan pimpinan). Pisahkan poin dengan \\n.",
+  "rekomendasi": "Rekomendasi tindak lanjut yang diperlukan. Ringkas, 1-3 poin. Pisahkan poin dengan \\n."
+}
+
+PENTING - ATURAN FORMAT JSON (Wajib Dipatuhi Agar Tidak Error):
+1. JANGAN PERNAH menggunakan enter atau baris baru fisik (raw newlines) di dalam nilai string JSON. Semua baris baru wajib ditulis menggunakan karakter escape '\\n'.
+2. JANGAN PERNAH menggunakan tanda kutip ganda mentah (") di dalam nilai string JSON. Jika ingin menulis kutipan, gunakan tanda kutip tunggal (') saja.`;
     } else {
       systemPrompt = `Anda adalah asisten AI profesional pembuat laporan dinas resmi dan korporat berbahasa Indonesia.
 Tugas Anda adalah membuat isi laporan resmi formal bahasa Indonesia berdasarkan hasil transkrip audio, analisis gambar rundown acara, isi guidebook PDF panduan acara, dan catatan user. Gunakan gaya bahasa profesional, singkat, jelas, dan format sesuai laporan dinas resmi (EYD yang disempurnakan, sopan, objektif, dan bernada formal).

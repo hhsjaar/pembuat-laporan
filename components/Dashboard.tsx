@@ -86,6 +86,7 @@ export default function Dashboard() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<any | null>(null);
   const [historySearchQuery, setHistorySearchQuery] = useState("");
+  const [historyCategory, setHistoryCategory] = useState<string>("all");
   const [isCopiedHistoryId, setIsCopiedHistoryId] = useState<string | null>(null);
   const [supabaseConfigured, setSupabaseConfigured] = useState(false);
 
@@ -156,7 +157,7 @@ export default function Dashboard() {
 
   const handleDownloadHistoryDocx = async (item: any) => {
     const rawReport = item.meta_data?.raw_report;
-    if ((item.template_type !== "laporan-informasi" && item.template_type !== "laporan-harian-khusus") || !rawReport) {
+    if ((item.template_type !== "laporan-informasi" && item.template_type !== "laporan-harian-khusus" && item.template_type !== "infosus") || !rawReport) {
       handleDownloadHistoryTxt(item);
       return;
     }
@@ -217,6 +218,9 @@ export default function Dashboard() {
       } else if (type === "laporan-harian-khusus") {
         title = report.perihal || "LAPORAN HARIAN KHUSUS";
         body = report.isi_laporan || "";
+      } else if (type === "infosus") {
+        title = report.perihal || "INFORMASI KHUSUS";
+        body = report.fakta_fakta || "";
       } else if (type === "laporan-kegiatan") {
         title = report.perihal || "LAPORAN KEGIATAN";
         body = report.isi_laporan || "";
@@ -354,6 +358,49 @@ Distribusi:
 
 Kasatintelkam Polrestabes Semarang
 Kapolsek Tembalang`;
+      } else if (type === "infosus") {
+        formattedContent = `POLRI DAERAH JAWA TENGAH
+RESOR KOTA BESAR SEMARANG
+SEKTOR TEMBALANG
+Jl. Turus Asri No. 9, Semarang 50245
+
+Nomor : R / INFOSUS / / / Ren.4.1.1. / / Intelkam
+
+INFORMASI KHUSUS
+
+TENTANG
+
+${report.perihal_judul || (report.perihal || "").toUpperCase()}
+
+TANGGAL : ${report.tanggal || ""}
+
+PERIHAL  : ${report.perihal || ""}
+
+FAKTA – FAKTA :
+${report.fakta_fakta || ""}
+
+CATATAN :
+
+Analisa
+${report.analisa || ""}
+
+Prediksi
+${report.prediksi || ""}
+
+Langkah - langkah kepolisian :
+${report.langkah || ""}
+
+Rekomendasi :
+${report.rekomendasi || ""}
+
+Semarang, ${report.tanggal || ""}
+UNIT INTELKAM
+
+Authentikasi :.......................
+
+Distribusi :
+1. Kapolsek Tembalang.
+2. Kasatintelkam Polrestabes Semarang.`;
       } else if (type !== "laporan-harian") {
         formattedContent = `POLRESTABES SEMARANG
 POLSEK TEMBALANG
@@ -1667,7 +1714,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
               </p>
             </div>
           ) : historyList.length === 0 ? (
-            /* Empty State */
+            /* Empty State: Absolutely no reports in DB */
             <div className="flex flex-col items-center justify-center py-20 text-center rounded-3xl border border-neutral-200/30 dark:border-neutral-800/30 bg-neutral-50/30 dark:bg-neutral-950/10 backdrop-blur-md p-8">
               <div className="p-4 rounded-full bg-neutral-100 dark:bg-neutral-900 text-neutral-400 dark:text-neutral-600 mb-4">
                 <FileText className="w-8 h-8" />
@@ -1679,85 +1726,182 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                 Mulai generate laporan resmi Anda, dan laporan tersebut akan disimpan secara otomatis di sini.
               </p>
             </div>
-          ) : (
-            /* History Grid Cards */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {historyList
-                .filter((item) =>
-                  item.perihal.toLowerCase().includes(historySearchQuery.toLowerCase()) ||
-                  item.template_type.toLowerCase().includes(historySearchQuery.toLowerCase())
-                )
-                .map((item) => {
-                  const date = new Date(item.created_at);
-                  const formattedDate = date.toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
+          ) : (() => {
+            const HISTORY_CATEGORIES = [
+              { id: "all", label: "Semua Kategori" },
+              { id: "laporan-informasi", label: "Laporan Informasi" },
+              { id: "laporan-harian-khusus", label: "LHK" },
+              { id: "infosus", label: "Informasi Khusus" },
+              { id: "laporan-kegiatan", label: "Laporan Kegiatan" },
+              { id: "laporan-harian", label: "Laporan Harian" },
+            ];
 
-                  // Badge colors & label mapping
-                  let badgeLabel = "";
-                  const badgeStyles = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
-                  if (item.template_type === "laporan-informasi") {
-                    badgeLabel = "Laporan Informasi";
-                  } else if (item.template_type === "laporan-harian-khusus") {
-                    badgeLabel = "Laporan Harian Khusus";
-                  } else if (item.template_type === "laporan-kegiatan") {
-                    badgeLabel = "Laporan Kegiatan";
-                  } else if (item.template_type === "laporan-harian") {
-                    badgeLabel = "Laporan Harian";
-                  } else {
-                    badgeLabel = "Laporan Lainnya";
-                  }
+            const getCategoryCount = (catId: string) => {
+              if (catId === "all") return historyList.length;
+              return historyList.filter((item) => item.template_type === catId).length;
+            };
 
-                  return (
-                    <div
-                      key={item.id}
-                      className="group flex flex-col justify-between rounded-2xl p-5 border border-neutral-200/50 dark:border-neutral-800/40 bg-white/40 dark:bg-neutral-900/30 hover:bg-white dark:hover:bg-neutral-900/70 hover:shadow-lg dark:hover:shadow-white/5 transition-all duration-300 backdrop-blur-md"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badgeStyles}`}>
-                            {badgeLabel}
+            const filteredHistory = historyList.filter((item) => {
+              if (historyCategory !== "all" && item.template_type !== historyCategory) return false;
+              const query = historySearchQuery.toLowerCase();
+              return (
+                item.perihal.toLowerCase().includes(query) ||
+                item.content.toLowerCase().includes(query) ||
+                item.template_type.toLowerCase().includes(query)
+              );
+            });
+
+            return (
+              <div className="space-y-6">
+                {/* Desktop view: Horizontal Pill Tabs */}
+                <div className="hidden sm:block relative w-full overflow-hidden">
+                  <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none scroll-smooth w-full select-none">
+                    {HISTORY_CATEGORIES.map((cat) => {
+                      const isActive = historyCategory === cat.id;
+                      const count = getCategoryCount(cat.id);
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => setHistoryCategory(cat.id)}
+                          className={`relative px-3.5 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-300 flex items-center space-x-1.5 active:scale-95 cursor-pointer ${
+                            isActive
+                              ? "bg-purple-600 text-white dark:bg-purple-500 shadow-md shadow-purple-500/10"
+                              : "bg-neutral-100 dark:bg-neutral-900/60 text-neutral-600 dark:text-neutral-300 border border-neutral-200/40 dark:border-neutral-800/40 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
+                          }`}
+                        >
+                          <span>{cat.label}</span>
+                          <span className={`px-1.5 py-0.5 rounded-full text-[9px] ${isActive ? "bg-white/20 text-white" : "bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400"}`}>
+                            {count}
                           </span>
-                          <div className="flex items-center space-x-1.5">
-                            <button
-                              onClick={() => setSelectedHistoryItem(item)}
-                              className="p-1.5 rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 bg-white/50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
-                              title="Lihat Laporan"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => deleteHistoryItem(item.id)}
-                              className="p-1.5 rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 bg-white/50 dark:bg-neutral-800/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
-                              title="Hapus"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Mobile view: Elegant Dropdown Selection Menu */}
+                <div className="block sm:hidden w-full relative">
+                  <select
+                    value={historyCategory}
+                    onChange={(e) => setHistoryCategory(e.target.value)}
+                    className="w-full px-4 py-3 text-xs font-bold rounded-xl border border-neutral-200/50 dark:border-neutral-800/40 bg-white/40 dark:bg-neutral-900/30 text-neutral-900 dark:text-white outline-none appearance-none hover:bg-white dark:hover:bg-neutral-900/50 focus:border-purple-500 transition-all cursor-pointer shadow-sm pr-10"
+                  >
+                    {HISTORY_CATEGORIES.map((cat) => {
+                      const count = getCategoryCount(cat.id);
+                      return (
+                        <option key={cat.id} value={cat.id} className="bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200">
+                          {cat.label} ({count})
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-500 dark:text-neutral-400">
+                    <Sliders className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+
+                {filteredHistory.length === 0 ? (
+                  /* Empty state for search/filter result */
+                  <div className="flex flex-col items-center justify-center py-20 text-center rounded-3xl border border-neutral-200/30 dark:border-neutral-800/30 bg-neutral-50/30 dark:bg-neutral-950/10 backdrop-blur-md p-8">
+                    <div className="p-4 rounded-full bg-neutral-100 dark:bg-neutral-900 text-neutral-400 dark:text-neutral-600 mb-4">
+                      <Search className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200">
+                      Laporan Tidak Ditemukan
+                    </h3>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-sm mt-1 mb-4">
+                      Tidak ada laporan yang cocok dengan pencarian kata kunci atau kategori yang Anda pilih.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setHistorySearchQuery("");
+                        setHistoryCategory("all");
+                      }}
+                      className="px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white font-semibold text-xs rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-md shadow-purple-500/10"
+                    >
+                      Reset Pencarian & Kategori
+                    </button>
+                  </div>
+                ) : (
+                  /* History Grid Cards */
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredHistory.map((item) => {
+                      const date = new Date(item.created_at);
+                      const formattedDate = date.toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
+
+                      // Badge colors & label mapping
+                      let badgeLabel = "";
+                      let badgeStyles = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+                      if (item.template_type === "laporan-informasi") {
+                        badgeLabel = "Laporan Informasi";
+                      } else if (item.template_type === "laporan-harian-khusus") {
+                        badgeLabel = "Laporan Harian Khusus";
+                      } else if (item.template_type === "laporan-kegiatan") {
+                        badgeLabel = "Laporan Kegiatan";
+                      } else if (item.template_type === "laporan-harian") {
+                        badgeLabel = "Laporan Harian";
+                      } else if (item.template_type === "infosus") {
+                        badgeLabel = "Informasi Khusus";
+                        badgeStyles = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+                      } else {
+                        badgeLabel = "Laporan Lainnya";
+                      }
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="group flex flex-col justify-between rounded-2xl p-5 border border-neutral-200/50 dark:border-neutral-800/40 bg-white/40 dark:bg-neutral-900/30 hover:bg-white dark:hover:bg-neutral-900/70 hover:shadow-lg dark:hover:shadow-white/5 transition-all duration-300 backdrop-blur-md"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badgeStyles}`}>
+                                {badgeLabel}
+                              </span>
+                              <div className="flex items-center space-x-1.5">
+                                <button
+                                  onClick={() => setSelectedHistoryItem(item)}
+                                  className="p-1.5 rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 bg-white/50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                                  title="Lihat Laporan"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => deleteHistoryItem(item.id)}
+                                  className="p-1.5 rounded-lg border border-neutral-200/50 dark:border-neutral-800/50 bg-white/50 dark:bg-neutral-800/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                                  title="Hapus"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <h4 className="text-xs font-extrabold text-neutral-900 dark:text-white line-clamp-2 leading-relaxed">
+                              {item.perihal}
+                            </h4>
+
+                            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 line-clamp-3 leading-relaxed">
+                              {item.content}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center space-x-1.5 pt-4 mt-4 border-t border-neutral-100 dark:border-neutral-800/60 text-[10px] text-neutral-400 font-medium">
+                            <Clock className="w-3 h-3" />
+                            <span>{formattedDate}</span>
                           </div>
                         </div>
-
-                        <h4 className="text-xs font-extrabold text-neutral-900 dark:text-white line-clamp-2 leading-relaxed">
-                          {item.perihal}
-                        </h4>
-
-                        <p className="text-[11px] text-neutral-500 dark:text-neutral-400 line-clamp-3 leading-relaxed">
-                          {item.content}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center space-x-1.5 pt-4 mt-4 border-t border-neutral-100 dark:border-neutral-800/60 text-[10px] text-neutral-400 font-medium">
-                        <Clock className="w-3 h-3" />
-                        <span>{formattedDate}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          )}
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </motion.div>
       )}
     </AnimatePresence>
@@ -1795,6 +1939,8 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                         ? "Laporan Harian Khusus"
                         : selectedHistoryItem.template_type === "laporan-kegiatan"
                         ? "Laporan Kegiatan"
+                        : selectedHistoryItem.template_type === "infosus"
+                        ? "Informasi Khusus"
                         : "Laporan Harian"}
                     </span>
                     <span className="text-[10px] text-neutral-400 font-medium">
@@ -1858,7 +2004,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                   <span>
                     {isDownloading 
                       ? "Mengunduh..." 
-                      : (selectedHistoryItem.template_type === "laporan-informasi" || selectedHistoryItem.template_type === "laporan-harian-khusus") && selectedHistoryItem.meta_data?.raw_report
+                      : (selectedHistoryItem.template_type === "laporan-informasi" || selectedHistoryItem.template_type === "laporan-harian-khusus" || selectedHistoryItem.template_type === "infosus") && selectedHistoryItem.meta_data?.raw_report
                       ? "Unduh (.docx)" 
                       : "Unduh (.txt)"}
                   </span>

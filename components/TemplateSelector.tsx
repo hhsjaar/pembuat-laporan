@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { Terminal, Activity, Radar, Shield, CheckCircle2 } from "lucide-react";
+import { Terminal, Activity, Radar, Shield, CheckCircle2, Zap } from "lucide-react";
 
-export type TemplateType = "laporan-informasi" | "laporan-kegiatan" | "laporan-harian-khusus" | "laporan-khusus-3" | "laporan-harian";
+export type TemplateType = "laporan-informasi" | "laporan-kegiatan" | "laporan-harian-khusus" | "laporan-khusus-3" | "laporan-harian" | "infosus";
 
 interface TemplateSelectorProps {
   selected: TemplateType;
@@ -40,6 +40,13 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
       color: "from-purple-500/10 to-indigo-500/10 text-purple-500 dark:text-purple-400",
       borderColor: "hover:border-purple-500/30 selected:border-purple-500",
     },
+    {
+      id: "infosus" as TemplateType,
+      title: "Informasi Khusus",
+      icon: Zap,
+      color: "from-purple-500/10 to-indigo-500/10 text-purple-500 dark:text-purple-400",
+      borderColor: "hover:border-purple-500/30 selected:border-purple-500",
+    },
   ];
 
   const selectedStyles: Record<TemplateType, string> = {
@@ -48,6 +55,7 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
     "laporan-harian": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
     "laporan-harian-khusus": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
     "laporan-khusus-3": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
+    "infosus": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
   };
 
   const checkColor: Record<TemplateType, string> = {
@@ -56,6 +64,7 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
     "laporan-harian": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
     "laporan-harian-khusus": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
     "laporan-khusus-3": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
+    "infosus": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
   };
 
   return (
@@ -66,7 +75,7 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
         </h3>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 pb-0 md:pb-4.5">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 pb-0 md:pb-4.5">
         {templates.map((temp) => {
           const Icon = temp.icon;
           const isSelected = selected === temp.id;
