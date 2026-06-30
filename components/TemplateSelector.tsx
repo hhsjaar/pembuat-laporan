@@ -67,6 +67,17 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
     "infosus": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
   };
 
+  const isLargeScreen = "lg:col-span-1 lg:row-span-1 lg:order-none lg:col-start-auto lg:row-start-auto";
+
+  const getResponsiveGridClasses = (idx: number) => {
+    if (idx === 0) return `col-span-1 order-1 ${isLargeScreen}`;
+    if (idx === 1) return `col-span-1 order-3 ${isLargeScreen}`;
+    if (idx === 4) return `col-span-1 row-span-2 order-2 col-start-2 row-start-1 h-full lg:h-auto ${isLargeScreen}`;
+    if (idx === 2) return `col-span-1 order-4 col-start-1 row-start-2 ${isLargeScreen}`;
+    if (idx === 3) return `col-span-1 order-5 col-start-3 row-start-2 ${isLargeScreen}`;
+    return isLargeScreen;
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -75,16 +86,21 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
         </h3>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 pb-0 md:pb-4.5">
-        {templates.map((temp) => {
+      <div className="grid grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 pb-0 md:pb-4.5">
+        {templates.map((temp, idx) => {
           const Icon = temp.icon;
           const isSelected = selected === temp.id;
+          const gridClasses = getResponsiveGridClasses(idx);
 
           return (
             <div
               key={temp.id}
               onClick={() => onChange(temp.id)}
-              className={`relative cursor-pointer rounded-2xl p-3.5 sm:p-5 glassmorphism transition-all duration-300 group overflow-hidden w-full ${
+              className={`relative cursor-pointer rounded-2xl p-3.5 sm:p-5 glassmorphism transition-all duration-300 group overflow-hidden w-full flex flex-col justify-between ${gridClasses} ${
+                idx === 4
+                  ? "justify-center items-center text-center lg:justify-between lg:items-start lg:text-left"
+                  : ""
+              } ${
                 isSelected
                   ? selectedStyles[temp.id]
                   : "border-neutral-200/50 dark:border-neutral-800/40 hover:bg-white dark:hover:bg-neutral-900/20 hover:shadow-md"
@@ -95,7 +111,9 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
                 className={`absolute inset-0 bg-gradient-to-br ${temp.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10`}
               />
 
-              <div className="flex items-start justify-between">
+              <div className={`flex w-full items-start justify-between ${
+                idx === 4 ? "justify-center lg:justify-between" : ""
+              }`}>
                 <div className={`p-2 sm:p-3 rounded-xl bg-gradient-to-br ${temp.color}`}>
                   <Icon className="w-4 h-4 sm:w-6 sm:h-6" />
                 </div>
@@ -105,13 +123,14 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className={idx === 4 ? "absolute top-3.5 right-3.5 lg:static" : ""}
                   >
                     <CheckCircle2 className={`w-4 h-4 sm:w-5 sm:h-5 ${checkColor[temp.id]}`} />
                   </motion.div>
                 )}
               </div>
 
-              <div className="mt-3 sm:mt-5">
+              <div className={`mt-3 sm:mt-5 ${idx === 4 ? "mt-4 lg:mt-5" : ""}`}>
                 <h4 className="font-bold text-xs sm:text-base text-neutral-950 dark:text-white group-hover:translate-x-0.5 transition-transform duration-300">
                   {temp.title}
                 </h4>
