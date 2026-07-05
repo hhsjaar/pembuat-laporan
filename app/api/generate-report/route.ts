@@ -235,7 +235,7 @@ PENTING:
 1. Susun seluruh isi laporan 100% secara dinamis dan faktual berdasarkan data nyata yang disediakan di masukan pengguna (gambar dokumen, PDF guidebook, transkrip, catatan teks). Jangan pernah berasumsi atau menyalin detail acara lain jika masukan berbeda!
 2. Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {
-  "perihal": "Informasi kejadian/kegiatan secara ringkas namun deskriptif (misal: Monitoring Giat Nobar Pesta Babi... di Beranda FH Undip Kec. Tembalang)",
+  "perihal": "Informasi kejadian/kegiatan secara ringkas namun deskriptif. PENTING: JANGAN PERNAH diawali dengan kata 'Laporan', tetapi harus langsung diawali dengan kata 'Kegiatan' (misal: Kegiatan Monitoring Giat Nobar Pesta Babi... di Beranda FH Undip Kec. Tembalang atau Kegiatan Silaturahmi...)",
   "isi_laporan": "Teks lengkap rincian fakta lapangan. Susun dalam alfabet penomoran (A., B., C., D... dst.) secara dinamis dan fleksibel (tidak dipatok harus A s.d F, sesuaikan dengan kompleksitas masukan pengguna). Setiap poin dipisahkan baris baru ganda (\\n\\n). Gunakan bahasa baku resmi Indonesia yang dinamis, tidak monoton, luwes, dan mengalir secara alami (tidak kaku seperti tulisan robot/template mati). Pelajari dan tiru susunan format dari 4 contoh referensi di bawah.",
   "kapolsek_nama": "Nama dan gelar Kapolsek Tembalang yang menandatangani laporan. PENTING: Selalu gunakan nama 'KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H.'."
 }
@@ -701,6 +701,15 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
 
     // Apply dynamic calendar corrector to ensure 100% precision for any day/date combination
     reportData = correctWeekdaysInObject(reportData);
+
+    // Clean up perihal if it starts with "Laporan Kegiatan" (case-insensitive) for "laporan-kegiatan" template
+    if (templateType === "laporan-kegiatan" && reportData && typeof reportData.perihal === "string") {
+      let perihal = reportData.perihal.trim();
+      if (/^laporan\s+kegiatan/i.test(perihal)) {
+        perihal = perihal.replace(/^laporan\s+/i, "");
+      }
+      reportData.perihal = perihal;
+    }
 
     console.log("Report narrative generated and calendar-synchronized successfully via Gemini!");
     return NextResponse.json(reportData);

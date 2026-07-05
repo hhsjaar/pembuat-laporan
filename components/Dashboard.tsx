@@ -222,7 +222,11 @@ export default function Dashboard() {
         title = report.perihal || "INFORMASI KHUSUS";
         body = report.fakta_fakta || "";
       } else if (type === "laporan-kegiatan") {
-        title = report.perihal || "LAPORAN KEGIATAN";
+        let perihal = report.perihal || "KEGIATAN";
+        if (/^laporan\s+kegiatan/i.test(perihal.trim())) {
+          perihal = perihal.trim().replace(/^laporan\s+/i, "");
+        }
+        title = perihal;
         body = report.isi_laporan || "";
       } else if (type === "laporan-harian") {
         title = report.perihal || "LAPORAN HARIAN SITUASI KAMTIBMAS";

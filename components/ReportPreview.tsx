@@ -305,6 +305,11 @@ Kapolsek Tembalang`;
 
     const kapolsekNama = reportData.kapolsek_nama || "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H.";
 
+    let perihal = reportData.perihal || "";
+    if (templateType === "laporan-kegiatan" && /^laporan\s+kegiatan/i.test(perihal.trim())) {
+      perihal = perihal.trim().replace(/^laporan\s+/i, "");
+    }
+
     return `POLRESTABES SEMARANG
 POLSEK TEMBALANG
 =======================
@@ -315,7 +320,7 @@ Kepada Yth.
 Dari :
 *KAPOLSEK TEMBALANG*
 
-Perihal : *${reportData.perihal || ""}*
+Perihal : *${perihal}*
 
 Dilaporkan dengan hormat kepada Ka bahwa :
 
