@@ -98,7 +98,7 @@ try {
   // 9. Replace Rekomendasi block
   const pRekomendasiStart = findParagraphBounds(docXml, 'Percepatan pengungkapan kasus dan pendalaman saksi.');
   const pSignoffDate = findParagraphBounds(docXml, 'UNITINTELKAM'); 
-  const pSemarangDateStart = findParagraphStart(docXml, pSignoffDate.start);
+  const pSemarangDateStart = findParagraphStart(docXml, pSignoffDate.start - 1);
 
   const rekomendasiReplacement = `<w:p><w:pPr><w:jc w:val="both"/><w:rPr><w:rFonts w:ascii="Arial" w:cs="Arial" w:eastAsia="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:cs="Arial" w:eastAsia="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t>{{rekomendasi}}</w:t></w:r></w:p>`;
   docXml = docXml.substring(0, pRekomendasiStart.start) + rekomendasiReplacement + docXml.substring(pSemarangDateStart);

@@ -142,11 +142,11 @@ Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berik
   "perihal": "Informasi kejadian/kegiatan secara KAPITAL PENUH and sangat deskriptif dimulai dengan kata 'INFORMASI KEGIATAN...' (sesuaikan dengan kegiatan nyata di masukan pengguna)",
   "cara-mendapatkan-informasi": "Bagaimana data/informasi didapatkan (misal: Observasi lapangan dan koordinasi dengan pihak panitia., Monitoring dan wawancara., dsb.)",
   "waktu-mendapatkan-informasi": "Hari dan tanggal mendapatkan informasi (misal: Sabtu tanggal 16 Mei 2026 atau sesuai dokumen masukan)",
-  "isi_laporan": "Teks rincian fakta lapangan yang SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF. Anda WAJIB membaginya ke dalam poin-poin terstruktur menggunakan urutan alfabet kapital (A., B., C., D., E., F., dst.). Jangan pernah terpatok hanya pada poin A sampai D saja; jika pembahasan dari masukan data bersifat panjang, kompleks, atau membutuhkan penjelasan multi-dimensi, silakan eksekusi poin-poin selanjutnya (seperti E., F., G., dst.) secara dinamis sesuai kebutuhan. Judul atau fokus dari masing-masing poin alfabet ini bersifat dinamis (menyesuaikan dengan jenis kegiatan/peristiwa yang dilaporkan, misalnya: A. Fakta-fakta Pelaksanaan Kegiatan, B. Rincian Susunan Acara/Rundown secara Detail, C. Aspek Keamanan dan Pengamanan, D. Informasi Tambahan/Lain-lain). Setiap poin wajib dijabarkan dengan deskripsi/narasi yang sangat mendalam dan tidak boleh disingkat-singkat. Pisahkan antar poin menggunakan baris baru ganda (\\n\\n). Gunakan bahasa dinas intelkam resmi kepolisian yang baku dan berwibawa, namun kemaslah diksi tersebut secara luwes, variatif, mengalir alami, dan tidak kaku (jangan monoton atau seperti tulisan robot/template mati).",
-  "analisa": "Paragraf pendapat pelapor berupa analisa menyeluruh terhadap kerawanan kegiatan (potensi kerawanan, gesekan, kesiapan pengamanan, dll.)",
-  "prediksi": "Poin-poin prediksi kerawanan ke depan (gunakan format poin-poin bernomor atau deskriptif, pisahkan dengan \\n)",
-  "langkah": "Langkah-langkah taktis antisipasi/penanganan oleh kepolisian (gunakan format poin-poin bernomor atau deskriptif, pisahkan dengan \\n)",
-  "rekomendasi": "Rekomendasi kebijakan jangka panjang atau koordinasi berkelanjutan (gunakan format paragraf atau poin, pisahkan dengan \\n)",
+  "isi_laporan": "Teks rincian fakta lapangan yang SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF. Anda WAJIB membaginya ke dalam poin-poin terstruktur menggunakan urutan alfabet kapital (A., B., C., D., E., F., dst.). Pisahkan setiap poin utama alfabet (seperti A., B., C., D., dst.) dengan baris baru ganda (\\n\\n). Jika isi poin tersebut HANYA terdiri dari 1 paragraf penjelasan/fakta, Anda DILARANG KERAS memberi judul/label/topik di awal poin (contoh: tulis langsung 'A. Pada hari Senin tanggal...', dan JANGAN PERNAH menulis seperti 'A. Penemuan Korban: Pada hari...' atau 'A. Waktu Kejadian \\n Pada hari...'). Jika poin tersebut memperkenalkan daftar (saksi, rundown/kronologi, hasil otopsi/pemeriksaan, dsb.), tulis kalimat pengantar setelah huruf alfabet (contoh: 'D. Saksi dalam kejadian tersebut antara lain sebagai berikut :'), lalu cantumkan item-itemnya sebagai sub-poin angka (1., 2., 3., dst.) pada baris baru di bawahnya. Untuk seluruh sub-poin (saksi-saksi, kronologi kejadian, hasil pemeriksaan awal, otopsi, dsb.), Anda WAJIB memisahkan kalimat pengantar, sub-poin pertama, dan antar sub-poin berikutnya hanya dengan baris baru tunggal (\\n) agar tidak terlalu renggang. Setiap paragraf penjelasan harus ringkas, padat informasi, formal, dan tidak terlalu panjang (jangan monoton atau seperti tulisan robot/template mati). Gunakan bahasa dinas intelkam resmi kepolisian yang baku dan berwibawa.",
+  "analisa": "Uraian analisa/analisis menyeluruh terhadap kerawanan kegiatan (potensi kerawanan, gesekan, kesiapan pengamanan, dll.) yang wajib dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
+  "prediksi": "Poin-poin prediksi kerawanan ke depan yang wajib dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
+  "langkah": "Langkah-langkah taktis antisipasi/penanganan oleh kepolisian yang wajib dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
+  "rekomendasi": "Rekomendasi kebijakan jangka panjang atau koordinasi berkelanjutan yang wajib dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
   "tanggal": "Tanggal pembuatan laporan (misal: 16 Mei 2026 atau disesuaikan)"
 }
 
@@ -205,11 +205,11 @@ Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berik
   "tanggal": "Tanggal pembuatan laporan (e.g. 1 Juni 2026 atau sesuai dokumen masukan)",
   "bidang": "Kategori bidang laporan (Kapital penuh, misal: POLITIK, SOSBUD, KEAMANAN)",
   "perihal": "Informasi kejadian/kegiatan secara Title Case/normal deskriptif dan diakhiri dengan tanda titik (e.g. Kegiatan Hari Lahir (Harlah) Ke-5 Partai Rakyat Adil Makmur (PRIMA) di Hotel Candi Indah Convention Kota Semarang.)",
-  "isi_laporan": "Teks rincian fakta lapangan yang SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF. Anda WAJIB membaginya ke dalam poin-poin terstruktur menggunakan urutan alfabet kapital (A., B., C., D., E., F., dst.). Setiap poin wajib dijabarkan dengan deskripsi/narasi yang sangat mendalam dan tidak boleh disingkat-singkat. Pisahkan antar poin menggunakan baris baru ganda (\\n\\n). Gunakan bahasa dinas intelkam resmi kepolisian yang baku dan berwibawa, namun kemaslah diksi tersebut secara luwes, variatif, mengalir alami, dan tidak kaku (jangan monoton atau seperti tulisan robot/template mati). Tiru gaya penulisan referensi LHK (A. Deskripsi Kejadian/Acara, B. Tamu Undangan yang Hadir, C. Susunan Acara, D. Pokok-Pokok Penyampaian/Materi, E. Situasi Akhir & Waktu Selesai).",
-  "analisa": "Paragraf pendapat pelapor berupa analisa menyeluruh terhadap kerawanan kegiatan (potensi kerawanan, gesekan, kesiapan pengamanan, dll.)",
-  "prediksi": "Poin-poin prediksi kerawanan ke depan (gunakan format poin-poin deskriptif atau bernomor, pisahkan dengan \\n)",
-  "langkah": "Langkah-langkah taktis antisipasi/penanganan oleh kepolisian (gunakan format poin-poin deskriptif atau bernomor, pisahkan dengan \\n)",
-  "rekomendasi": "Rekomendasi kebijakan jangka panjang atau koordinasi berkelanjutan (gunakan format paragraf atau poin, pisahkan dengan \\n)"
+  "isi_laporan": "Teks rincian fakta lapangan yang SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF. Anda WAJIB membaginya ke dalam poin-poin terstruktur menggunakan urutan alfabet kapital (A., B., C., D., E., F., dst.). Pisahkan setiap poin utama alfabet (seperti A., B., C., D., dst.) dengan baris baru ganda (\\n\\n). Jika isi poin tersebut HANYA terdiri dari 1 paragraf penjelasan/fakta, Anda DILARANG KERAS memberi judul/label/topik di awal poin (contoh: tulis langsung 'A. Pada hari Senin tanggal...', dan JANGAN PERNAH menulis seperti 'A. Penemuan Korban: Pada hari...' atau 'A. Waktu Kejadian \\n Pada hari...'). Jika poin tersebut memperkenalkan daftar (saksi, rundown/kronologi, hasil otopsi/pemeriksaan, dsb.), tulis kalimat pengantar setelah huruf alfabet (contoh: 'D. Saksi dalam kejadian tersebut antara lain sebagai berikut :'), lalu cantumkan item-itemnya sebagai sub-poin angka (1., 2., 3., dst.) pada baris baru di bawahnya. Untuk seluruh sub-poin (saksi-saksi, kronologi kejadian, hasil pemeriksaan awal, otopsi, dsb.), Anda WAJIB memisahkan kalimat pengantar, sub-poin pertama, dan antar sub-poin berikutnya hanya dengan baris baru tunggal (\\n) agar tidak terlalu renggang. Setiap paragraf penjelasan harus ringkas, padat informasi, formal, dan tidak terlalu panjang (jangan monoton atau seperti tulisan robot/template mati). Gunakan bahasa dinas intelkam resmi kepolisian yang baku dan berwibawa.",
+  "analisa": "Pendapat pelapor berupa analisa menyeluruh terhadap kerawanan kegiatan (potensi kerawanan, gesekan, kesiapan pengamanan, dll.) yang wajib dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
+  "prediksi": "Poin-poin prediksi kerawanan ke depan yang wajib dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
+  "langkah": "Langkah-langkah taktis antisipasi/penanganan oleh kepolisian yang wajib dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
+  "rekomendasi": "Rekomendasi kebijakan jangka panjang atau koordinasi berkelanjutan yang wajib dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n."
 }
 
 GAYA BAHASA, STRUKTUR FORMAT, DAN DIKSI INTELKAM UNTUK LHK:
@@ -336,15 +336,15 @@ Harga tertinggi per Kg:  Rp. ${form.cabaiRawitMax || "95.000"},-
 
 *5) CABAI TAMPAR*
 Harga terendah per Kg: Rp. ${form.cabaiTamparMin || "35.000"},-
-Harga tertinggi per Kg:  Rp. ${form.cabaiTamparMax || "40.000"},-
+Harga tertinggi per Kg: Rp. ${form.cabaiTamparMax || "40.000"},-
 
 *6) BAWANG MERAH*
 Harga terendah per Kg: Rp. ${form.bawangMerahMin || "45.000"},-
-Harga tertinggi per Kg:  Rp. ${form.bawangMerahMax || "50.000"},-
+Harga tertinggi per Kg: Rp. ${form.bawangMerahMax || "50.000"},-
 
 *7) BAWANG PUTIH*
 Harga terendah per Kg: Rp. ${form.bawangPutihMin || "35.000"},-
-Harga tertinggi per Kg:  Rp. ${form.bawangPutihMax || "40.000"},-
+Harga tertinggi per Kg: Rp. ${form.bawangPutihMax || "40.000"},-
 
 *8) JAGUNG (Pipilan Kering)*
 Harga terendah per Kg: Rp.   ${form.jagungMin || "8.000"},-
@@ -546,8 +546,8 @@ PANDUAN EKSTRAPOLASI KREATIF & SIMULASI LOGIS (JIKA DATA MASUKAN TIDAK LENGKAP):
 - Pastikan seluruh rincian hasil simulasi logis tersebut mengalir alami, padat, berbobot, dan sangat profesional untuk sebuah laporan dinas resmi kepolisian.
 
 KARAKTER KHAS GAYA PENULISAN INFOSUS (Berbeda dari LHK dan LI):
-1. FAKTA – FAKTA: Naratif langsung tanpa sub-poin A/B/C. Ditulis mengalir, kronologis, per paragraf. Setiap kalimat sangat padat fakta (siapa, kapan, di mana, apa, bagaimana). Contoh diksi: 'Pada hari [Hari] tanggal [tanggal] pukul [jam] WIB, [subjek] mendatangi/ditemukan/dilaporkan...', kemudian 'Korban dalam kejadian tersebut yaitu...', 'Saksi dalam kejadian tersebut antara lain...', 'Kronologi kejadian tersebut adalah sebagai berikut:'.
-2. CATATAN: Bukan sub-bab A/B/C, melainkan menggunakan judul inline: Analisa, Prediksi, Langkah-langkah kepolisian, Rekomendasi.
+1. FAKTA – FAKTA: Harus menggunakan poin A, B, C, D dan sub-poin 1, 2, 3 (jika memang ada). Setiap poin/sub-poin ditulis secara terstruktur, kronologis, dengan paragraf yang ringkas dan tidak terlalu panjang (jangan monoton atau seperti tulisan robot/template mati).
+2. CATATAN: Terdiri dari Analisa, Prediksi, Langkah-langkah kepolisian, Rekomendasi yang masing-masing uraiannya wajib dikelompokkan per poin langsung dengan format penomoran (1, 2, 3, dst) tanpa kalimat pengantar/pembuka.
 3. PERIHAL: Ringkas, kapital sebagian, menggambarkan kejadian utama (misal: 'Ditemukan Orang Meninggal Dunia Di...').
 4. PERIHAL_JUDUL: Versi KAPITAL PENUH dari perihal untuk cover halaman depan (misal: 'DITEMUKAN ORANG MENINGGAL DUNIA DI...').
 
@@ -556,11 +556,11 @@ Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berik
   "tanggal": "Tanggal pembuatan laporan (misal: 30 April 2026 atau sesuai dokumen masukan)",
   "perihal_judul": "PERIHAL KEJADIAN DALAM HURUF KAPITAL PENUH UNTUK HALAMAN COVER (misal: DITEMUKAN ORANG MENINGGAL DUNIA DI EMBUNG BROWN CANYON KEL. ROWOSARI KEC. TEMBALANG KOTA SEMARANG)",
   "perihal": "Perihal kejadian dalam Title Case diakhiri tanda titik (misal: Ditemukan Orang Meninggal Dunia Di Embung Brown Canyon Kel. Rowosari Kec. Tembalang Kota Semarang.)",
-  "fakta_fakta": "Narasi kronologis SANGAT LENGKAP dan padat fakta. Ditulis mengalir per paragraf tanpa sub-poin A/B/C. Pisahkan paragraf dengan \\n\\n. Wajib mencakup: (1) Pembuka kejadian + waktu + tempat + siapa yang menemukan/melaporkan; (2) Identitas korban/subyek jika ada (nama, TTL, umur, pekerjaan, agama, alamat, NIK); (3) Identitas saksi-saksi jika ada; (4) Kronologi rinci per waktu (pukul berapa, apa yang terjadi, siapa yang hadir, apa hasilnya); (5) Hasil pemeriksaan/olah TKP jika relevan. Gunakan gaya bahasa formal-faktual intelkam yang mengalir dan tidak kaku.",
-  "analisa": "Paragraf analisa singkat namun tajam berdasarkan fakta-fakta yang dilaporkan. Berisi penilaian pelapor atas indikasi, motif, atau dampak kejadian. Pisahkan poin dengan \\n.",
-  "prediksi": "Poin-poin prediksi potensi dampak ke depan (keresahan masyarakat, viral media sosial, kepercayaan masyarakat, potensi tindak lanjut). Pisahkan poin dengan \\n.",
-  "langkah": "Langkah-langkah nyata yang sudah diambil oleh kepolisian (mendatangi TKP, mengamankan TKP, mendata korban/saksi, memeriksa saksi, memasang garis polisi, berkoordinasi dengan pihak terkait, melaporkan pimpinan). Pisahkan poin dengan \\n.",
-  "rekomendasi": "Rekomendasi tindak lanjut yang diperlukan. Ringkas, 1-3 poin. Pisahkan poin dengan \\n."
+  "fakta_fakta": "Narasi kronologis SANGAT LENGKAP dan padat fakta. Anda WAJIB membaginya ke dalam poin-poin terstruktur menggunakan urutan alfabet kapital (A., B., C., D., E., F., dst.). Pisahkan setiap poin utama alfabet (seperti A., B., C., D., dst.) dengan baris baru ganda (\\n\\n). Jika isi poin tersebut HANYA terdiri dari 1 paragraf penjelasan/fakta, Anda DILARANG KERAS memberi judul/label/topik di awal poin (contoh: tulis langsung 'A. Pada hari Senin tanggal...', dan JANGAN PERNAH menulis seperti 'A. Penemuan Korban: Pada hari...' atau 'A. Waktu Kejadian \\n Pada hari...'). Jika poin tersebut memperkenalkan daftar (saksi, rundown/kronologi, hasil otopsi/pemeriksaan, dsb.), tulis kalimat pengantar setelah huruf alfabet (contoh: 'D. Saksi dalam kejadian tersebut antara lain sebagai berikut :'), lalu cantumkan item-itemnya sebagai sub-poin angka (1., 2., 3., dst.) pada baris baru di bawahnya. Untuk seluruh sub-poin (saksi-saksi, kronologi kejadian, hasil pemeriksaan awal, otopsi, dsb.), Anda WAJIB memisahkan kalimat pengantar, sub-poin pertama, dan antar sub-poin berikutnya hanya dengan baris baru tunggal (\\n) agar tidak terlalu renggang. Setiap paragraf penjelasan harus ringkas, padat informasi, formal, dan tidak terlalu panjang (jangan monoton atau seperti tulisan robot/template mati). Gunakan gaya bahasa formal-faktual intelkam yang baku dan berwibawa.",
+  "analisa": "Uraian analisa singkat namun tajam berdasarkan fakta-fakta yang dilaporkan, dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
+  "prediksi": "Poin-poin prediksi potensi dampak ke depan (keresahan masyarakat, viral media sosial, kepercayaan masyarakat, potensi tindak lanjut) yang dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
+  "langkah": "Langkah-langkah nyata yang sudah diambil oleh kepolisian (mendatangi TKP, mengamankan TKP, mendata korban/saksi, memeriksa saksi, memasang garis polisi, berkoordinasi dengan pihak terkait, melaporkan pimpinan) yang dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n.",
+  "rekomendasi": "Rekomendasi tindak lanjut yang diperlukan (ringkas, 1-3 poin) yang dikelompokkan per poin langsung dengan format penomoran (1., 2., 3., dst.) tanpa kalimat pengantar/pembuka. Pisahkan poin dengan \\n."
 }
 
 PENTING - ATURAN FORMAT JSON (Wajib Dipatuhi Agar Tidak Error):

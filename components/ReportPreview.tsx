@@ -573,7 +573,7 @@ Tembusan:
                       {templateType === "laporan-harian-khusus" ? "Analisis" : templateType === "infosus" ? "Analisa" : "A. Analisa"}
                     </span>
                   </div>
-                  <p className="pl-4" style={{ textIndent: "0.25in" }}>{reportData.analisa}</p>
+                  <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.analisa}</div>
                 </div>
 
                 <div className="space-y-1">
@@ -600,7 +600,7 @@ Tembusan:
                       {templateType === "laporan-harian-khusus" ? "Rekomendasi" : templateType === "infosus" ? "Rekomendasi :" : "D. Rekomendasi"}
                     </span>
                   </div>
-                  <p className="pl-4" style={{ textIndent: "0.25in" }}>{reportData.rekomendasi}</p>
+                  <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.rekomendasi}</div>
                 </div>
               </div>
             </div>
