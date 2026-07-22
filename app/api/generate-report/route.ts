@@ -658,6 +658,7 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
           ],
           response_format: { type: "json_object" },
           temperature: 0.3,
+          max_tokens: 8192,
         });
         break; // Success! Break out of loop
       } catch (err: any) {
