@@ -546,11 +546,12 @@ Tembusan:
   };
 
   // Custom states for Laporan Harian structured form input
-  const [formTab, setFormTab] = useState<"umum" | "ekonomi" | "patroli" | "rencana">("umum");
+  const [formTab, setFormTab] = useState<"umum" | "politik" | "ekonomi" | "sosbud" | "patroli" | "rencana">("umum");
   const [laporanHarianForm, setLaporanHarianForm] = useState({
     hari: "",
     tanggal: "",
     waktu: "08.00 s.d. 08.00 WIB",
+    politik: "Tidak ada hal yang dapat dilaporkan.",
     berasMin: "15.000", berasMax: "17.000",
     kedelaiMin: "9.000", kedelaiMax: "13.000",
     cabaiBesarMin: "40.000", cabaiBesarMax: "45.000",
@@ -567,6 +568,7 @@ Tembusan:
     telurMin: "29.000", telurMax: "31.000",
     garamMin: "2.500", garamMax: "3.500",
     lpgMin: "18.000", lpgMax: "23.000",
+    sosbud: "Tidak ada hal yang dapat dilaporkan.",
     kriminalitas: "Tidak ada hal yang dapat dilaporkan.",
     lakaLantas: "Tidak ada hal yang dapat dilaporkan.",
     tahananL: "0",
@@ -663,24 +665,30 @@ Tembusan:
   // AI autofill states & function
   const [showAutofillPanel, setShowAutofillPanel] = useState<Record<string, boolean>>({
     umum: false,
+    politik: false,
     ekonomi: false,
+    sosbud: false,
     patroli: false,
     rencana: false,
   });
   const [autofillSelectedInputs, setAutofillSelectedInputs] = useState<Record<string, ("text" | "image" | "audio")[]>>({
     umum: ["text"],
+    politik: ["text"],
     ekonomi: ["image"],
+    sosbud: ["text"],
     patroli: ["audio"],
     rencana: ["text"],
   });
   const [isAutofilling, setIsAutofilling] = useState<Record<string, boolean>>({
     umum: false,
+    politik: false,
     ekonomi: false,
+    sosbud: false,
     patroli: false,
     rencana: false,
   });
 
-  const handleAutofillLaporanHarian = async (scope: "umum" | "ekonomi" | "patroli" | "rencana") => {
+  const handleAutofillLaporanHarian = async (scope: "umum" | "politik" | "ekonomi" | "sosbud" | "patroli" | "rencana") => {
     setIsAutofilling((prev) => ({ ...prev, [scope]: true }));
     try {
       let finalTranscript = "";
@@ -761,7 +769,7 @@ Tembusan:
     }
   };
 
-  const renderAutofillPanel = (scope: "umum" | "ekonomi" | "patroli" | "rencana", title: string) => {
+  const renderAutofillPanel = (scope: "umum" | "politik" | "ekonomi" | "sosbud" | "patroli" | "rencana", title: string) => {
     const isOpen = showAutofillPanel[scope];
     const selected = autofillSelectedInputs[scope];
     const loading = isAutofilling[scope];
@@ -1344,7 +1352,9 @@ Tembusan:
                   <div className="flex border-b border-neutral-200 dark:border-neutral-800 overflow-x-auto whitespace-nowrap">
                     {[
                       { id: "umum", label: "Umum & Tahanan" },
+                      { id: "politik", label: "Politik" },
                       { id: "ekonomi", label: "Ekonomi (Harga)" },
+                      { id: "sosbud", label: "Sosial Budaya" },
                       { id: "patroli", label: "Patroli BLP" },
                       { id: "rencana", label: "Rencana Esok" },
                     ].map((tab) => (
@@ -1463,6 +1473,24 @@ Tembusan:
                       </div>
                     )}
 
+                    {formTab === "politik" && (
+                      <div className="space-y-4">
+                        {renderAutofillPanel("politik", "Politik")}
+                        <div>
+                          <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                            Peristiwa & Perkembangan Politik
+                          </label>
+                          <textarea
+                            rows={6}
+                            value={laporanHarianForm.politik}
+                            onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, politik: e.target.value })}
+                            className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                            placeholder="Tulis perkembangan politik atau biarkan terisi otomatis oleh AI..."
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     {formTab === "ekonomi" && (
                       <div className="space-y-4">
                         {renderAutofillPanel("ekonomi", "Harga Sembako")}
@@ -1512,6 +1540,24 @@ Tembusan:
                               </div>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {formTab === "sosbud" && (
+                      <div className="space-y-4">
+                        {renderAutofillPanel("sosbud", "Sosial Budaya")}
+                        <div>
+                          <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                            Kegiatan Sosial Budaya
+                          </label>
+                          <textarea
+                            rows={6}
+                            value={laporanHarianForm.sosbud}
+                            onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, sosbud: e.target.value })}
+                            className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                            placeholder="Tulis kegiatan keagamaan, kemasyarakatan, aksi sosial, kuliah umum, dll. atau biarkan terisi otomatis oleh AI..."
+                          />
                         </div>
                       </div>
                     )}

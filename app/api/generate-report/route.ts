@@ -391,7 +391,7 @@ Waktu     : ${form.waktu || "08.00 s.d. 08.00 WIB"}
 *I. SITUASI / KEGIATAN:*
 
 *A. Politik:*
-[ISI_POLITIK]
+${form.politik || "Tidak ada hal yang dapat dilaporkan."}
 
 ---
 
@@ -468,7 +468,7 @@ Harga tertinggi: Rp. ${form.lpgMax || "23.000"},- (pengecer)
 ---
 
 *C. Sosial Budaya:*
-[KEGIATAN_SOSBUD]
+${form.sosbud || "Tidak ada hal yang dapat dilaporkan."}
 
 ---
 
@@ -766,6 +766,16 @@ PENTING - ATURAN FORMAT JSON:
   "garamMin": "...", "garamMax": "...",
   "lpgMin": "...", "lpgMax": "..."
 }`;
+      } else if (scope === "politik") {
+        scopeInstructions = `Fokus HANYA pada informasi politik di wilayah hukum Polsek Tembalang. Ekstrak data untuk bidang politik (politik). Jika tidak ada informasi politik sama sekali, gunakan default 'Tidak ada hal yang dapat dilaporkan'.`;
+        jsonSchema = `{
+  "politik": "..."
+}`;
+      } else if (scope === "sosbud") {
+        scopeInstructions = `Fokus HANYA pada informasi kegiatan Sosial Budaya (keagamaan, kemasyarakatan, aksi sosial, kuliah umum, dll.) di wilayah hukum Polsek Tembalang. Ekstrak deskripsi kejadian secara detail, panjang, dan komprehensif, tiru gaya bahasa referensi resmi kepolisian (misal: 'Kegiatan Kuliah umum... Pada hari... pukul... bertempat di... telah berlangsung... Rundown:... Dihadiri oleh:... Substansi:... Pengamanan...'). Jika tidak ada informasi sosial budaya sama sekali, gunakan default 'Tidak ada hal yang dapat dilaporkan'.`;
+        jsonSchema = `{
+  "sosbud": "..."
+}`;
       } else if (scope === "patroli") {
         scopeInstructions = `Fokus HANYA pada kegiatan patroli (Siang & Malam). Ekstrak waktu, cuaca, personil, sasaran, rute, dan hasil patroli.`;
         jsonSchema = `{
@@ -781,6 +791,7 @@ PENTING - ATURAN FORMAT JSON:
         scopeInstructions = `Ekstrak seluruh informasi laporan harian secara lengkap.`;
         jsonSchema = `{
   "hari": "...", "tanggal": "...", "waktu": "...",
+  "politik": "...", "sosbud": "...",
   "berasMin": "...", "berasMax": "...",
   "kedelaiMin": "...", "kedelaiMax": "...",
   "cabaiBesarMin": "...", "cabaiBesarMax": "...",
