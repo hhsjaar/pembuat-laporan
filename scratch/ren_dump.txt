@@ -1,0 +1,20 @@
+[P] POLRI DAERAH JAWA TENGAH
+[P] RESOR KOTA BESAR SEMARANG
+[P] SEKTOR TEMBALANG
+[EMPTY P]
+[EMPTY P]
+[P] RENCANA  KEGIATAN  ANGGOTA  UNIT  INTELKAM  
+[P] HARI / TANGGAL : KAMIS, 16 JULI 2026
+[EMPTY P]
+[TABLE START]
+  [ROW] NO | WAKTU / LOKASI | KEGIATAN | HASIL YANG INGIN DICAPAI | KET
+  [ROW] 1. | Pukul 07.00 WIB s.d. selesai di wilayah hukum Polsek Tembalang. | Pam dan monitoring giat masyarakat | Situasi kamtibmas aman terkendali berikut kejadian menonjol nihil | 
+  [ROW] 2. | Pukul 08.00 WIB s.d. selesai di wilayah hukum Polsek Tembalang. | Melaksanakan KKRYD 2026 | Situasi kamtibmas aman terkendali berikut kejadian menonjol nihil | 
+[TABLE END]
+[EMPTY P]
+[P] Semarang, 15 Juli 2026
+[P] BA SIAGA INTELKAM
+[EMPTY P]
+[EMPTY P]
+[P] YUDHA M.P.
+[P] AIPDA NRP 86040324

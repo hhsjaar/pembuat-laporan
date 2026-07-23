@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders, FileSpreadsheet } from "lucide-react";
+import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders, FileSpreadsheet, Zap } from "lucide-react";
 import TemplateSelector, { TemplateType } from "./TemplateSelector";
 import ImageUploader from "./ImageUploader";
 import AudioUploader from "./AudioUploader";
@@ -157,7 +157,7 @@ export default function Dashboard() {
 
   const handleDownloadHistoryDocx = async (item: any) => {
     const rawReport = item.meta_data?.raw_report;
-    if ((item.template_type !== "laporan-informasi" && item.template_type !== "laporan-harian-khusus" && item.template_type !== "infosus") || !rawReport) {
+    if ((item.template_type !== "laporan-informasi" && item.template_type !== "laporan-harian-khusus" && item.template_type !== "infosus" && item.template_type !== "laporan-harian-intelijen" && item.template_type !== "rencana-kegiatan") || !rawReport) {
       handleDownloadHistoryTxt(item);
       return;
     }
@@ -231,6 +231,12 @@ export default function Dashboard() {
       } else if (type === "laporan-harian") {
         title = report.perihal || "LAPORAN HARIAN SITUASI KAMTIBMAS";
         body = report.isi_laporan || "";
+      } else if (type === "laporan-harian-intelijen") {
+        title = report.perihal || "LAPORAN HARIAN INTELIJEN";
+        body = report.fakta_sosial_budaya || "";
+      } else if (type === "rencana-kegiatan") {
+        title = `RENCANA KEGIATAN INTELKAM - ${report.hari_tanggal || ""}`;
+        body = (report.kegiatan_list || []).map((k: any) => `${k.no} ${k.waktu_lokasi} - Giat: ${k.kegiatan} - Hasil: ${k.hasil}`).join("\n");
       } else {
         title = report.judul || "LAPORAN RESMI";
         body = report.isi_laporan || "";
@@ -405,6 +411,90 @@ Authentikasi :.......................
 Distribusi :
 1. Kapolsek Tembalang.
 2. Kasatintelkam Polrestabes Semarang.`;
+      } else if (type === "laporan-harian-intelijen") {
+        formattedContent = `POLRI DAERAH JAWA TENGAH
+RESOR KOTA BESAR SEMARANG
+POLSEK TEMMBALANG
+Jl. Turus Asri No. 9 Tembalang Semarang
+=======================================
+Nomor: ${report.nomor_laporan || ""}
+
+LAPORAN HARIAN INTELIJEN
+Hari ${report.hari || ""}, tanggal ${report.tanggal || ""}
+
+I. PENDAHULUAN
+   A. Bidang Politik:
+      ${report.pendahuluan_politik || ""}
+   B. Bidang Sosial Budaya:
+      ${report.pendahuluan_sosbud || ""}
+   C. Bidang Ekonomi:
+      ${report.pendahuluan_ekonomi || ""}
+   D. Bidang Keamanan:
+      ${report.pendahuluan_keamanan || ""}
+
+II. FAKTA-FAKTA
+   A. Aspek Sosial
+      1. Sosial Politik:
+         ${report.fakta_sosial_politik || ""}
+      2. Sosial Ekonomi:
+         ${report.fakta_sosial_ekonomi_intro || ""}
+         [Tabel Harga Bahan Makanan]
+         - Beras Medium: ${report.beras_hari_ini || "Rp. 12.600/Kg"} (Selisih: ${report.beras_selisih || "-"})
+         - Kedelai: ${report.kedelai_hari_ini || "Rp. 12.600/Kg"} (Selisih: ${report.kedelai_selisih || "-"})
+         - Cabai Merah Besar: ${report.cabai_merah_hari_ini || "Rp. 41.500/Kg"} (Selisih: ${report.cabai_merah_selisih || "-"})
+         - Rawit Merah: ${report.cabai_rawit_hari_ini || "Rp. 53.500/Kg"} (Selisih: ${report.cabai_rawit_selisih || "-"})
+         - Cabai Tampar: ${report.cabai_tampar_hari_ini || "Rp. 39.500/Kg"} (Selisih: ${report.cabai_tampar_selisih || "-"})
+         - Bawang Merah: ${report.bawang_merah_hari_ini || "Rp. 42.200/Kg"} (Selisih: ${report.bawang_merah_selisih || "-"})
+         - Bawang Putih: ${report.bawang_putih_hari_ini || "Rp. 35.800/Kg"} (Selisih: ${report.bawang_putih_selisih || "-"})
+         - Jagung: ${report.jagung_hari_ini || "Rp. 8.200/Kg"} (Selisih: ${report.jagung_selisih || "-"})
+         - Gula Pasir: ${report.gula_hari_ini || "Rp. 17.800/Kg"} (Selisih: ${report.gula_selisih || "-"})
+         - Minyak Goreng: ${report.minyak_hari_ini || "Rp. 15.900/Liter"} (Selisih: ${report.minyak_selisih || "-"})
+         - Tepung Terigu: ${report.terigu_hari_ini || "Rp. 12.200/Kg"} (Selisih: ${report.terigu_selisih || "-"})
+         - Daging Sapi Lokal: ${report.daging_sapi_hari_ini || "Rp. 130.300/Kg"} (Selisih: ${report.daging_sapi_selisih || "-"})
+         - Daging Ayam Ras: ${report.daging_ayam_hari_ini || "Rp. 36.800/Kg"} (Selisih: ${report.daging_ayam_selisih || "-"})
+         - Telur Ayam Ras: ${report.telur_hari_ini || "Rp. 29.300/Kg"} (Selisih: ${report.telur_selisih || "-"})
+         - Garam: ${report.garam_hari_ini || "Rp. 2.500 (250g)"} (Selisih: ${report.garam_selisih || "-"})
+         - Gas LPG 3 Kg: ${report.lpg_hari_ini || "Rp. 22.000/Kg"} (Selisih: ${report.lpg_selisih || "-"})
+      3. Sosial Budaya:
+         ${report.fakta_sosial_budaya || ""}
+   B. Aspek Keamanan
+      1. Keamanan Umum:
+         a. Kriminalitas:
+            ${report.kriminalitas_text || ""}
+         b. Laka Lantas:
+            ${report.laka_lantas_text || ""}
+      2. Keamanan Khusus:
+         ${report.tahanan_text || ""}
+      3. Bencana Alam:
+         ${report.bencana_alam_text || ""}
+      4. Lain-lain:
+         ${report.lain_lain_text || ""}
+
+Semarang, ${report.tanggal_ttd || ""}
+LHI UNIT INTELKAM
+
+Autentikasi:
+Kanit Intelkam Polsek Tembalang
+
+Distribusi:
+1. Sat Intelkam Polrestabes Semarang
+2. Kapolsek Tembalang`;
+      } else if (type === "rencana-kegiatan") {
+        formattedContent = `POLRI DAERAH JAWA TENGAH
+RESOR KOTA BESAR SEMARANG
+SEKTOR TEMBALANG
+===================================
+RENCANA KEGIATAN ANGGOTA UNIT INTELKAM
+HARI / TANGGAL : ${report.hari_tanggal || ""}
+
+RENCANA KEGIATAN:
+${(report.kegiatan_list || []).map((k: any) => `${k.no} Waktu/Lokasi: ${k.waktu_lokasi}\n   Kegiatan: ${k.kegiatan}\n   Hasil: ${k.hasil}\n   Ket: ${k.ket || "-"}`).join("\n\n")}
+
+Semarang, ${report.tanggal_ttd || ""}
+${report.jabatan_ttd || "BA SIAGA INTELKAM"}
+
+${report.nama_ttd || "YUDHA M.P."}
+${report.pangkat_nrp_ttd || "AIPDA NRP 86040324"}`;
       } else if (type !== "laporan-harian") {
         formattedContent = `POLRESTABES SEMARANG
 POLSEK TEMBALANG
@@ -568,6 +658,260 @@ Tembusan:
 
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // AI autofill states & function
+  const [showAutofillPanel, setShowAutofillPanel] = useState<Record<string, boolean>>({
+    umum: false,
+    ekonomi: false,
+    patroli: false,
+    rencana: false,
+  });
+  const [autofillSelectedInputs, setAutofillSelectedInputs] = useState<Record<string, ("text" | "image" | "audio")[]>>({
+    umum: ["text"],
+    ekonomi: ["image"],
+    patroli: ["audio"],
+    rencana: ["text"],
+  });
+  const [isAutofilling, setIsAutofilling] = useState<Record<string, boolean>>({
+    umum: false,
+    ekonomi: false,
+    patroli: false,
+    rencana: false,
+  });
+
+  const handleAutofillLaporanHarian = async (scope: "umum" | "ekonomi" | "patroli" | "rencana") => {
+    setIsAutofilling((prev) => ({ ...prev, [scope]: true }));
+    try {
+      let finalTranscript = "";
+      let finalImageAnalysis = "";
+      const selected = autofillSelectedInputs[scope];
+
+      // 1. If audio is selected and there's an audio file, transcribe it
+      if (selected.includes("audio") && audioFile) {
+        addToast("Mentranskripsikan rekaman suara...", "info");
+        const audioFormData = new FormData();
+        audioFormData.append("file", audioFile);
+
+        const transcribeRes = await fetch("/api/transcribe", {
+          method: "POST",
+          body: audioFormData,
+        });
+
+        if (!transcribeRes.ok) {
+          throw new Error("Gagal mentranskripsikan berkas audio.");
+        }
+        const transcribeData = await transcribeRes.json();
+        finalTranscript = transcribeData.text || "";
+      }
+
+      // 2. If image is selected and there are images, analyze them
+      if (selected.includes("image") && images.length > 0) {
+        addToast("Menganalisis gambar/foto...", "info");
+        const imageFormData = new FormData();
+        images.forEach((img) => {
+          imageFormData.append("images", img);
+        });
+
+        const imageRes = await fetch("/api/analyze-image", {
+          method: "POST",
+          body: imageFormData,
+        });
+
+        if (!imageRes.ok) {
+          throw new Error("Gagal menganalisis gambar.");
+        }
+        const imageData = await imageRes.json();
+        finalImageAnalysis = imageData.analysis || "";
+      }
+
+      // 3. Request form fields generation/mapping via AI
+      addToast("Mengisi formulir secara otomatis menggunakan AI...", "info");
+      const generateRes = await fetch("/api/generate-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transcript: finalTranscript,
+          imageAnalysis: finalImageAnalysis,
+          userInput: selected.includes("text") ? userInput : "",
+          templateType: "laporan-harian-autofill",
+          scope
+        }),
+      });
+
+      if (!generateRes.ok) {
+        const errText = await generateRes.text();
+        throw new Error(`AI Gagal mengisi form: ${errText}`);
+      }
+
+      const autofillData = await generateRes.json();
+      
+      // 4. Update the form values!
+      setLaporanHarianForm((prev) => ({
+        ...prev,
+        ...autofillData
+      }));
+
+      addToast("Formulir Laporan Harian Situasi berhasil terisi otomatis!", "success");
+    } catch (err: any) {
+      console.error("Autofill Error:", err);
+      addToast(err.message || "Gagal mengisi formulir secara otomatis.", "error");
+    } finally {
+      setIsAutofilling((prev) => ({ ...prev, [scope]: false }));
+    }
+  };
+
+  const renderAutofillPanel = (scope: "umum" | "ekonomi" | "patroli" | "rencana", title: string) => {
+    const isOpen = showAutofillPanel[scope];
+    const selected = autofillSelectedInputs[scope];
+    const loading = isAutofilling[scope];
+
+    const toggleInput = (type: "text" | "image" | "audio") => {
+      setAutofillSelectedInputs((prev) => {
+        const current = prev[scope];
+        const updated = current.includes(type)
+          ? current.filter((t) => t !== type)
+          : [...current, type];
+        return { ...prev, [scope]: updated };
+      });
+    };
+
+    return (
+      <div className="border border-purple-500/20 rounded-2xl p-4 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 dark:from-purple-950/10 dark:to-indigo-950/10 space-y-4 mb-4">
+        <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowAutofillPanel(prev => ({ ...prev, [scope]: !isOpen }))}>
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+              <Zap className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs md:text-sm font-bold text-neutral-900 dark:text-white">
+                🤖 Isi {title} dengan AI
+              </h4>
+              <p className="text-[10px] md:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                Gunakan asisten AI untuk memproses suara, gambar, atau catatan lalu mengisi kolom {title} otomatis.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 text-xs font-bold"
+          >
+            {isOpen ? "Sembunyikan ↑" : "Tampilkan ↓"}
+          </button>
+        </div>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden space-y-4 pt-3 border-t border-neutral-200/50 dark:border-neutral-800/40"
+            >
+              {/* Input Type Selector Toggles */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider block">
+                  Pilih Media Input (Bisa Pilih Lebih Dari Satu):
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { type: "text" as const, label: "📝 Catatan Teks" },
+                    { type: "image" as const, label: "📷 Unggah Foto" },
+                    { type: "audio" as const, label: "🎙️ Rekaman Suara" }
+                  ].map((opt) => {
+                    const isSelected = selected.includes(opt.type);
+                    return (
+                      <button
+                        key={opt.type}
+                        type="button"
+                        onClick={() => toggleInput(opt.type)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+                          isSelected
+                            ? "bg-purple-600 border-purple-600 text-white shadow-sm"
+                            : "border-neutral-300 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Dynamic Inputs Rendering */}
+              {selected.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 border-t border-dashed border-neutral-200 dark:border-neutral-800/50 pt-3">
+                  {/* Text Input */}
+                  {selected.includes("text") && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300 block">
+                        Catatan Kejadian
+                      </label>
+                      <textarea
+                        value={userInput}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        placeholder={`Ketik instruksi/detail untuk kolom ${title}...`}
+                        className="w-full text-xs p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none min-h-[120px]"
+                      />
+                    </div>
+                  )}
+
+                  {/* Image Upload */}
+                  {selected.includes("image") && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300 block">
+                        Unggah Foto Pendukung
+                      </label>
+                      <ImageUploader
+                        images={images}
+                        onChange={setImages}
+                        onError={(msg) => addToast(msg, "error")}
+                      />
+                    </div>
+                  )}
+
+                  {/* Audio Upload */}
+                  {selected.includes("audio") && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300 block">
+                        Rekam/Unggah Suara
+                      </label>
+                      <AudioUploader
+                        audioFile={audioFile}
+                        onChange={setAudioFile}
+                        onError={(msg) => addToast(msg, "error")}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleAutofillLaporanHarian(scope)}
+                  disabled={loading || selected.length === 0}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white transition-all flex items-center justify-center gap-2 shadow-md shadow-purple-600/15 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <span className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" />
+                      AI Sedang Memproses...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-3.5 h-3.5" />
+                      Isi Kolom {title} via AI
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
   };
 
   // The sequential execution engine
@@ -995,6 +1339,7 @@ Tembusan:
                     </p>
                   </div>
 
+
                   {/* Form Tabs Navigation */}
                   <div className="flex border-b border-neutral-200 dark:border-neutral-800 overflow-x-auto whitespace-nowrap">
                     {[
@@ -1022,6 +1367,7 @@ Tembusan:
                   <div className="pt-2">
                     {formTab === "umum" && (
                       <div className="space-y-4">
+                        {renderAutofillPanel("umum", "Umum & Tahanan")}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div>
                             <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Hari</label>
@@ -1119,6 +1465,7 @@ Tembusan:
 
                     {formTab === "ekonomi" && (
                       <div className="space-y-4">
+                        {renderAutofillPanel("ekonomi", "Harga Sembako")}
                         <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase bg-purple-500/10 dark:bg-purple-500/5 px-2 py-1 rounded-md inline-block">
                           Pantauan Harga Pasar Tradisional Kedungmundu & Meteseh
                         </p>
@@ -1170,7 +1517,9 @@ Tembusan:
                     )}
 
                     {formTab === "patroli" && (
-                      <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2">
+                      <div className="space-y-4">
+                        {renderAutofillPanel("patroli", "Patroli")}
+                        <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2">
                         {/* Patroli Siang */}
                         <div className="border border-neutral-100 dark:border-neutral-900 rounded-2xl p-4 bg-neutral-50/50 dark:bg-neutral-955/20 space-y-3">
                           <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200 block border-b border-neutral-100 dark:border-neutral-900 pb-1.5">
@@ -1297,10 +1646,13 @@ Tembusan:
                           </div>
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
 
                     {formTab === "rencana" && (
-                      <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                      <div className="space-y-4">
+                        {renderAutofillPanel("rencana", "Rencana Kegiatan")}
+                        <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Hari Rencana Esok</label>
@@ -1398,7 +1750,8 @@ Tembusan:
                           />
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
                   </div>
                 </div>
               )}

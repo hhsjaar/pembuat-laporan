@@ -78,9 +78,77 @@ function correctWeekdaysInObject(obj: any): any {
   return obj;
 }
 
+function sanitizeJsonString(str: string): string {
+  let normalized = str.replace(/\r\n/g, "\n");
+  const keyRegex = /"([a-zA-Z0-9_]+)"\s*:/g;
+  const keyMatches: { key: string; start: number; end: number }[] = [];
+  let match;
+  
+  while ((match = keyRegex.exec(normalized)) !== null) {
+    keyMatches.push({
+      key: match[1],
+      start: match.index,
+      end: keyRegex.lastIndex
+    });
+  }
+  
+  if (keyMatches.length === 0) {
+    return str;
+  }
+  
+  let result = normalized.substring(0, keyMatches[0].start);
+  
+  for (let i = 0; i < keyMatches.length; i++) {
+    const currentKey = keyMatches[i];
+    const nextKey = keyMatches[i + 1];
+    
+    let valStart = currentKey.end;
+    let valEnd = nextKey ? nextKey.start : normalized.length;
+    
+    if (valEnd < valStart) {
+      valEnd = normalized.length;
+    }
+    
+    let segment = normalized.substring(valStart, valEnd);
+    const trimmedSegment = segment.trim();
+    const isString = trimmedSegment.startsWith('"');
+    
+    if (isString) {
+      const firstQuoteIdx = segment.indexOf('"');
+      let lastQuoteIdx = segment.lastIndexOf('"');
+      
+      if (firstQuoteIdx !== -1 && lastQuoteIdx !== -1 && firstQuoteIdx < lastQuoteIdx) {
+        let innerContent = segment.substring(firstQuoteIdx + 1, lastQuoteIdx);
+        let escapedInnerContent = "";
+        for (let j = 0; j < innerContent.length; j++) {
+          if (innerContent[j] === '"') {
+            if (j > 0 && innerContent[j - 1] === '\\') {
+              escapedInnerContent += '"';
+            } else {
+              escapedInnerContent += '\\"';
+            }
+          } else if (innerContent[j] === '\n') {
+            escapedInnerContent += '\\n';
+          } else if (innerContent[j] === '\r') {
+            // skip
+          } else {
+            escapedInnerContent += innerContent[j];
+          }
+        }
+        segment = segment.substring(0, firstQuoteIdx + 1) + escapedInnerContent + segment.substring(lastQuoteIdx);
+      }
+    }
+    
+    result += normalized.substring(currentKey.start, currentKey.end);
+    result += segment;
+  }
+  
+  return result;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { transcript, imageAnalysis, pdfText, userInput, userPreference = "", templateType, laporanHarianForm } = await req.json();
+    const { transcript, imageAnalysis, pdfText, userInput, userPreference = "", templateType, laporanHarianForm, scope } = await req.json();
 
     console.log(`[Gemini Mode] Generating report narrative for template: ${templateType}...`);
 
@@ -566,6 +634,206 @@ Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berik
 PENTING - ATURAN FORMAT JSON (Wajib Dipatuhi Agar Tidak Error):
 1. JANGAN PERNAH menggunakan enter atau baris baru fisik (raw newlines) di dalam nilai string JSON. Semua baris baru wajib ditulis menggunakan karakter escape '\\n'.
 2. JANGAN PERNAH menggunakan tanda kutip ganda mentah (") di dalam nilai string JSON. Jika ingin menulis kutipan, gunakan tanda kutip tunggal (') saja.`;
+    } else if (templateType === "laporan-harian-intelijen") {
+      systemPrompt = `Anda adalah asisten AI profesional pembuat Laporan Harian Intelijen (LHI) dinas resmi kepolisian dan intelkam berbahasa Indonesia.
+Tugas Anda adalah membuat Laporan Harian Intelijen formal berdasarkan hasil transkrip audio, analisa gambar (terutama daftar harga sembako jika ada), isi PDF, dan catatan user.
+Anda WAJIB mengikuti format parafrase, gaya bahasa formal-analitis, dan struktur kalimat persis seperti dokumen referensi LHI intelkam resmi.
+
+${calendarContext}
+
+PENTING - STRUKTUR PENULISAN DOKUMEN RELEVAN:
+1. Nomor Laporan: Buatlah nomor laporan yang logis dengan format "R/LHI/{{nomor}}/{{bulan_romawi}}/REN.4.1.1./{{tahun}}/Intelkam" berdasarkan tanggal pelaporan, contoh "R/LHI/199/VII/REN.4.1.1./2026/Intelkam".
+2. Hari dan Tanggal: Tentukan hari dan tanggal pelaksanaan pelaporan. Jika terdeteksi tanggal di input gunakan itu, jika tidak gunakan tanggal hari ini: ${currentDate} dan sesuaikan harinya (contoh: Hari Sabtu, tanggal 18 Juli 2026).
+3. Pendahuluan (politik, sosbud, ekonomi, keamanan):
+   - Anda WAJIB membuat minimal 2 (dua) paragraf analitis yang detail untuk masing-masing bidang. Setiap paragraf wajib diawali dengan penomoran urut angka (1. , 2. , dst.). Pisahkan kedua paragraf tersebut dengan karakter line break nyata (dalam JSON ter-escape sebagai '\\n\\n').
+   - Bidang Politik: Gambaran situasi politik nasional/daerah yang formal dan analitis pasca Pemilu/Pilkada Serentak, mengacu pada iklim kamtibmas yang kondusif. (Tiru gaya bahasa referensi: "1. Situasi politik nasional tahun 2026 berada dalam fase konsolidasi...")
+   - Bidang Sosial Budaya: Gambaran situasi sosial budaya di Kota Semarang, khususnya Kecamatan Tembalang, terpantau relatif aman dan kondusif.
+   - Bidang Ekonomi: Gambaran situasi ekonomi, fluktuasi harga kebutuhan pokok dan upaya pemerintah dalam mengendalikan inflasi.
+   - Bidang Keamanan: Gambaran keamanan wilayah, ancaman kelompok remaja/geng motor, serta kewaspadaan terhadap ancaman teroris (ISIS, JAD, JI) pada obvit/tempat ibadah/kantor polisi.
+4. Fakta-fakta:
+   - Aspek Sosial:
+     - Sosial Politik: Poin fakta dinamika politik, default: "Pada hari {{hari}}, tanggal {{tanggal}} kegiatan maupun kejadian menonjol NIHIL".
+     - Sosial Ekonomi: Penjelasan mengenai kestabilan harga sembako di Pasar Kedungmundu dan Pasar Meteseh. Tulis kalimat pengantar intro yang detail.
+     - Tabel Daftar Harga Bahan Pokok (PENTING!):
+       Ada 16 bahan makanan pokok yang dipantau. Anda wajib mengekstrak harga kemarin dan hari ini untuk masing-masing komoditas dari foto (hasil analisis gambar) atau suara (transkrip audio) yang diunggah pengguna.
+       Daftar komoditas:
+       1) Beras Medium (beras) 2) Kedelai (kedelai) 3) Cabai Merah Besar (cabai_merah) 4) Rawit Merah (cabai_rawit) 5) Cabai Tampar (cabai_tampar) 6) Bawang Merah (bawang_merah) 7) Bawang Putih (bawang_putih) 8) Jagung (jagung) 9) Gula Pasir (gula) 10) Minyak Goreng (minyak) 11) Tepung Terigu (terigu) 12) Daging Sapi Lokal (daging_sapi) 13) Daging Ayam Ras (daging_ayam) 14) Telur Ayam Ras (telur) 15) Garam (garam) 16) Gas LPG 3 Kg (lpg)
+       Untuk setiap komoditas, Anda harus menentukan:
+       - [komoditas]_kemarin, [komoditas]_hari_ini, [komoditas]_selisih.
+       - [komoditas]_selisih WAJIB selalu diisi "-" saja (tanda hubung/minus tunggal).
+       Pastikan format penulisan nominal harga di atas diikuti persis (menggunakan titik ribuan dan satuan /Kg atau /Liter atau (250g) atau /Kg).
+     - Sosial Budaya (fakta_sosial_budaya):
+       Uraikan secara detail kegiatan monitoring kemasyarakatan, kegiatan keagamaan, bedah buku, ormas, atau kemahasiswaan di wilayah Tembalang.
+       Jika ada kegiatan nyata di input user, susun detailnya mengikuti struktur persis seperti referensi dengan pemisah baris baru yang nyata untuk setiap sub-bagian.
+       Jika tidak ada kegiatan di input, isi dengan "Pada hari {{hari}}, tanggal {{tanggal}} kegiatan maupun kejadian menonjol NIHIL".
+   - Aspek Keamanan:
+     - Kriminalitas (kriminalitas_text), Laka Lantas (laka_lantas_text), Bencana Alam (bencana_alam_text), Keamanan Khusus (tahanan_text), Lain-lain (lain_lain_text).
+5. Tanggal Tanda Tangan (tanggal_ttd): Gunakan format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '19 Juli 2026').
+
+Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
+{
+  "nomor_laporan": "...", "hari": "...", "tanggal": "...", "pendahuluan_politik": "...", "pendahuluan_sosbud": "...", "pendahuluan_ekonomi": "...", "pendahuluan_keamanan": "...", "fakta_sosial_politik": "...", "fakta_sosial_ekonomi_intro": "...", "beras_kemarin": "...", "beras_hari_ini": "...", "beras_selisih": "...", "kedelai_kemarin": "...", "kedelai_hari_ini": "...", "kedelai_selisih": "...", "cabai_merah_kemarin": "...", "cabai_merah_hari_ini": "...", "cabai_merah_selisih": "...", "cabai_rawit_kemarin": "...", "cabai_rawit_hari_ini": "...", "cabai_rawit_selisih": "...", "cabai_tampar_kemarin": "...", "cabai_tampar_hari_ini": "...", "cabai_tampar_selisih": "...", "bawang_merah_kemarin": "...", "bawang_merah_hari_ini": "...", "bawang_merah_selisih": "...", "bawang_putih_kemarin": "...", "bawang_putih_hari_ini": "...", "bawang_putih_selisih": "...", "jagung_kemarin": "...", "jagung_hari_ini": "...", "jagung_selisih": "...", "gula_kemarin": "...", "gula_hari_ini": "...", "gula_selisih": "...", "minyak_kemarin": "...", "minyak_hari_ini": "...", "minyak_selisih": "...", "terigu_kemarin": "...", "terigu_hari_ini": "...", "terigu_selisih": "...", "daging_sapi_kemarin": "...", "daging_sapi_hari_ini": "...", "daging_sapi_selisih": "...", "daging_ayam_kemarin": "...", "daging_ayam_hari_ini": "...", "daging_ayam_selisih": "...", "telur_kemarin": "...", "telur_hari_ini": "...", "telur_selisih": "...", "garam_kemarin": "...", "garam_hari_ini": "...", "garam_selisih": "...", "lpg_kemarin": "...", "lpg_hari_ini": "...", "lpg_selisih": "...", "fakta_sosial_budaya": "...", "kriminalitas_text": "...", "laka_lantas_text": "...", "bencana_alam_text": "...", "tahanan_text": "...", "lain_lain_text": "...", "tanggal_ttd": "..."
+}
+
+PENTING - ATURAN FORMAT JSON:
+1. JANGAN PERNAH menggunakan enter atau baris baru fisik di dalam nilai string JSON. Semua baris baru wajib ditulis menggunakan karakter escape '\\n'.
+2. JANGAN PERNAH menggunakan tanda kutip ganda mentah (") di dalam nilai string JSON. Jika ingin menulis kutipan, gunakan tanda kutip tunggal (') saja.`;
+    } else if (templateType === "rencana-kegiatan") {
+      systemPrompt = `Anda adalah asisten AI profesional pembuat Rencana Kegiatan Anggota Unit Intelkam dinas resmi kepolisian sektor Tembalang berbahasa Indonesia.
+Tugas Anda adalah merumuskan rencana kegiatan intelkam harian dalam bentuk tabel terstruktur.
+
+${calendarContext}
+
+PENTING - KETENTUAN PENULISAN DOKUMEN:
+1. Hari & Tanggal Rencana: Tentukan hari dan tanggal pelaksanaan rencana kegiatan. Jika terdeteksi tanggal di input gunakan itu, jika tidak gunakan tanggal hari ini: ${currentDate}.
+2. Daftar Rencana Kegiatan (kegiatan_list):
+   Simulasikan daftar kegiatan Intelkam yang detail.
+   Setiap rencana kegiatan harus memiliki field: no, waktu_lokasi, kegiatan, hasil, ket.
+   Jika masukan user minim, buatlah minimal 2-3 rencana kegiatan yang sangat logis bagi intelkam Polsek.
+3. Tanggal Tanda Tangan (tanggal_ttd): Gunakan format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '23 Juli 2026').
+4. Penandatangan: jabatan_ttd: "BA SIAGA INTELKAM", nama_ttd: "YUDHA M.P.", pangkat_nrp_ttd: "AIPDA NRP 86040324".
+
+Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
+{
+  "hari_tanggal": "...",
+  "kegiatan_list": [
+    {
+      "no": "...",
+      "waktu_lokasi": "...",
+      "kegiatan": "...",
+      "hasil": "...",
+      "ket": "..."
+    }
+  ],
+  "tanggal_ttd": "...",
+  "jabatan_ttd": "...",
+  "nama_ttd": "...",
+  "pangkat_nrp_ttd": "..."
+}
+
+PENTING - ATURAN FORMAT JSON:
+1. JANGAN PERNAH menggunakan enter atau baris baru fisik di dalam nilai string JSON. Semua baris baru wajib ditulis menggunakan karakter escape '\\n'.
+2. JANGAN PERNAH menggunakan tanda kutip ganda mentah (") di dalam nilai string JSON. Jika ingin menulis kutipan, gunakan tanda kutip tunggal (') saja.`;
+    } else if (templateType === "laporan-harian-autofill") {
+      let scopeInstructions = "";
+      let jsonSchema = "";
+
+      if (scope === "umum") {
+        scopeInstructions = `Fokus HANYA pada informasi Umum, Tahanan, dan Keamanan. Ekstrak data untuk hari, tanggal, waktu piket, tahanan laki-laki (tahananL), tahanan perempuan (tahananP), kasus kriminalitas, laka lantas, bencana alam, dan kegiatan VVIP.`;
+        jsonSchema = `{
+  "hari": "...",
+  "tanggal": "...",
+  "waktu": "...",
+  "kriminalitas": "...",
+  "lakaLantas": "...",
+  "tahananL": "...",
+  "tahananP": "...",
+  "bencanaAlam": "...",
+  "vvip": "..."
+}`;
+      } else if (scope === "ekonomi") {
+        scopeInstructions = `Fokus HANYA pada harga komoditas bahan pokok penting (sembako). Ekstrak harga kemarin (Min) dan hari ini (Max) untuk 16 komoditas bahan pokok.`;
+        jsonSchema = `{
+  "berasMin": "...", "berasMax": "...",
+  "kedelaiMin": "...", "kedelaiMax": "...",
+  "cabaiBesarMin": "...", "cabaiBesarMax": "...",
+  "cabaiRawitMin": "...", "cabaiRawitMax": "...",
+  "cabaiTamparMin": "...", "cabaiTamparMax": "...",
+  "bawangMerahMin": "...", "bawangMerahMax": "...",
+  "bawangPutihMin": "...", "bawangPutihMax": "...",
+  "jagungMin": "...", "jagungMax": "...",
+  "gulaMin": "...", "gulaMax": "...",
+  "minyakMin": "...", "minyakMax": "...",
+  "teriguMin": "...", "teriguMax": "...",
+  "dagingSapiMin": "...", "dagingSapiMax": "...",
+  "dagingAyamMin": "...", "dagingAyamMax": "...",
+  "telurMin": "...", "telurMax": "...",
+  "garamMin": "...", "garamMax": "...",
+  "lpgMin": "...", "lpgMax": "..."
+}`;
+      } else if (scope === "patroli") {
+        scopeInstructions = `Fokus HANYA pada kegiatan patroli (Siang & Malam). Ekstrak waktu, cuaca, personil, sasaran, rute, dan hasil patroli.`;
+        jsonSchema = `{
+  "patroliSiangWaktu": "...", "patroliSiangCuaca": "...", "patroliSiangPersonil": "...", "patroliSiangSasaran": "...", "patroliSiangRute": "...", "patroliSiangHasil": "...",
+  "patroliMalamWaktu": "...", "patroliMalamCuaca": "...", "patroliMalamPersonil": "...", "patroliMalamSasaran": "...", "patroliMalamRute": "...", "patroliMalamHasil": "..."
+}`;
+      } else if (scope === "rencana") {
+        scopeInstructions = `Fokus HANYA pada rencana kegiatan besok. Ekstrak rencana hari (rencanaHari), rencana tanggal (rencanaTanggal), rencana waktu (rencanaWaktu), rencana sasaran (rencanaSasaran), rencana kegiatan (rencanaKegiatan), rencana hasil (rencanaHasil), dan rencana keterangan (rencanaKeterangan).`;
+        jsonSchema = `{
+  "rencanaHari": "...", "rencanaTanggal": "...", "rencanaWaktu": "...", "rencanaSasaran": "...", "rencanaKegiatan": "...", "rencanaHasil": "...", "rencanaKeterangan": "..."
+}`;
+      } else {
+        scopeInstructions = `Ekstrak seluruh informasi laporan harian secara lengkap.`;
+        jsonSchema = `{
+  "hari": "...", "tanggal": "...", "waktu": "...",
+  "berasMin": "...", "berasMax": "...",
+  "kedelaiMin": "...", "kedelaiMax": "...",
+  "cabaiBesarMin": "...", "cabaiBesarMax": "...",
+  "cabaiRawitMin": "...", "cabaiRawitMax": "...",
+  "cabaiTamparMin": "...", "cabaiTamparMax": "...",
+  "bawangMerahMin": "...", "bawangMerahMax": "...",
+  "bawangPutihMin": "...", "bawangPutihMax": "...",
+  "jagungMin": "...", "jagungMax": "...",
+  "gulaMin": "...", "gulaMax": "...",
+  "minyakMin": "...", "minyakMax": "...",
+  "teriguMin": "...", "teriguMax": "...",
+  "dagingSapiMin": "...", "dagingSapiMax": "...",
+  "dagingAyamMin": "...", "dagingAyamMax": "...",
+  "telurMin": "...", "telurMax": "...",
+  "garamMin": "...", "garamMax": "...",
+  "lpgMin": "...", "lpgMax": "...",
+  "kriminalitas": "...", "lakaLantas": "...", "tahananL": "...", "tahananP": "...", "bencanaAlam": "...", "vvip": "...",
+  "patroliSiangWaktu": "...", "patroliSiangCuaca": "...", "patroliSiangPersonil": "...", "patroliSiangSasaran": "...", "patroliSiangRute": "...", "patroliSiangHasil": "...",
+  "patroliMalamWaktu": "...", "patroliMalamCuaca": "...", "patroliMalamPersonil": "...", "patroliMalamSasaran": "...", "patroliMalamRute": "...", "patroliMalamHasil": "...",
+  "rencanaHari": "...", "rencanaTanggal": "...", "rencanaWaktu": "...", "rencanaSasaran": "...", "rencanaKegiatan": "...", "rencanaHasil": "...", "rencanaKeterangan": "..."
+}`;
+      }
+
+      systemPrompt = `Anda adalah asisten AI profesional untuk ekstraksi data formulir kepolisian Polsek Tembalang berbahasa Indonesia.
+Tugas Anda adalah membaca input transkrip suara pimpinan, hasil analisa foto lapangan, atau catatan pengguna, lalu mengekstrak informasi tersebut ke dalam skema JSON formulir Laporan Harian Situasi (LHS) secara lengkap.
+
+${scopeInstructions}
+
+${calendarContext}
+
+PENTING - KETENTUAN PENGISIAN FIELD:
+1. hari: Hari pelaksanaan kegiatan (misal: "Kamis").
+2. tanggal: Tanggal pelaksanaan (misal: "23 Juli 2026").
+3. waktu: Waktu piket siaga, default "08.00 s.d. 08.00 WIB".
+4. Harga Sembako (Min & Max): Ekstrak harga kemarin (Min) dan hari ini (Max) untuk 16 komoditas bahan pokok penting. Format nominal angka tanpa tanda Rp dan tanpa titik ribuan, contoh: "12500" atau "35000" (sebagai string). Jika tidak terdeteksi harga di input, gunakan nilai default:
+   - berasMin: "15000", berasMax: "15000"
+   - kedelaiMin: "9000", kedelaiMax: "10000"
+   - cabaiBesarMin: "40000", cabaiBesarMax: "42000"
+   - cabaiRawitMin: "50000", cabaiRawitMax: "53000"
+   - cabaiTamparMin: "35000", cabaiTamparMax: "38000"
+   - bawangMerahMin: "40000", bawangMerahMax: "42000"
+   - bawangPutihMin: "35000", bawangPutihMax: "35800"
+   - jagungMin: "8000", jagungMax: "8200"
+   - gulaMin: "17500", gulaMax: "17800"
+   - minyakMin: "15700", minyakMax: "15900"
+   - teriguMin: "11000", teriguMax: "12200"
+   - dagingSapiMin: "130000", dagingSapiMax: "130300"
+   - dagingAyamMin: "35000", dagingAyamMax: "36800"
+   - telurMin: "29000", telurMax: "29300"
+   - garamMin: "2500", garamMax: "2500"
+   - lpgMin: "20000", lpgMax: "22000"
+5. Keamanan:
+   - kriminalitas: Default "Tidak ada hal yang dapat dilaporkan."
+   - lakaLantas: Default "Tidak ada hal yang dapat dilaporkan."
+   - bencanaAlam: Default "Tidak ada hal yang dapat dilaporkan."
+   - tahananL: Jumlah tahanan Laki-laki (contoh: "4" atau "0").
+   - tahananP: Jumlah tahanan Perempuan (contoh: "0").
+6. Kegiatan VVIP / Menonjol (vvip): default "Tidak ada kegiatan untuk dilaporkan."
+7. Patroli (Siang & Malam):
+   - Waktu, cuaca (default "CERAH"), personil, sasaran, rute, hasil.
+8. Rencana Kegiatan Besok (rencanaHari, rencanaTanggal, rencanaWaktu, rencanaSasaran, rencanaKegiatan, rencanaHasil, rencanaKeterangan).
+
+Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
+${jsonSchema}
+
+PENTING - ATURAN FORMAT JSON:
+1. JANGAN PERNAH menggunakan enter atau baris baru fisik di dalam nilai string JSON. Semua baris baru wajib ditulis menggunakan karakter escape '\\n'.
+2. JANGAN PERNAH menggunakan tanda kutip ganda mentah (") di dalam nilai string JSON. Jika ingin menulis kutipan, gunakan tanda kutip tunggal (') saja.`;
     } else {
       systemPrompt = `Anda adalah asisten AI profesional pembuat laporan dinas resmi dan korporat berbahasa Indonesia.
 Tugas Anda adalah membuat isi laporan resmi formal bahasa Indonesia berdasarkan hasil transkrip audio, analisis gambar rundown acara, isi guidebook PDF panduan acara, dan catatan user. Gunakan gaya bahasa profesional, singkat, jelas, dan format sesuai laporan dinas resmi (EYD yang disempurnakan, sopan, objektif, dan bernada formal).
@@ -687,21 +955,42 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
       console.error(resultText);
       console.error("=================================");
       
-      // Attempt a basic sanitization to recover raw newlines in string properties:
+      // Attempt our advanced state-machine sanitization to escape nested double quotes and newlines:
       try {
-        const sanitized = resultText
-          .replace(/\r?\n/g, "\\n")
-          .replace(/\\n\s*"/g, '\n  "')
-          .replace(/\\n\s*}/g, '\n}');
+        const sanitized = sanitizeJsonString(resultText);
         reportData = JSON.parse(sanitized);
-        console.log("Successfully parsed JSON after regex sanitization fallback!");
-      } catch (secondErr) {
-        throw new Error(`Gagal mem-parsing format JSON dari AI. Detail: ${parseErr.message}`);
+        console.log("Successfully parsed JSON after state-machine sanitization fallback!");
+      } catch (secondErr: any) {
+        console.error("State-machine sanitization also failed:", secondErr.message);
+        
+        // Final fallback: attempt basic regex sanitization to recover raw newlines in string properties:
+        try {
+          const sanitizedRegex = resultText
+            .replace(/\r?\n/g, "\\n")
+            .replace(/\\n\s*"/g, '\n  "')
+            .replace(/\\n\s*}/g, '\n}');
+          reportData = JSON.parse(sanitizedRegex);
+          console.log("Successfully parsed JSON after regex sanitization fallback!");
+        } catch (thirdErr) {
+          throw new Error(`Gagal mem-parsing format JSON dari AI. Detail: ${parseErr.message}`);
+        }
       }
     }
 
     // Apply dynamic calendar corrector to ensure 100% precision for any day/date combination
     reportData = correctWeekdaysInObject(reportData);
+
+    // Force all sembako selisih fields to be "-" as requested by the user
+    if (templateType === "laporan-harian-intelijen" && reportData) {
+      const sembakoKeys = [
+        "beras", "kedelai", "cabai_merah", "cabai_rawit", "cabai_tampar", 
+        "bawang_merah", "bawang_putih", "jagung", "gula", "minyak", 
+        "terigu", "daging_sapi", "daging_ayam", "telur", "garam", "lpg"
+      ];
+      sembakoKeys.forEach((key) => {
+        reportData[`${key}_selisih`] = "-";
+      });
+    }
 
     // Clean up perihal if it starts with "Laporan Kegiatan" (case-insensitive) for "laporan-kegiatan" template
     if (templateType === "laporan-kegiatan" && reportData && typeof reportData.perihal === "string") {

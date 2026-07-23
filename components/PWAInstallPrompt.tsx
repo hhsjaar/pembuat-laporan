@@ -9,7 +9,9 @@ export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
     // 1. Check if the app is already running in standalone mode (already installed)
@@ -33,7 +35,15 @@ export default function PWAInstallPrompt() {
 
     const ios = checkIOS();
 
-    // 3. Register the service worker
+    // 3. Check if device is mobile
+    const checkMobile = () => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+      setIsMobile(mobileRegex.test(userAgent));
+    };
+    checkMobile();
+
+    // 4. Register the service worker
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")
@@ -41,38 +51,27 @@ export default function PWAInstallPrompt() {
         .catch((err) => console.error("Service Worker registration failed:", err));
     }
 
-    // 4. Handle chrome beforeinstallprompt event
+    // 5. Handle chrome beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
-
-      // Only show if not dismissed in the last 3 days
-      const dismissedUntil = localStorage.getItem("pwa_prompt_dismissed_until");
-      const isDismissed = dismissedUntil && Number(dismissedUntil) > Date.now();
-
-      if (!isDismissed && !isStandaloneMode) {
-        // Show after a brief delay for smoother page loading
-        const timer = setTimeout(() => {
-          setShowPrompt(true);
-        }, 3000); // 3 seconds delay
-        return () => clearTimeout(timer);
-      }
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    // 5. For iOS, if they haven't installed and haven't dismissed, show after 4 seconds
-    if (ios && !isStandaloneMode) {
-      const dismissedUntil = localStorage.getItem("pwa_prompt_dismissed_until");
-      const isDismissed = dismissedUntil && Number(dismissedUntil) > Date.now();
+    // 6. Show prompt for everyone after 5 seconds if not dismissed and not already installed
+    // Clear legacy localStorage blocker to immediately show to the user during testing
+    localStorage.removeItem("pwa_prompt_dismissed_until");
 
-      if (!isDismissed) {
-        const timer = setTimeout(() => {
-          setShowPrompt(true);
-        }, 4000);
-        return () => clearTimeout(timer);
-      }
+    const dismissedUntil = sessionStorage.getItem("pwa_prompt_dismissed_until");
+    const isDismissed = dismissedUntil === "true";
+
+    if (!isDismissed && !isStandaloneMode) {
+      const timer = setTimeout(() => {
+        setShowPrompt(true);
+      }, 5000); // 5 seconds delay
+      return () => clearTimeout(timer);
     }
 
     return () => {
@@ -85,7 +84,11 @@ export default function PWAInstallPrompt() {
       return;
     }
 
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // Native prompt not supported or ready yet, display browser instructions instead
+      setShowInstructions(true);
+      return;
+    }
 
     // Show the browser's install prompt
     deferredPrompt.prompt();
@@ -101,9 +104,7 @@ export default function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    // Dismiss for 3 days
-    const nextShowTime = Date.now() + 3 * 24 * 60 * 60 * 1000;
-    localStorage.setItem("pwa_prompt_dismissed_until", String(nextShowTime));
+    sessionStorage.setItem("pwa_prompt_dismissed_until", "true");
   };
 
   if (isStandalone) return null;
@@ -118,7 +119,7 @@ export default function PWAInstallPrompt() {
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="fixed inset-x-4 bottom-4 md:bottom-6 md:right-6 md:left-auto md:w-[380px] z-50"
         >
-          <div className="glassmorphism rounded-2xl p-5 border border-purple-500/20 shadow-2xl relative bg-neutral-900/90 backdrop-blur-xl dark:bg-purple-950/25">
+          <div className="glassmorphism rounded-2xl p-5 border border-purple-500/25 shadow-2xl relative bg-neutral-900/95 backdrop-blur-xl dark:bg-purple-950/40">
             {/* Close button */}
             <button
               onClick={handleDismiss}
@@ -149,7 +150,7 @@ export default function PWAInstallPrompt() {
               </div>
             </div>
 
-            {/* Dynamic section: Android/Chrome vs iOS Safari instructions */}
+            {/* Dynamic sections */}
             {isIOS ? (
               <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-purple-900/40 space-y-2 text-xs text-neutral-600 dark:text-neutral-300">
                 <p className="font-semibold text-neutral-800 dark:text-neutral-200">
@@ -162,6 +163,31 @@ export default function PWAInstallPrompt() {
                   <li>
                     Pilih <span className="font-bold text-neutral-900 dark:text-white">Tambahkan ke Layar Utama</span> <Plus className="inline-block w-3.5 h-3.5 mx-0.5 text-neutral-500 dark:text-neutral-400" /> (Add to Home Screen).
                   </li>
+                </ol>
+                <button
+                  onClick={handleDismiss}
+                  className="w-full mt-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider bg-purple-600 text-white hover:bg-purple-500 transition-colors shadow-md shadow-purple-500/20 cursor-pointer"
+                >
+                  Saya Mengerti
+                </button>
+              </div>
+            ) : showInstructions ? (
+              <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-purple-900/40 space-y-2 text-xs text-neutral-600 dark:text-neutral-300">
+                <p className="font-semibold text-neutral-800 dark:text-neutral-200">
+                  {isMobile ? "Langkah instalasi Android:" : "Langkah instalasi Browser/Desktop:"}
+                </p>
+                <ol className="list-decimal pl-4 space-y-1.5 leading-relaxed">
+                  {isMobile ? (
+                    <>
+                      <li>Ketuk ikon menu tiga titik <span className="font-bold text-neutral-900 dark:text-white">⋮</span> di pojok kanan atas browser Anda.</li>
+                      <li>Pilih <span className="font-bold text-neutral-900 dark:text-white">Tambahkan ke Layar Utama</span> atau <span className="font-bold text-neutral-900 dark:text-white">Instal Aplikasi</span>.</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>Ketuk ikon instalasi (berbentuk layar monitor atau tanda panah unduh) di sebelah kanan kolom alamat (URL bar) browser Anda.</li>
+                      <li>Atau ketuk menu tiga titik <span className="font-bold text-neutral-900 dark:text-white">⋮</span> di pojok kanan atas, lalu pilih <span className="font-bold text-neutral-900 dark:text-white">Simpan dan bagikan</span>, kemudian pilih <span className="font-bold text-neutral-900 dark:text-white">Instal Aplikasi</span>.</li>
+                    </>
+                  )}
                 </ol>
                 <button
                   onClick={handleDismiss}

@@ -33,6 +33,8 @@ interface ReportData {
   // Infosus-specific fields
   perihal_judul?: string;
   fakta_fakta?: string;
+
+  [key: string]: any;
 }
 
 interface ReportPreviewProps {
@@ -451,7 +453,7 @@ Tembusan:
         {/* Document watermarking/top lines */}
         <div className="absolute top-0 inset-x-0 h-1.5 bg-accent" />
 
-        {templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" || templateType === "infosus" ? (
+        {templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" || templateType === "infosus" || templateType === "laporan-harian-intelijen" || templateType === "rencana-kegiatan" ? (
           /* High-Fidelity Police Laporan Informasi / LHK Preview matching Calibri spacing, font, and sizes */
           <div
             className="space-y-6 max-w-2xl mx-auto text-neutral-900 select-text"
@@ -463,59 +465,217 @@ Tembusan:
             }}
           >
             {/* Top Sub-header (POLRI) */}
-            <div className="border-b border-neutral-300 pb-3 mb-4" style={{ fontFamily: "Calibri, Arial, sans-serif" }}>
-              <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>POLRI DAERAH JAWA TENGAH</p>
-              <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>RESOR KOTA BESAR SEMARANG</p>
-              <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>SEKTOR TEMBALANG</p>
-              <p className="text-neutral-500 font-sans" style={{ fontSize: "10pt" }}>Jl. Turus Asri no 9 Tembalang Semarang</p>
-            </div>
-
-            {/* Document Title Header */}
-            <div className="text-center space-y-1 my-6" style={{ fontFamily: "Calibri, Arial, sans-serif" }}>
-              {templateType === "laporan-harian-khusus" ? (
-                <>
-                  <p className="font-semibold text-neutral-600 font-sans" style={{ fontSize: "11pt" }}>Nomor : R / LHK / / / / Intelkam</p>
-                  <h2 className="font-bold tracking-wide border-b-2 border-neutral-900 inline-block pb-0.5 text-neutral-950" style={{ fontSize: "14pt" }}>
-                    LAPORAN HARIAN KHUSUS
-                  </h2>
-                </>
-              ) : templateType === "infosus" ? (
-                <>
-                  <p className="font-semibold text-neutral-600 font-sans" style={{ fontSize: "11pt" }}>Nomor : R / INFOSUS / / / Ren.4.1.1. / / Intelkam</p>
-                  <h2 className="font-bold tracking-wide border-b-2 border-neutral-900 inline-block pb-0.5 text-neutral-950" style={{ fontSize: "14pt" }}>
-                    INFORMASI KHUSUS
-                  </h2>
-                </>
-              ) : (
-                <>
-                  <p className="font-semibold text-neutral-600 font-sans" style={{ fontSize: "11pt" }}>Nomor :  R  / LI / / /  / Intelkam</p>
-                  <h2 className="font-bold tracking-wide border-b-2 border-neutral-900 inline-block pb-0.5 text-neutral-950" style={{ fontSize: "14pt" }}>
-                    LAPORAN – INFORMASI
-                  </h2>
-                </>
-              )}
-            </div>
-
-            {/* Metadata Table: Infosus shows TANGGAL/PERIHAL, others show BIDANG/PERIHAL */}
-            {templateType === "infosus" ? (
-              <div className="grid grid-cols-[80px_10px_1fr] gap-x-2 gap-y-2 border border-neutral-300 p-4 rounded-xl bg-neutral-50/50 font-sans" style={{ fontSize: "11pt" }}>
-                <span className="font-bold text-neutral-500 uppercase tracking-wider self-start pt-0.5" style={{ fontSize: "9.5pt" }}>TANGGAL</span>
-                <span className="font-semibold text-neutral-400 self-start">:</span>
-                <span className="font-bold text-neutral-900" style={{ fontFamily: "Calibri, sans-serif" }}>{reportData.tanggal}</span>
-
-                <span className="font-bold text-neutral-500 uppercase tracking-wider self-start pt-0.5" style={{ fontSize: "9.5pt" }}>PERIHAL</span>
-                <span className="font-semibold text-neutral-400 self-start">:</span>
-                <span className="font-bold text-neutral-950" style={{ fontFamily: "Calibri, sans-serif", fontSize: "11.5pt", lineHeight: "1.4" }}>{reportData.perihal}</span>
+            {templateType === "rencana-kegiatan" ? (
+              <div className="border-b border-neutral-300 pb-3 mb-4" style={{ fontFamily: "Calibri, Arial, sans-serif" }}>
+                <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>POLRI DAERAH JAWA TENGAH</p>
+                <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>RESOR KOTA BESAR SEMARANG</p>
+                <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>SEKTOR TEMBALANG</p>
+              </div>
+            ) : templateType === "laporan-harian-intelijen" ? (
+              <div className="border-b border-neutral-300 pb-3 mb-4" style={{ fontFamily: "Calibri, Arial, sans-serif" }}>
+                <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>POLRI DAERAH JAWA TENGAH</p>
+                <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>RESOR KOTA BESAR SEMARANG</p>
+                <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>POLSEK TEMMBALANG</p>
+                <p className="text-neutral-500 font-sans" style={{ fontSize: "10pt" }}>Jl. Turus Asri No. 9 Tembalang Semarang</p>
               </div>
             ) : (
-              <div className="grid grid-cols-[80px_10px_1fr] gap-x-2 gap-y-2 border border-neutral-300 p-4 rounded-xl bg-neutral-50/50 font-sans" style={{ fontSize: "11pt" }}>
-                <span className="font-bold text-neutral-500 uppercase tracking-wider self-start pt-0.5" style={{ fontSize: "9.5pt" }}>BIDANG</span>
-                <span className="font-semibold text-neutral-400 self-start">:</span>
-                <span className="font-bold text-neutral-900 uppercase" style={{ fontFamily: "Calibri, sans-serif" }}>{reportData.bidang}</span>
+              <div className="border-b border-neutral-300 pb-3 mb-4" style={{ fontFamily: "Calibri, Arial, sans-serif" }}>
+                <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>POLRI DAERAH JAWA TENGAH</p>
+                <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>RESOR KOTA BESAR SEMARANG</p>
+                <p className="font-bold uppercase tracking-tight text-neutral-950" style={{ fontSize: "11.5pt" }}>SEKTOR TEMBALANG</p>
+                <p className="text-neutral-500 font-sans" style={{ fontSize: "10pt" }}>Jl. Turus Asri no 9 Tembalang Semarang</p>
+              </div>
+            )}
 
-                <span className="font-bold text-neutral-500 uppercase tracking-wider self-start pt-0.5" style={{ fontSize: "9.5pt" }}>PERIHAL</span>
-                <span className="font-semibold text-neutral-400 self-start">:</span>
-                <span className="font-bold text-neutral-950 uppercase" style={{ fontFamily: "Calibri, sans-serif", fontSize: "11.5pt", lineHeight: "1.4" }}>{reportData.perihal}</span>
+            {/* Document Title Header */}
+            {templateType === "rencana-kegiatan" ? (
+              <div className="text-center space-y-3 my-6" style={{ fontFamily: "Calibri, Arial, sans-serif" }}>
+                <h2 className="font-bold tracking-wider inline-block text-neutral-950 uppercase" style={{ fontSize: "13pt" }}>
+                  RENCANA KEGIATAN ANGGOTA UNIT INTELKAM
+                </h2>
+                <p className="font-bold text-neutral-900 text-left uppercase" style={{ fontSize: "11pt" }}>
+                  HARI / TANGGAL : {reportData.hari_tanggal}
+                </p>
+              </div>
+            ) : templateType === "laporan-harian-intelijen" ? (
+              <div className="space-y-4 font-sans">
+                <div className="text-left font-semibold text-neutral-800" style={{ fontSize: "11pt" }}>
+                  Nomor: {reportData.nomor_laporan}
+                </div>
+                <div className="text-center my-6">
+                  <h2 className="font-bold tracking-wide text-neutral-950 uppercase" style={{ fontSize: "14pt" }}>
+                    LAPORAN HARIAN INTELIJEN
+                  </h2>
+                  <p className="font-semibold text-neutral-700" style={{ fontSize: "11pt" }}>
+                    Hari {reportData.hari}, tanggal {reportData.tanggal}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-1 my-6" style={{ fontFamily: "Calibri, Arial, sans-serif" }}>
+                {templateType === "laporan-harian-khusus" ? (
+                  <>
+                    <p className="font-semibold text-neutral-600 font-sans" style={{ fontSize: "11pt" }}>Nomor : R / LHK / / / / Intelkam</p>
+                    <h2 className="font-bold tracking-wide border-b-2 border-neutral-900 inline-block pb-0.5 text-neutral-950" style={{ fontSize: "14pt" }}>
+                      LAPORAN HARIAN KHUSUS
+                    </h2>
+                  </>
+                ) : templateType === "infosus" ? (
+                  <>
+                    <p className="font-semibold text-neutral-600 font-sans" style={{ fontSize: "11pt" }}>Nomor : R / INFOSUS / / / Ren.4.1.1. / / Intelkam</p>
+                    <h2 className="font-bold tracking-wide border-b-2 border-neutral-900 inline-block pb-0.5 text-neutral-950" style={{ fontSize: "14pt" }}>
+                      INFORMASI KHUSUS
+                    </h2>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-semibold text-neutral-600 font-sans" style={{ fontSize: "11pt" }}>Nomor :  R  / LI / / /  / Intelkam</p>
+                    <h2 className="font-bold tracking-wide border-b-2 border-neutral-900 inline-block pb-0.5 text-neutral-950" style={{ fontSize: "14pt" }}>
+                      LAPORAN – INFORMASI
+                    </h2>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Metadata Table (For standard templates) */}
+            {templateType !== "rencana-kegiatan" && templateType !== "laporan-harian-intelijen" && (
+              templateType === "infosus" ? (
+                <div className="grid grid-cols-[80px_10px_1fr] gap-x-2 gap-y-2 border border-neutral-300 p-4 rounded-xl bg-neutral-50/50 font-sans" style={{ fontSize: "11pt" }}>
+                  <span className="font-bold text-neutral-500 uppercase tracking-wider self-start pt-0.5" style={{ fontSize: "9.5pt" }}>TANGGAL</span>
+                  <span className="font-semibold text-neutral-400 self-start">:</span>
+                  <span className="font-bold text-neutral-900" style={{ fontFamily: "Calibri, sans-serif" }}>{reportData.tanggal}</span>
+
+                  <span className="font-bold text-neutral-500 uppercase tracking-wider self-start pt-0.5" style={{ fontSize: "9.5pt" }}>PERIHAL</span>
+                  <span className="font-semibold text-neutral-400 self-start">:</span>
+                  <span className="font-bold text-neutral-950" style={{ fontFamily: "Calibri, sans-serif", fontSize: "11.5pt", lineHeight: "1.4" }}>{reportData.perihal}</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-[80px_10px_1fr] gap-x-2 gap-y-2 border border-neutral-300 p-4 rounded-xl bg-neutral-50/50 font-sans" style={{ fontSize: "11pt" }}>
+                  <span className="font-bold text-neutral-500 uppercase tracking-wider self-start pt-0.5" style={{ fontSize: "9.5pt" }}>BIDANG</span>
+                  <span className="font-semibold text-neutral-400 self-start">:</span>
+                  <span className="font-bold text-neutral-900 uppercase" style={{ fontFamily: "Calibri, sans-serif" }}>{reportData.bidang}</span>
+
+                  <span className="font-bold text-neutral-500 uppercase tracking-wider self-start pt-0.5" style={{ fontSize: "9.5pt" }}>PERIHAL</span>
+                  <span className="font-semibold text-neutral-400 self-start">:</span>
+                  <span className="font-bold text-neutral-950 uppercase" style={{ fontFamily: "Calibri, sans-serif", fontSize: "11.5pt", lineHeight: "1.4" }}>{reportData.perihal}</span>
+                </div>
+              )
+            )}
+
+            {/* LHI Body Content */}
+            {templateType === "laporan-harian-intelijen" && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase text-left" style={{ fontSize: "12pt" }}>
+                    PENDAHULUAN
+                  </h3>
+                  <div className="space-y-3 pl-3 mt-2 text-justify font-sans" style={{ fontSize: "11pt" }}>
+                    <p className="whitespace-pre-line"><strong>Bidang Politik:</strong> {reportData.pendahuluan_politik}</p>
+                    <p className="whitespace-pre-line"><strong>Bidang Sosial Budaya:</strong> {reportData.pendahuluan_sosbud}</p>
+                    <p className="whitespace-pre-line"><strong>Bidang Ekonomi:</strong> {reportData.pendahuluan_ekonomi}</p>
+                    <p className="whitespace-pre-line"><strong>Bidang Keamanan:</strong> {reportData.pendahuluan_keamanan}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase text-left" style={{ fontSize: "12pt" }}>
+                    FAKTA-FAKTA
+                  </h3>
+                  <div className="space-y-4 pl-3 mt-2 font-sans" style={{ fontSize: "11pt" }}>
+                    <div>
+                      <p className="font-bold text-neutral-900 uppercase text-left">Aspek Sosial</p>
+                      <div className="pl-4 space-y-3 text-justify">
+                        <p className="whitespace-pre-line"><strong>1. Sosial Politik:</strong> {reportData.fakta_sosial_politik}</p>
+                        <div className="space-y-2">
+                          <p><strong>2. Sosial Ekonomi:</strong></p>
+                          <p className="mt-1 whitespace-pre-line">{reportData.fakta_sosial_ekonomi_intro}</p>
+                          
+                          <table className="w-full border-collapse border border-neutral-300 my-4 text-[10pt] font-sans">
+                            <thead>
+                              <tr className="bg-neutral-100 text-neutral-900 font-bold">
+                                <th className="border border-neutral-300 p-1.5 text-center">NO</th>
+                                <th className="border border-neutral-300 p-1.5 text-left">NAMA BARANG</th>
+                                <th className="border border-neutral-300 p-1.5 text-right">KEMARIN</th>
+                                <th className="border border-neutral-300 p-1.5 text-right">HARI INI</th>
+                                <th className="border border-neutral-300 p-1.5 text-center">NAIK/TURUN</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {[
+                                { no: "1", name: "Beras Medium", key: "beras" },
+                                { no: "2", name: "Kedelai", key: "kedelai" },
+                                { no: "3", name: "Cabai Merah Besar", key: "cabai_merah" },
+                                { no: "", name: "Rawit Merah", key: "cabai_rawit" },
+                                { no: "", name: "Cabai Tampar", key: "cabai_tampar" },
+                                { no: "4", name: "Bawang Merah", key: "bawang_merah" },
+                                { no: "", name: "Bawang Putih", key: "bawang_putih" },
+                                { no: "5", name: "Jagung", key: "jagung" },
+                                { no: "6", name: "Gula Pasir", key: "gula" },
+                                { no: "7", name: "Minyak Goreng", key: "minyak" },
+                                { no: "8", name: "Tepung Terigu", key: "terigu" },
+                                { no: "9", name: "Daging Sapi Lokal", key: "daging_sapi" },
+                                { no: "10", name: "Daging Ayam Ras", key: "daging_ayam" },
+                                { no: "11", name: "Telur Ayam Ras", key: "telur" },
+                                { no: "12", name: "Garam", key: "garam" },
+                                { no: "13", name: "Gas LPG 3 Kg", key: "lpg" }
+                              ].map((item, idx) => (
+                                <tr key={idx} className="hover:bg-neutral-50/50">
+                                  <td className="border border-neutral-300 p-1 text-center font-bold">{item.no}</td>
+                                  <td className="border border-neutral-300 p-1">{item.name}</td>
+                                  <td className="border border-neutral-300 p-1 text-right">{reportData[`${item.key}_kemarin`] || "-"}</td>
+                                  <td className="border border-neutral-300 p-1 text-right">{reportData[`${item.key}_hari_ini`] || "-"}</td>
+                                  <td className="border border-neutral-300 p-1 text-center font-semibold">{reportData[`${item.key}_selisih`] || "-"}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="whitespace-pre-line"><strong>3. Sosial Budaya:</strong><br />{reportData.fakta_sosial_budaya}</div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="font-bold text-neutral-900 uppercase text-left">Aspek Keamanan</p>
+                      <div className="pl-4 space-y-3 text-justify">
+                        <p className="whitespace-pre-line"><strong>1. Keamanan Umum:</strong></p>
+                        <p className="pl-4 whitespace-pre-line">a. Kriminalitas: {reportData.kriminalitas_text}</p>
+                        <p className="pl-4 whitespace-pre-line">b. Laka Lantas: {reportData.laka_lantas_text}</p>
+                        <p className="whitespace-pre-line"><strong>2. Keamanan Khusus:</strong> {reportData.tahanan_text}</p>
+                        <p className="whitespace-pre-line"><strong>3. Bencana Alam:</strong> {reportData.bencana_alam_text}</p>
+                        <p className="whitespace-pre-line"><strong>4. Lain-lain:</strong> {reportData.lain_lain_text}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Rencana Kegiatan Body Content */}
+            {templateType === "rencana-kegiatan" && (
+              <div className="space-y-6">
+                <table className="w-full border-collapse border border-neutral-300 my-4 text-[10.5pt] font-sans">
+                  <thead>
+                    <tr className="bg-neutral-100 text-neutral-900 font-bold">
+                      <th className="border border-neutral-300 p-2 text-center" style={{ width: "40px" }}>NO</th>
+                      <th className="border border-neutral-300 p-2 text-left" style={{ width: "220px" }}>WAKTU / LOKASI</th>
+                      <th className="border border-neutral-300 p-2 text-left">KEGIATAN</th>
+                      <th className="border border-neutral-300 p-2 text-left">HASIL YANG INGIN DICAPAI</th>
+                      <th className="border border-neutral-300 p-2 text-center" style={{ width: "60px" }}>KET</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(reportData.kegiatan_list || []).map((item: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-neutral-50/50">
+                        <td className="border border-neutral-300 p-2 text-center font-bold">{item.no || `${idx + 1}.`}</td>
+                        <td className="border border-neutral-300 p-2 whitespace-pre-line text-justify">{item.waktu_lokasi}</td>
+                        <td className="border border-neutral-300 p-2 whitespace-pre-line text-justify">{item.kegiatan}</td>
+                        <td className="border border-neutral-300 p-2 whitespace-pre-line text-justify">{item.hasil}</td>
+                        <td className="border border-neutral-300 p-2 text-center">{item.ket || "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
 
@@ -550,64 +710,97 @@ Tembusan:
             )}
 
             {/* HAL-HAL YANG DILAPORKAN / FAKTA-FAKTA Section */}
-            <div className="space-y-4">
-              <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
-                {templateType === "laporan-harian-khusus" ? "I. FAKTA – FAKTA :" : templateType === "infosus" ? "FAKTA – FAKTA :" : "HAL-HAL YANG DILAPORKAN"}
-              </h3>
+            {templateType !== "rencana-kegiatan" && templateType !== "laporan-harian-intelijen" && (
+              <div className="space-y-4">
+                <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
+                  {templateType === "laporan-harian-khusus" ? "I. FAKTA – FAKTA :" : templateType === "infosus" ? "FAKTA – FAKTA :" : "HAL-HAL YANG DILAPORKAN"}
+                </h3>
 
-              <div className="whitespace-pre-line text-neutral-900 pl-3 text-justify leading-relaxed" style={{ textIndent: "0.25in" }}>
-                {templateType === "infosus" ? reportData.fakta_fakta : getDisplayIsiLaporan()}
+                <div className="whitespace-pre-line text-neutral-900 pl-3 text-justify leading-relaxed" style={{ textIndent: "0.25in" }}>
+                  {templateType === "infosus" ? reportData.fakta_fakta : getDisplayIsiLaporan()}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* PENDAPAT PELAPOR / CATATAN Section */}
-            <div className="space-y-4">
-              <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
-                {templateType === "laporan-harian-khusus" ? "II. CATATAN :" : templateType === "infosus" ? "CATATAN :" : "PENDAPAT PELAPOR"}
-              </h3>
+            {templateType !== "rencana-kegiatan" && templateType !== "laporan-harian-intelijen" && (
+              <div className="space-y-4">
+                <h3 className="font-bold text-neutral-950 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
+                  {templateType === "laporan-harian-khusus" ? "II. CATATAN :" : templateType === "infosus" ? "CATATAN :" : "PENDAPAT PELAPOR"}
+                </h3>
 
-              <div className="space-y-4 pl-3 text-neutral-900 text-justify">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="font-bold text-neutral-950">
-                      {templateType === "laporan-harian-khusus" ? "Analisis" : templateType === "infosus" ? "Analisa" : "A. Analisa"}
-                    </span>
+                <div className="space-y-4 pl-3 text-neutral-900 text-justify">
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-bold text-neutral-950">
+                        {templateType === "laporan-harian-khusus" ? "Analisis" : templateType === "infosus" ? "Analisa" : "A. Analisa"}
+                      </span>
+                    </div>
+                    <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.analisa}</div>
                   </div>
-                  <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.analisa}</div>
-                </div>
 
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="font-bold text-neutral-950">
-                      {templateType === "laporan-harian-khusus" ? "Prediksi Intelijen" : templateType === "infosus" ? "Prediksi" : "B. Prediksi"}
-                    </span>
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-bold text-neutral-950">
+                        {templateType === "laporan-harian-khusus" ? "Prediksi Intelijen" : templateType === "infosus" ? "Prediksi" : "B. Prediksi"}
+                      </span>
+                    </div>
+                    <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.prediksi}</div>
                   </div>
-                  <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.prediksi}</div>
-                </div>
 
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="font-bold text-neutral-950">
-                      {templateType === "laporan-harian-khusus" ? "Langkah – Langkah" : templateType === "infosus" ? "Langkah - langkah kepolisian :" : "C. Langkah-langkah"}
-                    </span>
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-bold text-neutral-950">
+                        {templateType === "laporan-harian-khusus" ? "Langkah – Langkah" : templateType === "infosus" ? "Langkah - langkah kepolisian :" : "C. Langkah-langkah"}
+                      </span>
+                    </div>
+                    <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.langkah}</div>
                   </div>
-                  <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.langkah}</div>
-                </div>
 
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="font-bold text-neutral-950">
-                      {templateType === "laporan-harian-khusus" ? "Rekomendasi" : templateType === "infosus" ? "Rekomendasi :" : "D. Rekomendasi"}
-                    </span>
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-bold text-neutral-950">
+                        {templateType === "laporan-harian-khusus" ? "Rekomendasi" : templateType === "infosus" ? "Rekomendasi :" : "D. Rekomendasi"}
+                      </span>
+                    </div>
+                    <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.rekomendasi}</div>
                   </div>
-                  <div className="whitespace-pre-line pl-4" style={{ textIndent: "0.25in" }}>{reportData.rekomendasi}</div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Semarang date and Pelapor/Sat intelkam signoff */}
             <div className="pt-8 pl-3 flex justify-between items-start font-sans" style={{ fontSize: "11pt" }}>
-              {templateType === "laporan-harian-khusus" || templateType === "infosus" ? (
+              {templateType === "rencana-kegiatan" ? (
+                <>
+                  <div></div>
+                  <div className="text-center space-y-12">
+                    <div style={{ fontFamily: "Calibri, sans-serif" }}>
+                      <p className="text-neutral-800">Semarang, {reportData.tanggal_ttd}</p>
+                      <p className="font-bold tracking-wide text-neutral-950">{reportData.jabatan_ttd}</p>
+                    </div>
+                    <div>
+                      <p className="font-bold underline text-neutral-950 leading-none">{reportData.nama_ttd}</p>
+                      <p className="text-neutral-700 text-xs">{reportData.pangkat_nrp_ttd}</p>
+                    </div>
+                  </div>
+                </>
+              ) : templateType === "laporan-harian-intelijen" ? (
+                <>
+                  <div className="text-neutral-500 leading-relaxed text-left" style={{ fontSize: "10pt" }}>
+                    <p className="mb-2">Autentikasi :.......................</p>
+                    <p className="font-bold uppercase tracking-wider text-neutral-600 mt-2" style={{ fontSize: "9pt" }}>Distribusi:</p>
+                    <p>1. Sat Intelkam Polrestabes Semarang</p>
+                    <p>2. Kapolsek Tembalang</p>
+                  </div>
+                  <div className="text-center space-y-12">
+                    <div style={{ fontFamily: "Calibri, sans-serif" }}>
+                      <p className="text-neutral-800">Semarang, {reportData.tanggal_ttd}</p>
+                      <p className="font-bold tracking-wide text-neutral-950">LHI UNIT INTELKAM</p>
+                    </div>
+                  </div>
+                </>
+              ) : templateType === "laporan-harian-khusus" || templateType === "infosus" ? (
                 <>
                   <div className="text-neutral-500 leading-relaxed" style={{ fontSize: "10pt" }}>
                     <p className="mb-2">Authentikasi :.......................</p>

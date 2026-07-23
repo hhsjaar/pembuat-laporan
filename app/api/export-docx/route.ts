@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
       "laporan-harian-khusus": "laporan-harian-khusus.docx",
       "laporan-khusus-3": "laporan-khusus-3.docx",
       "infosus": "infosus.docx",
+      "laporan-harian-intelijen": "laporan-harian-intelijen.docx",
+      "rencana-kegiatan": "rencana-kegiatan.docx",
     };
 
     const templateName = templateFilenameMap[templateType];
@@ -63,18 +65,27 @@ export async function POST(req: NextRequest) {
       
       let xml = "";
       
+      // Determine font family and size dynamically based on template type
+      const fontFamily = templateType === "laporan-harian-intelijen" ? "Arial Narrow" : "Arial";
+      const fontSize = templateType === "laporan-harian-intelijen" ? "24" : ""; // 12pt is size val 24 in OpenXML
+      
+      const fontXml = `<w:rFonts w:ascii="${fontFamily}" w:hAnsi="${fontFamily}" w:cs="${fontFamily}" w:eastAsia="${fontFamily}"/>`;
+      const szXml = fontSize ? `<w:sz w:val="${fontSize}"/><w:szCs w:val="${fontSize}"/>` : "";
+      const rPrXml = `<w:rPr>${fontXml}${szXml}</w:rPr>`;
+      const pPrRPrXml = `<w:rPr>${fontXml}${szXml}</w:rPr>`;
+      
       for (let i = 0; i < escapedLines.length; i++) {
         const line = escapedLines[i];
         
         if (i === 0 && prefix) {
-          // First line with bullet prefix and tab, matching police report margins (Arial, inheriting size)
-          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}" w:hanging="567"/><w:jc w:val="both"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr><w:t xml:space="preserve">${prefix}</w:t><w:tab/><w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
+          // First line with bullet prefix and tab, matching police report margins (inheriting font family/size)
+          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}" w:hanging="567"/><w:jc w:val="both"/>${pPrRPrXml}</w:pPr><w:r>${rPrXml}<w:t xml:space="preserve">${prefix}</w:t><w:tab/><w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
         } else if (line.trim() === "") {
           // Empty paragraph spacing
-          xml += `<w:p><w:pPr><w:spacing w:after="120"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr></w:pPr></w:p>`;
+          xml += `<w:p><w:pPr><w:spacing w:after="120"/>${pPrRPrXml}</w:pPr></w:p>`;
         } else {
-          // Regular paragraph matching police report indentation and Arial font
-          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}"/><w:jc w:val="both"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/></w:rPr><w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
+          // Regular paragraph matching police report indentation and custom font family/size
+          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}"/><w:jc w:val="both"/>${pPrRPrXml}</w:pPr><w:r>${rPrXml}<w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
         }
       }
       return xml;
@@ -118,8 +129,8 @@ export async function POST(req: NextRequest) {
       return result;
     };
 
-    // Preprocess template if it's "Laporan Informasi", "Laporan Harian Khusus", or "Infosus" to enable raw XML parsing for multiline paragraphs
-    if (templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" || templateType === "infosus") {
+    // Preprocess template if it's Laporan Informasi, LHK, Infosus, or LHI to enable raw XML parsing for multiline paragraphs
+    if (templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" || templateType === "infosus" || templateType === "laporan-harian-intelijen") {
       let docXml = zip.files["word/document.xml"].asText();
       
       // 1. Clean up any split runs inside the placeholders
@@ -128,7 +139,9 @@ export async function POST(req: NextRequest) {
       // 2. Replace multiline fields with raw XML tags using double curly delimiters
       const otherFields = templateType === "infosus"
         ? ["fakta_fakta", "analisa", "prediksi", "langkah", "rekomendasi"]
-        : ["isi_laporan", "analisa", "prediksi", "langkah", "rekomendasi"];
+        : (templateType === "laporan-harian-intelijen"
+          ? ["pendahuluan_politik", "pendahuluan_sosbud", "pendahuluan_ekonomi", "pendahuluan_keamanan", "fakta_sosial_budaya", "kriminalitas_text", "laka_lantas_text", "bencana_alam_text", "tahanan_text", "lain_lain_text"]
+          : ["isi_laporan", "analisa", "prediksi", "langkah", "rekomendasi"]);
       otherFields.forEach((field) => {
         const regex = new RegExp(`\\{\\{${field}\\}\\}`, "g");
         docXml = docXml.replace(regex, `{{@${field}}}`);
@@ -147,7 +160,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const isXmlTemplate = templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" || templateType === "infosus";
+    const isXmlTemplate = templateType === "laporan-informasi" || templateType === "laporan-harian-khusus" || templateType === "infosus" || templateType === "laporan-harian-intelijen";
 
     // Backward compatibility helper to combine old A, B, C, D fields if isi_laporan is missing
     let finalIsiLaporan = reportData.isi_laporan;
@@ -170,6 +183,7 @@ export async function POST(req: NextRequest) {
     }
 
     const renderData: Record<string, any> = {
+      ...reportData,
       tanggal: reportData.tanggal || "",
       lokasi: reportData.lokasi || "",
       judul: reportData.judul || "",
@@ -190,6 +204,18 @@ export async function POST(req: NextRequest) {
       // Infosus-specific placeholders
       perihal_judul: reportData.perihal_judul || "",
       fakta_fakta: isXmlTemplate ? convertTextToOpenXml(reportData.fakta_fakta || "") : (reportData.fakta_fakta || ""),
+
+      // LHI specific placeholders
+      pendahuluan_politik: isXmlTemplate ? convertTextToOpenXml(reportData.pendahuluan_politik || "", "", 1134) : (reportData.pendahuluan_politik || ""),
+      pendahuluan_sosbud: isXmlTemplate ? convertTextToOpenXml(reportData.pendahuluan_sosbud || "", "", 1134) : (reportData.pendahuluan_sosbud || ""),
+      pendahuluan_ekonomi: isXmlTemplate ? convertTextToOpenXml(reportData.pendahuluan_ekonomi || "", "", 1134) : (reportData.pendahuluan_ekonomi || ""),
+      pendahuluan_keamanan: isXmlTemplate ? convertTextToOpenXml(reportData.pendahuluan_keamanan || "", "", 1134) : (reportData.pendahuluan_keamanan || ""),
+      fakta_sosial_budaya: isXmlTemplate ? convertTextToOpenXml(reportData.fakta_sosial_budaya || "", "", 1701) : (reportData.fakta_sosial_budaya || ""),
+      kriminalitas_text: isXmlTemplate ? convertTextToOpenXml(reportData.kriminalitas_text || "", "", 2268) : (reportData.kriminalitas_text || ""),
+      laka_lantas_text: isXmlTemplate ? convertTextToOpenXml(reportData.laka_lantas_text || "", "", 2268) : (reportData.laka_lantas_text || ""),
+      bencana_alam_text: isXmlTemplate ? convertTextToOpenXml(reportData.bencana_alam_text || "", "", 2268) : (reportData.bencana_alam_text || ""),
+      tahanan_text: isXmlTemplate ? convertTextToOpenXml(reportData.tahanan_text || "", "", 1701) : (reportData.tahanan_text || ""),
+      lain_lain_text: isXmlTemplate ? convertTextToOpenXml(reportData.lain_lain_text || "", "", 1701) : (reportData.lain_lain_text || ""),
     };
 
     doc.render(renderData);

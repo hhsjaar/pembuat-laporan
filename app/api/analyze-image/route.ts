@@ -18,12 +18,13 @@ export async function POST(req: NextRequest) {
     const contentParts: any[] = [
       {
         type: "text",
-        text: `Minta tolong analisis seluruh gambar dokumen terlampir yang berisi Rundown, Jadwal Acara, Potongan Detail Acara, Informasi Latar Belakang, maupun dokumen pendukung lainnya dalam bahasa Indonesia yang formal.
+        text: `Minta tolong analisis seluruh gambar dokumen terlampir yang berisi Rundown, Jadwal Acara, Potongan Detail Acara, Informasi Latar Belakang, DAFTAR HARGA BAHAN POKOK/MAKANAN/KOMODITAS (seperti Beras, Kedelai, Cabai, Bawang, Daging, Telur, dll.), maupun dokumen pendukung lainnya dalam bahasa Indonesia yang formal.
 Mohon lakukan analisis mendalam dan lakukan ekstraksi detail terperinci:
 1. Jadwal & Rundown Acara: Waktu/timestamps pelaksanaan, nama sesi, pembicara, narasumber, moderator, atau penanggung jawab, dan lokasi ruang/tempat acara jika tercantum.
 2. Latar Belakang & Detail Acara: Informasi konteks acara, tujuan, sejarah singkat, kepengurusan panitia, latar belakang organisasi, atau profil tokoh penting yang relevan.
 3. Aturan & Ketentuan Khusus: Segala aturan keamanan, petunjuk teknis pelaksanaan, body checking, barang terlarang, atau tata tertib acara.
-4. Fakta Tambahan: Informasi penting lainnya yang dapat dijadikan bahan fakta dasar penyusunan laporan intelkam resmi.
+4. Daftar Harga Sembako/Bahan Makanan: Jika ada gambar berupa tabel/foto daftar harga bahan pokok atau hasil pantauan harga pasar, tolong lakukan ekstraksi nominal harga (harga kemarin, harga hari ini, kenaikan/penurunan) untuk masing-masing komoditas secara sangat rinci dan presisi.
+5. Fakta Tambahan: Informasi penting lainnya yang dapat dijadikan bahan fakta dasar penyusunan laporan intelkam resmi.
 
 Berikan hasil analisis ekstraksi yang sangat detail, padat, runtut, terstruktur, dan profesional. Kelompokkan berdasarkan kategori informasi yang Anda temukan agar mudah dibaca dan dijadikan dasar penyusunan laporan.`,
       },
