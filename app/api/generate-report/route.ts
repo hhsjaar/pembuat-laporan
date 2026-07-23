@@ -79,68 +79,83 @@ function correctWeekdaysInObject(obj: any): any {
 }
 
 function sanitizeJsonString(str: string): string {
+  // Normalize line endings
   let normalized = str.replace(/\r\n/g, "\n");
-  const keyRegex = /"([a-zA-Z0-9_]+)"\s*:/g;
-  const keyMatches: { key: string; start: number; end: number }[] = [];
-  let match;
   
-  while ((match = keyRegex.exec(normalized)) !== null) {
-    keyMatches.push({
-      key: match[1],
-      start: match.index,
-      end: keyRegex.lastIndex
-    });
-  }
+  let result = "";
+  let inString = false;
+  let escaped = false;
   
-  if (keyMatches.length === 0) {
-    return str;
-  }
-  
-  let result = normalized.substring(0, keyMatches[0].start);
-  
-  for (let i = 0; i < keyMatches.length; i++) {
-    const currentKey = keyMatches[i];
-    const nextKey = keyMatches[i + 1];
-    
-    let valStart = currentKey.end;
-    let valEnd = nextKey ? nextKey.start : normalized.length;
-    
-    if (valEnd < valStart) {
-      valEnd = normalized.length;
-    }
-    
-    let segment = normalized.substring(valStart, valEnd);
-    const trimmedSegment = segment.trim();
-    const isString = trimmedSegment.startsWith('"');
-    
-    if (isString) {
-      const firstQuoteIdx = segment.indexOf('"');
-      let lastQuoteIdx = segment.lastIndexOf('"');
-      
-      if (firstQuoteIdx !== -1 && lastQuoteIdx !== -1 && firstQuoteIdx < lastQuoteIdx) {
-        let innerContent = segment.substring(firstQuoteIdx + 1, lastQuoteIdx);
-        let escapedInnerContent = "";
-        for (let j = 0; j < innerContent.length; j++) {
-          if (innerContent[j] === '"') {
-            if (j > 0 && innerContent[j - 1] === '\\') {
-              escapedInnerContent += '"';
-            } else {
-              escapedInnerContent += '\\"';
-            }
-          } else if (innerContent[j] === '\n') {
-            escapedInnerContent += '\\n';
-          } else if (innerContent[j] === '\r') {
-            // skip
-          } else {
-            escapedInnerContent += innerContent[j];
-          }
-        }
-        segment = segment.substring(0, firstQuoteIdx + 1) + escapedInnerContent + segment.substring(lastQuoteIdx);
+  const getNextNonWhitespace = (index: number): { char: string; index: number } => {
+    for (let k = index; k < normalized.length; k++) {
+      const c = normalized[k];
+      if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
+        return { char: c, index: k };
       }
     }
+    return { char: '', index: normalized.length };
+  };
+
+  for (let i = 0; i < normalized.length; i++) {
+    const char = normalized[i];
     
-    result += normalized.substring(currentKey.start, currentKey.end);
-    result += segment;
+    if (inString) {
+      if (escaped) {
+        result += char;
+        escaped = false;
+      } else if (char === '\\') {
+        result += char;
+        escaped = true;
+      } else if (char === '"') {
+        // Look ahead to see if this is the closing quote
+        const next1 = getNextNonWhitespace(i + 1);
+        let isClose = false;
+        
+        if (next1.char === '}' || next1.char === ']' || next1.char === ':') {
+          isClose = true;
+        } else if (next1.char === ',') {
+          // Look ahead past the comma to verify the next JSON token structure
+          const next2 = getNextNonWhitespace(next1.index + 1);
+          const c2 = next2.char;
+          const isValidJsonNext = 
+            c2 === '"' || 
+            c2 === '{' || 
+            c2 === '[' || 
+            c2 === '}' || 
+            c2 === ']' || 
+            (c2 >= '0' && c2 <= '9') || 
+            c2 === '-' || 
+            c2 === 't' || 
+            c2 === 'f' || 
+            c2 === 'n';
+            
+          if (isValidJsonNext) {
+            isClose = true;
+          }
+        }
+        
+        if (isClose) {
+          result += char;
+          inString = false;
+        } else {
+          // Unescaped double quote inside the string, escape it!
+          result += '\\"';
+        }
+      } else if (char === '\n') {
+        // Escape raw newline inside string
+        result += '\\n';
+      } else if (char === '\r') {
+        // skip
+      } else {
+        result += char;
+      }
+    } else {
+      result += char;
+      if (char === '"') {
+        inString = true;
+        escaped = false;
+      }
+    }
   }
   
   return result;
