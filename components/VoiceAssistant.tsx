@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, MicOff, X, Send, Volume2, VolumeX, Loader2, Play, Search, FileText } from "lucide-react";
+import { Mic, MicOff, X, Send, Volume2, VolumeX, Loader2, Play, Search, FileText, Download } from "lucide-react";
 
 // Custom markdown renderer helper to format bold highlights, bullets, and tables inside the bubble chat
 function parseMarkdown(text: string): React.ReactNode {
@@ -299,6 +299,34 @@ export default function VoiceAssistant({ onSelectTemplate, onViewReport, history
     }
   };
 
+  const handleDownloadDocx = async (text: string) => {
+    try {
+      const res = await fetch("/api/export-assistant-docx", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!res.ok) throw new Error("Gagal mengekspor dokumen.");
+
+      // Receive binary blob
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `draf-asisten-suara-${new Date().toISOString().slice(0, 10)}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mengunduh berkas Word. Silakan coba lagi.");
+    }
+  };
+
   const handleSubmitQuery = async (queryStr: string) => {
     if (!queryStr.trim()) return;
 
@@ -451,8 +479,35 @@ export default function VoiceAssistant({ onSelectTemplate, onViewReport, history
                       <div className="w-6 h-6 rounded-full bg-purple-600/30 border border-purple-500/20 text-purple-400 flex items-center justify-center text-[10px] font-bold shrink-0">
                         AI
                       </div>
-                      <div className="bg-neutral-900/60 border border-neutral-800/50 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%] shadow-md">
+                      <div className="bg-neutral-900/60 border border-neutral-800/50 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%] shadow-md relative group">
                         {parseMarkdown(msg.text)}
+                        
+                        {/* Download button for drafts/calculations */}
+                        {(() => {
+                          const isSubstantive = 
+                            msg.text.includes("|") || 
+                            msg.text.includes("- ") || 
+                            msg.text.includes("* ") || 
+                            /^\d+\.\s/m.test(msg.text) || 
+                            msg.text.length > 160 || 
+                            (msg.matchedReports && msg.matchedReports.length > 0);
+                          
+                          if (!isSubstantive) return null;
+
+                          return (
+                            <div className="mt-2.5 pt-1.5 border-t border-neutral-800/40 flex justify-end">
+                              <button
+                                type="button"
+                                onClick={() => handleDownloadDocx(msg.text)}
+                                className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-400 hover:text-white bg-neutral-800/40 hover:bg-purple-600/80 px-2 py-1 rounded-lg transition-all cursor-pointer shadow-sm border border-neutral-700/30 active:scale-95 select-none"
+                                title="Unduh Draf sebagai berkas Word (.docx)"
+                              >
+                                <Download className="w-3 h-3 text-purple-400 group-hover:text-white" />
+                                <span>Unduh Word</span>
+                              </button>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   ) : (

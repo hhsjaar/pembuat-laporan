@@ -702,6 +702,13 @@ PENTING - KETENTUAN PENULISAN DOKUMEN:
    - kegiatan: Tuliskan rencana kegiatan intelkam secara singkat dan padat (contoh: "Pemberangkatan Mahasiswa KKN Undip Tim I TA. 2024/ 2025", "Melaksanakan KKRYD 2024", "Melakukan monitoring distribusi BBM, LPG serta Bahan kebutuhan pokok di wilayah hukum Polsek Tembalang").
    - hasil: Anda WAJIB menuliskan kalimat ini secara eksak tanpa variasi apa pun: "Situasi kamtibmas aman terkendali berikut kejadian menonjol nihil"
    - ket: Isi dengan "-" atau "Nihil".
+   - KEGIATAN WAJIB/PATEN: Anda WAJIB menyertakan rencana kegiatan berikut ini di dalam daftar 'kegiatan_list' (masukkan sebagai salah satu item di no urut berapa pun):
+     {
+       "waktu_lokasi": "Pukul 10.00 Wib di wilayah Hukum Polsek Tembalang",
+       "kegiatan": "Melakukan monitoring distribusi BBM, LPG serta Bahan kebutuhan pokok di wilayah hukum Polsek Tembalang.",
+       "hasil": "Situasi kamtibmas aman terkendali berikut kejadian menonjol nihil",
+       "ket": "-"
+     }
 3. Tanggal Tanda Tangan (tanggal_ttd): Gunakan format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '${currentDate}').
 4. Penandatangan: jabatan_ttd: "BA SIAGA INTELKAM", nama_ttd: "YUDHA M.P.", pangkat_nrp_ttd: "AIPDA NRP 86040324".
 
