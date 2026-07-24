@@ -120,14 +120,7 @@ function sanitizeJsonString(str: string): string {
           const isValidJsonNext = 
             c2 === '"' || 
             c2 === '{' || 
-            c2 === '[' || 
-            c2 === '}' || 
-            c2 === ']' || 
-            (c2 >= '0' && c2 <= '9') || 
-            c2 === '-' || 
-            c2 === 't' || 
-            c2 === 'f' || 
-            c2 === 'n';
+            c2 === '[';
             
           if (isValidJsonNext) {
             isClose = true;
