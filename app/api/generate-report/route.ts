@@ -695,17 +695,21 @@ PENTING - ATURAN FORMAT JSON:
 2. JANGAN PERNAH menggunakan tanda kutip ganda mentah (") di dalam nilai string JSON. Jika ingin menulis kutipan, gunakan tanda kutip tunggal (') saja.`;
     } else if (templateType === "rencana-kegiatan") {
       systemPrompt = `Anda adalah asisten AI profesional pembuat Rencana Kegiatan Anggota Unit Intelkam dinas resmi kepolisian sektor Tembalang berbahasa Indonesia.
-Tugas Anda adalah merumuskan rencana kegiatan intelkam harian dalam bentuk tabel terstruktur.
+Tugas Anda adalah merumuskan rencana kegiatan intelkam harian dalam bentuk tabel terstruktur yang singkat, padat, dan jelas.
 
 ${calendarContext}
 
 PENTING - KETENTUAN PENULISAN DOKUMEN:
-1. Hari & Tanggal Rencana: Tentukan hari dan tanggal pelaksanaan rencana kegiatan. Jika terdeteksi tanggal di input gunakan itu, jika tidak gunakan tanggal hari ini: ${currentDate}.
+1. Hari & Tanggal Rencana (hari_tanggal): Gunakan hari dan tanggal hari ini yaitu: ${currentDay}, ${currentDate}. JANGAN PERNAH menambahkan atau memajukan 1 hari ke depan (jangan gunakan hari esok), selalu gunakan tanggal hari ini atau tanggal yang diminta oleh user secara eksak.
 2. Daftar Rencana Kegiatan (kegiatan_list):
-   Simulasikan daftar kegiatan Intelkam yang detail.
-   Setiap rencana kegiatan harus memiliki field: no, waktu_lokasi, kegiatan, hasil, ket.
-   Jika masukan user minim, buatlah minimal 2-3 rencana kegiatan yang sangat logis bagi intelkam Polsek.
-3. Tanggal Tanda Tangan (tanggal_ttd): Gunakan format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '23 Juli 2026').
+   Simulasikan rencana kegiatan Unit Intelkam yang sangat singkat, padat, dan berupa poin-poin dasar saja (tanpa penjelasan yang bertele-tele atau bahasa AI yang panjang lebar).
+   Setiap rencana kegiatan wajib memiliki field: no, waktu_lokasi, kegiatan, hasil, ket.
+   - no: Angka urutan (contoh: "1", "2")
+   - waktu_lokasi: Gunakan format "Pukul [Waktu] [WIB/Wib] [s.d. selesai] di [Lokasi/Wilayah hukum Polsek Tembalang]".
+   - kegiatan: Tuliskan rencana kegiatan intelkam secara singkat dan padat (contoh: "Pemberangkatan Mahasiswa KKN Undip Tim I TA. 2024/ 2025", "Melaksanakan KKRYD 2024", "Melakukan monitoring distribusi BBM, LPG serta Bahan kebutuhan pokok di wilayah hukum Polsek Tembalang").
+   - hasil: Anda WAJIB menuliskan kalimat ini secara eksak tanpa variasi apa pun: "Situasi kamtibmas aman terkendali berikut kejadian menonjol nihil"
+   - ket: Isi dengan "-" atau "Nihil".
+3. Tanggal Tanda Tangan (tanggal_ttd): Gunakan format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '${currentDate}').
 4. Penandatangan: jabatan_ttd: "BA SIAGA INTELKAM", nama_ttd: "YUDHA M.P.", pangkat_nrp_ttd: "AIPDA NRP 86040324".
 
 Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
