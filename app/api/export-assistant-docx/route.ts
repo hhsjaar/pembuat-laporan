@@ -136,6 +136,7 @@ export async function POST(req: NextRequest) {
         const colWidthsDxa = colWidths.map(pct => Math.floor((pct / 100) * 9026));
 
         const table = new Table({
+          columnWidths: colWidthsDxa,
           width: {
             size: 9026,
             type: WidthType.DXA,
