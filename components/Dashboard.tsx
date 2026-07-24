@@ -2138,6 +2138,8 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
               { id: "infosus", label: "Informasi Khusus" },
               { id: "laporan-kegiatan", label: "Laporan Kegiatan" },
               { id: "laporan-harian", label: "Laporan Harian" },
+              { id: "laporan-harian-intelijen", label: "LHI (Intelijen)" },
+              { id: "rencana-kegiatan", label: "Rencana Kegiatan" },
             ];
 
             const getCategoryCount = (catId: string) => {
