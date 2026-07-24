@@ -133,11 +133,12 @@ export async function POST(req: NextRequest) {
         const headers = tableRows[0];
         const rows = tableRows.slice(1).filter((row: string[]) => !row.every((cell: string) => cell.match(/^:?-+:?$/)));
         const colWidths = getColWidths(headers);
+        const colWidthsDxa = colWidths.map(pct => Math.floor((pct / 100) * 9026));
 
         const table = new Table({
           width: {
-            size: 100,
-            type: WidthType.PERCENTAGE,
+            size: 9026,
+            type: WidthType.DXA,
           },
           borders: {
             top: { style: BorderStyle.SINGLE, size: 8, color: "cccccc" },
@@ -153,8 +154,8 @@ export async function POST(req: NextRequest) {
               children: headers.map((h: string, idx: number) => 
                 new TableCell({
                   width: {
-                    size: colWidths[idx],
-                    type: WidthType.PERCENTAGE,
+                    size: colWidthsDxa[idx],
+                    type: WidthType.DXA,
                   },
                   children: [
                     new Paragraph({
@@ -166,7 +167,8 @@ export async function POST(req: NextRequest) {
                           color: "374151",
                           font: "Arial",
                         })
-                      ]
+                      ],
+                      spacing: { before: 40, after: 40 },
                     })
                   ],
                   shading: { fill: "f3f4f6", type: ShadingType.CLEAR },
@@ -180,12 +182,13 @@ export async function POST(req: NextRequest) {
                 children: row.map((cell: string, idx: number) => 
                   new TableCell({
                     width: {
-                      size: colWidths[idx],
-                      type: WidthType.PERCENTAGE,
+                      size: colWidthsDxa[idx],
+                      type: WidthType.DXA,
                     },
                     children: [
                       new Paragraph({
-                        children: parseInlineFormatting(cell.trim())
+                        children: parseInlineFormatting(cell.trim()),
+                        spacing: { before: 40, after: 40 },
                       })
                     ],
                     margins: { top: 100, bottom: 100, left: 150, right: 150 },
