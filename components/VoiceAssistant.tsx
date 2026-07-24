@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, MicOff, X, Send, Volume2, VolumeX, Loader2, Play, Search, FileText, Download } from "lucide-react";
+import { Mic, MicOff, X, Send, Volume2, VolumeX, Loader2, Play, Search, FileText, Download, Copy, Check } from "lucide-react";
 
 // Custom markdown renderer helper to format bold highlights, bullets, and tables inside the bubble chat
 function parseMarkdown(text: string): React.ReactNode {
@@ -170,6 +170,7 @@ export default function VoiceAssistant({ onSelectTemplate, onViewReport, history
   ]);
 
   const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
   // Update drag constraints dynamically based on window size to prevent dragging offscreen
   useEffect(() => {
@@ -325,6 +326,66 @@ export default function VoiceAssistant({ onSelectTemplate, onViewReport, history
       console.error(err);
       alert("Gagal mengunduh berkas Word. Silakan coba lagi.");
     }
+  };
+
+  const formatForWhatsApp = (rawText: string): string => {
+    const lines = rawText.split("\n");
+    const processedLines: string[] = [];
+    let inTable = false;
+    let tableLines: string[] = [];
+
+    const flushTable = () => {
+      if (tableLines.length > 0) {
+        processedLines.push("```");
+        tableLines.forEach((l) => processedLines.push(l));
+        processedLines.push("```");
+        tableLines = [];
+        inTable = false;
+      }
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
+        inTable = true;
+        tableLines.push(line);
+      } else {
+        if (inTable) {
+          flushTable();
+        }
+        let formattedLine = line;
+        // Replace double asterisks with single asterisks
+        formattedLine = formattedLine.replace(/\*\*([^*]+)\*\*/g, "*$1*");
+        // Convert headings to bold
+        formattedLine = formattedLine.replace(/^###\s*(.*)$/g, "*$1*");
+        formattedLine = formattedLine.replace(/^##\s*(.*)$/g, "*$1*");
+        // Ensure bullet lists start with "- "
+        if (formattedLine.trim().startsWith("* ")) {
+          formattedLine = formattedLine.replace(/^\*\s+/, "- ");
+        }
+        processedLines.push(formattedLine);
+      }
+    }
+
+    if (inTable) {
+      flushTable();
+    }
+
+    return processedLines.join("\n");
+  };
+
+  const handleCopyWhatsApp = (rawText: string, idx: number) => {
+    const formatted = formatForWhatsApp(rawText);
+    navigator.clipboard.writeText(formatted)
+      .then(() => {
+        setCopiedIdx(idx);
+        setTimeout(() => setCopiedIdx(null), 2000);
+      })
+      .catch((err) => {
+        console.error("Gagal menyalin teks:", err);
+      });
   };
 
   const handleSubmitQuery = async (queryStr: string) => {
@@ -495,14 +556,35 @@ export default function VoiceAssistant({ onSelectTemplate, onViewReport, history
                           if (!isSubstantive) return null;
 
                           return (
-                            <div className="mt-2.5 pt-1.5 border-t border-neutral-800/40 flex justify-end">
+                            <div className="mt-2.5 pt-1.5 border-t border-neutral-800/40 flex justify-end gap-2">
+                              {/* Copy for WhatsApp */}
+                              <button
+                                type="button"
+                                onClick={() => handleCopyWhatsApp(msg.text, index)}
+                                className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-400 hover:text-white bg-neutral-800/40 hover:bg-green-600/80 px-2 py-1 rounded-lg transition-all cursor-pointer shadow-sm border border-neutral-700/30 active:scale-95 select-none"
+                                title="Salin format untuk WhatsApp (*teks*, - list)"
+                              >
+                                {copiedIdx === index ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 text-green-400 group-hover:text-white" />
+                                    <span>Tersalin!</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5 text-green-400 group-hover:text-white" />
+                                    <span>Salin WA</span>
+                                  </>
+                                )}
+                              </button>
+
+                              {/* Download Word */}
                               <button
                                 type="button"
                                 onClick={() => handleDownloadDocx(msg.text)}
                                 className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-400 hover:text-white bg-neutral-800/40 hover:bg-purple-600/80 px-2 py-1 rounded-lg transition-all cursor-pointer shadow-sm border border-neutral-700/30 active:scale-95 select-none"
                                 title="Unduh Draf sebagai berkas Word (.docx)"
                               >
-                                <Download className="w-3 h-3 text-purple-400 group-hover:text-white" />
+                                <Download className="w-3.5 h-3.5 text-purple-400 group-hover:text-white" />
                                 <span>Unduh Word</span>
                               </button>
                             </div>
