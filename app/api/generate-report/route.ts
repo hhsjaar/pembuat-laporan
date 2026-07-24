@@ -258,6 +258,16 @@ export async function POST(req: NextRequest) {
 
     const currentDay = new Date().toLocaleDateString("id-ID", { weekday: "long" });
 
+    // Calculate tomorrow's date for Rencana Kegiatan template (H+1)
+    const tomorrowDateObj = new Date();
+    tomorrowDateObj.setDate(tomorrowDateObj.getDate() + 1);
+    const tomorrowDate = tomorrowDateObj.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    const tomorrowDay = tomorrowDateObj.toLocaleDateString("id-ID", { weekday: "long" });
+
     // Calendar helper matrix to guarantee 100% accurate day-to-date mapping for all of 2026
     const calendarContext = `
 =========================================
@@ -783,8 +793,9 @@ ${calendarContext}
 
 PENTING - KETENTUAN PENULISAN DOKUMEN:
 1. Hari & Tanggal Rencana (hari_tanggal): 
-   - Gunakan hari dan tanggal hari ini yaitu: ${currentDay}, ${currentDate} ATAU tanggal yang diminta oleh user/tertera di dokumen referensi secara eksak.
-   - JANGAN PERNAH MENAMBAHKAN ATAU MEMAJUKAN TANGGAL 1 HARI KE DEPAN! (Contoh: jika user meminta tanggal 18 Januari 2025, gunakan 18 Januari 2025 secara eksak. JANGAN mengubahnya menjadi 19 Januari 2025). Rencana kegiatan yang Anda susun harus dijadwalkan pada hari tersebut, bukan untuk esok harinya.
+   - Karena ini merupakan dokumen "Rencana Kegiatan" (rencana masa depan), maka hari dan tanggal rencana wajib dijadwalkan untuk esok hari / besok (H+1 dari tanggal hari ini atau tanggal referensi).
+   - Jika berdasarkan hari ini, Anda wajib menjadwalkannya untuk esok hari yaitu: ${tomorrowDay}, ${tomorrowDate}.
+   - Jika pengguna menentukan/merujuk tanggal referensi lain secara spesifik, Anda wajib menjadwalkannya tepat 1 hari setelah tanggal tersebut (H+1 secara eksak). Contoh: jika tanggal referensi di dokumen masukan adalah Sabtu, 18 Januari 2025, maka Rencana Kegiatan wajib dijadwalkan untuk Minggu, 19 Januari 2025.
 2. Daftar Rencana Kegiatan (kegiatan_list):
    Simulasikan rencana kegiatan Unit Intelkam yang sangat singkat, padat, dan berupa poin-poin dasar saja (tanpa penjelasan yang bertele-tele atau bahasa AI yang panjang lebar).
    Setiap rencana kegiatan wajib memiliki field: no, waktu_lokasi, kegiatan, hasil, ket.
