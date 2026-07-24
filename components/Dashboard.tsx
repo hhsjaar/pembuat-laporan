@@ -10,6 +10,7 @@ import AudioUploader from "./AudioUploader";
 import PdfUploader from "./PdfUploader";
 import ProcessingModal, { ProcessingStep, StepId } from "./ProcessingModal";
 import ReportPreview from "./ReportPreview";
+import VoiceAssistant from "./VoiceAssistant";
 
 interface Toast {
   id: string;
@@ -2460,7 +2461,32 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
         </AnimatePresence>
       </div>
 
-
+      {/* AI Voice Assistant */}
+      <VoiceAssistant
+        onSelectTemplate={(templateId) => {
+          setTemplateType(templateId as any);
+          setActiveTab("generator");
+          addToast(`Beralih ke pembuatan ${templateId.replace(/-/g, " ")}`, "success");
+        }}
+        onViewReport={(reportId) => {
+          const item = historyList.find((r) => r.id === reportId);
+          if (item) {
+            setSelectedHistoryItem(item);
+            setActiveTab("history");
+            addToast(`Membuka riwayat laporan: ${item.perihal}`, "success");
+          } else {
+            addToast("Laporan tidak ditemukan di riwayat lokal. Memuat ulang riwayat...", "info");
+            fetchHistory().then(() => {
+              const updatedItem = historyList.find((r) => r.id === reportId);
+              if (updatedItem) {
+                setSelectedHistoryItem(updatedItem);
+                setActiveTab("history");
+              }
+            });
+          }
+        }}
+        historyList={historyList}
+      />
 
     {/* Mobile Bottom Navigation Bar */}
     <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/90 dark:bg-neutral-950/90 border-t border-neutral-200/40 dark:border-neutral-800/40 backdrop-blur-md px-6 py-2 flex justify-around items-center">
