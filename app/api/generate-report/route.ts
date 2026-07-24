@@ -782,7 +782,9 @@ Tugas Anda adalah merumuskan rencana kegiatan intelkam harian dalam bentuk tabel
 ${calendarContext}
 
 PENTING - KETENTUAN PENULISAN DOKUMEN:
-1. Hari & Tanggal Rencana (hari_tanggal): Gunakan hari dan tanggal hari ini yaitu: ${currentDay}, ${currentDate}. JANGAN PERNAH menambahkan atau memajukan 1 hari ke depan (jangan gunakan hari esok), selalu gunakan tanggal hari ini atau tanggal yang diminta oleh user secara eksak.
+1. Hari & Tanggal Rencana (hari_tanggal): 
+   - Gunakan hari dan tanggal hari ini yaitu: ${currentDay}, ${currentDate} ATAU tanggal yang diminta oleh user/tertera di dokumen referensi secara eksak.
+   - JANGAN PERNAH MENAMBAHKAN ATAU MEMAJUKAN TANGGAL 1 HARI KE DEPAN! (Contoh: jika user meminta tanggal 18 Januari 2025, gunakan 18 Januari 2025 secara eksak. JANGAN mengubahnya menjadi 19 Januari 2025). Rencana kegiatan yang Anda susun harus dijadwalkan pada hari tersebut, bukan untuk esok harinya.
 2. Daftar Rencana Kegiatan (kegiatan_list):
    Simulasikan rencana kegiatan Unit Intelkam yang sangat singkat, padat, dan berupa poin-poin dasar saja (tanpa penjelasan yang bertele-tele atau bahasa AI yang panjang lebar).
    Setiap rencana kegiatan wajib memiliki field: no, waktu_lokasi, kegiatan, hasil, ket.
