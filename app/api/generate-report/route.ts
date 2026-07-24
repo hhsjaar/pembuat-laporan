@@ -154,6 +154,95 @@ function sanitizeJsonString(str: string): string {
   return result;
 }
 
+function healTruncatedJson(str: string): any {
+  let cleaned = str.trim();
+  
+  const closeStructures = (input: string): string => {
+    let inString = false;
+    let escaped = false;
+    const stack: string[] = [];
+    
+    for (let i = 0; i < input.length; i++) {
+      const char = input[i];
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (char === '\\') {
+          escaped = true;
+        } else if (char === '"') {
+          inString = false;
+        }
+      } else {
+        if (char === '"') {
+          inString = true;
+          escaped = false;
+        } else if (char === '{' || char === '[') {
+          stack.push(char);
+        } else if (char === '}') {
+          if (stack[stack.length - 1] === '{') {
+            stack.pop();
+          }
+        } else if (char === ']') {
+          if (stack[stack.length - 1] === '[') {
+            stack.pop();
+          }
+        }
+      }
+    }
+    
+    let result = input;
+    if (inString) {
+      if (result.endsWith('\\') && !result.endsWith('\\\\')) {
+        result = result.slice(0, -1);
+      }
+      result += '"';
+    }
+    
+    while (stack.length > 0) {
+      const openChar = stack.pop();
+      if (openChar === '{') {
+        result += '}';
+      } else if (openChar === '[') {
+        result += ']';
+      }
+    }
+    
+    return result;
+  };
+
+  // Attempt 1: Just close current structures
+  try {
+    const attempt1 = closeStructures(cleaned);
+    return JSON.parse(attempt1);
+  } catch (err1) {
+    // Attempt 2: If it failed, slice up to the last comma and try again
+    const lastCommaIndex = cleaned.lastIndexOf(",");
+    if (lastCommaIndex !== -1) {
+      try {
+        const sliced = cleaned.substring(0, lastCommaIndex);
+        const attempt2 = closeStructures(sliced);
+        return JSON.parse(attempt2);
+      } catch (err2) {
+        // Multi-level comma slicing up to 3 times
+        let tempStr = cleaned;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const commaIdx = tempStr.lastIndexOf(",");
+          if (commaIdx === -1) break;
+          tempStr = tempStr.substring(0, commaIdx);
+          try {
+            const attemptN = closeStructures(tempStr);
+            return JSON.parse(attemptN);
+          } catch (errN) {
+            // continue
+          }
+        }
+      }
+    }
+  }
+  
+  throw new Error("Gagal menyembuhkan JSON yang terpotong.");
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { transcript, imageAnalysis, pdfText, userInput, userPreference = "", templateType, laporanHarianForm, scope } = await req.json();
@@ -993,16 +1082,33 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
       } catch (secondErr: any) {
         console.error("State-machine sanitization also failed:", secondErr.message);
         
-        // Final fallback: attempt basic regex sanitization to recover raw newlines in string properties:
+        // Try healing the JSON from state-machine sanitized text in case it is truncated:
         try {
-          const sanitizedRegex = resultText
-            .replace(/\r?\n/g, "\\n")
-            .replace(/\\n\s*"/g, '\n  "')
-            .replace(/\\n\s*}/g, '\n}');
-          reportData = JSON.parse(sanitizedRegex);
-          console.log("Successfully parsed JSON after regex sanitization fallback!");
-        } catch (thirdErr) {
-          throw new Error(`Gagal mem-parsing format JSON dari AI. Detail: ${parseErr.message}`);
+          const sanitized = sanitizeJsonString(resultText);
+          reportData = healTruncatedJson(sanitized);
+          console.log("Successfully healed and parsed truncated JSON after state-machine sanitization!");
+        } catch (healErr: any) {
+          console.error("JSON healing after state-machine sanitization failed:", healErr.message);
+          
+          // Try healing raw resultText directly:
+          try {
+            reportData = healTruncatedJson(resultText);
+            console.log("Successfully healed and parsed raw truncated JSON!");
+          } catch (healErr2: any) {
+            console.error("JSON healing of raw text failed:", healErr2.message);
+            
+            // Final fallback: attempt basic regex sanitization to recover raw newlines in string properties:
+            try {
+              const sanitizedRegex = resultText
+                .replace(/\r?\n/g, "\\n")
+                .replace(/\\n\s*"/g, '\n  "')
+                .replace(/\\n\s*}/g, '\n}');
+              reportData = JSON.parse(sanitizedRegex);
+              console.log("Successfully parsed JSON after regex sanitization fallback!");
+            } catch (thirdErr) {
+              throw new Error(`Gagal mem-parsing format JSON dari AI. Detail: ${parseErr.message}`);
+            }
+          }
         }
       }
     }
