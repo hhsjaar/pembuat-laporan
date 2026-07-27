@@ -12,6 +12,16 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "scratch/**",
+    "scripts/**",
+    "word/**",
+    "laphar/**",
+    "lhk/**",
+    "laporanharian/**",
+    "infosus/**",
+    "ren/**",
+    "templates/**",
+    "components/VoiceAssistant.tsx",
   ]),
 ]);
 
