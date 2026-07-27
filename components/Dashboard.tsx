@@ -10,7 +10,7 @@ import AudioUploader from "./AudioUploader";
 import PdfUploader from "./PdfUploader";
 import ProcessingModal, { ProcessingStep, StepId } from "./ProcessingModal";
 import ReportPreview from "./ReportPreview";
-import VoiceAssistant from "./VoiceAssistant";
+// import VoiceAssistant from "./VoiceAssistant";
 
 interface Toast {
   id: string;
@@ -2463,8 +2463,8 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
         </AnimatePresence>
       </div>
 
-      {/* AI Voice Assistant */}
-      <VoiceAssistant
+      {/* AI Voice Assistant (Disabled) */}
+      {/* <VoiceAssistant
         onSelectTemplate={(templateId) => {
           setTemplateType(templateId as any);
           setActiveTab("generator");
@@ -2488,7 +2488,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
           }
         }}
         historyList={historyList}
-      />
+      /> */}
 
     {/* Mobile Bottom Navigation Bar */}
     <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/90 dark:bg-neutral-950/90 border-t border-neutral-200/40 dark:border-neutral-800/40 backdrop-blur-md px-6 py-2 flex justify-around items-center">
