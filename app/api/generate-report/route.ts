@@ -1017,7 +1017,7 @@ Aturan Tambahan:
     }
 
     let userPrompt = "";
-    if (templateType === "laporan-harian") {
+    if (templateType === "laporan-harian" || templateType === "laporan-harian-intelijen") {
       userPrompt = `
 Template Laporan yang Dipilih: ${templateType}
 
@@ -1042,7 +1042,7 @@ DOKUMEN DAN UNGGAHAN BERKAS DARI USER (Untuk ekstraksi event dinamis):
 
 PENTING: Jika pengguna memberikan instruksi khusus pada bagian ke-5 di atas, Anda WAJIB memprioritaskan dan mematuhi instruksi tersebut dalam merancang konten, struktur, maupun detail teknis dari laporan yang dihasilkan.
 
-Silakan susun Laporan Harian Situasi Kamtibmas Polsek Tembalang lengkap sesuai format dan merging rules.`;
+Silakan susun laporan lengkap sesuai format dan merging rules.`;
     } else {
       userPrompt = `
 Template Laporan yang Dipilih: ${templateType}

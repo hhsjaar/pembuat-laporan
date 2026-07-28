@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
       const otherFields = templateType === "infosus"
         ? ["fakta_fakta", "analisa", "prediksi", "langkah", "rekomendasi"]
         : (templateType === "laporan-harian-intelijen"
-          ? ["pendahuluan_politik", "pendahuluan_sosbud", "pendahuluan_ekonomi", "pendahuluan_keamanan", "fakta_sosial_budaya", "kriminalitas_text", "laka_lantas_text", "bencana_alam_text", "tahanan_text", "vvip_text", "lain_lain_text"]
+          ? ["pendahuluan_politik", "pendahuluan_sosbud", "pendahuluan_ekonomi", "pendahuluan_keamanan", "fakta_sosial_politik", "fakta_sosial_ekonomi_intro", "fakta_sosial_budaya", "kriminalitas_text", "laka_lantas_text", "bencana_alam_text", "tahanan_text", "vvip_text", "lain_lain_text"]
           : ["isi_laporan", "analisa", "prediksi", "langkah", "rekomendasi"]);
       otherFields.forEach((field) => {
         const regex = new RegExp(`\\{\\{${field}\\}\\}`, "g");
@@ -210,6 +210,8 @@ export async function POST(req: NextRequest) {
       pendahuluan_sosbud: isXmlTemplate ? convertTextToOpenXml(reportData.pendahuluan_sosbud || "", "", 1134) : (reportData.pendahuluan_sosbud || ""),
       pendahuluan_ekonomi: isXmlTemplate ? convertTextToOpenXml(reportData.pendahuluan_ekonomi || "", "", 1134) : (reportData.pendahuluan_ekonomi || ""),
       pendahuluan_keamanan: isXmlTemplate ? convertTextToOpenXml(reportData.pendahuluan_keamanan || "", "", 1134) : (reportData.pendahuluan_keamanan || ""),
+      fakta_sosial_politik: isXmlTemplate ? convertTextToOpenXml(reportData.fakta_sosial_politik || "", "", 1701) : (reportData.fakta_sosial_politik || ""),
+      fakta_sosial_ekonomi_intro: isXmlTemplate ? convertTextToOpenXml(reportData.fakta_sosial_ekonomi_intro || "", "", 1701) : (reportData.fakta_sosial_ekonomi_intro || ""),
       fakta_sosial_budaya: isXmlTemplate ? convertTextToOpenXml(reportData.fakta_sosial_budaya || "", "", 1701) : (reportData.fakta_sosial_budaya || ""),
       kriminalitas_text: isXmlTemplate ? convertTextToOpenXml(reportData.kriminalitas_text || "", "", 2268) : (reportData.kriminalitas_text || ""),
       laka_lantas_text: isXmlTemplate ? convertTextToOpenXml(reportData.laka_lantas_text || "", "", 2268) : (reportData.laka_lantas_text || ""),
