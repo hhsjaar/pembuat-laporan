@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Image, Upload, X, FileImage, Trash2 } from "lucide-react";
 
@@ -85,6 +85,15 @@ export default function ImageUploader({ images, onChange, onError }: ImageUpload
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+
+  useEffect(() => {
+    const urls = images.map((file) => URL.createObjectURL(file));
+    setImageUrls(urls);
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [images]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -248,7 +257,8 @@ export default function ImageUploader({ images, onChange, onError }: ImageUpload
             className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3"
           >
             {images.map((file, idx) => {
-              const fileUrl = URL.createObjectURL(file);
+              const fileUrl = imageUrls[idx];
+              if (!fileUrl) return null;
               return (
                 <motion.div
                   key={`${file.name}-${idx}`}
