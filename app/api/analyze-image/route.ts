@@ -23,10 +23,10 @@ Mohon lakukan analisis mendalam dan lakukan ekstraksi detail terperinci:
 1. Jadwal & Rundown Acara: Waktu/timestamps pelaksanaan, nama sesi, pembicara, narasumber, moderator, atau penanggung jawab, dan lokasi ruang/tempat acara jika tercantum.
 2. Latar Belakang & Detail Acara: Informasi konteks acara, tujuan, sejarah singkat, kepengurusan panitia, latar belakang organisasi, atau profil tokoh penting yang relevan.
 3. Aturan & Ketentuan Khusus: Segala aturan keamanan, petunjuk teknis pelaksanaan, body checking, barang terlarang, atau tata tertib acara.
-4. Daftar Harga Sembako/Bahan Makanan: Jika ada gambar berupa tabel/foto daftar harga bahan pokok atau hasil pantauan harga pasar, tolong lakukan ekstraksi nominal harga (harga kemarin, harga hari ini, kenaikan/penurunan) untuk masing-masing komoditas secara sangat rinci dan presisi.
+4. Daftar Harga Sembako/Bahan Makanan: Jika ada gambar berupa tabel/foto daftar harga bahan pokok atau hasil pantauan harga pasar, tolong lakukan ekstraksi nominal harga terendah (Harga Min) dan harga tertinggi (Harga Max) untuk masing-masing komoditas secara sangat rinci, lengkap, dan presisi. JANGAN menyingkat atau membulatkan nominal angka. Ekstrak seluruh 16 bahan makanan pokok yang terlihat secara verbatim.
 5. Fakta Tambahan: Informasi penting lainnya yang dapat dijadikan bahan fakta dasar penyusunan laporan intelkam resmi.
 
-Berikan hasil analisis ekstraksi yang sangat detail, padat, runtut, terstruktur, dan profesional. Kelompokkan berdasarkan kategori informasi yang Anda temukan agar mudah dibaca dan dijadikan dasar penyusunan laporan.`,
+Berikan hasil analisis ekstraksi yang sangat detail, padat, runtut, terstruktur, dan profesional. Kelompokkan berdasarkan kategori informasi yang Anda temukan agar mudah dibaca dan dijadikan dasar penyusunan laporan. JANGAN melakukan pembulatan, ringkasan, atau perkiraan untuk setiap nominal harga, waktu, maupun nama orang yang tercantum.`,
       },
     ];
 
@@ -53,7 +53,7 @@ Berikan hasil analisis ekstraksi yang sangat detail, padat, runtut, terstruktur,
           content: contentParts,
         },
       ],
-      max_tokens: 1200,
+      max_tokens: 4000,
     });
 
     const analysis = response.choices[0].message.content || "Tidak ada hasil analisis.";

@@ -1,0 +1,100 @@
+[P] POLRI DAERAH JAWA TENGAH
+[P] RESOR KOTA BESAR SEMARANG
+[P] POLSEK TEMMBALANG
+[P] Jl. Turus Asri No. 9 Tembalang Semarang
+[P] Nomor: {{nomor_laporan}}
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[P] LAPORAN HARIAN INTELIJEN
+[P] Hari {{hari}}, Tanggal {{tanggal}}
+[EMPTY P]
+[EMPTY P]
+[P] PENDAHULUAN
+[EMPTY P]
+[P] Bidang Politik
+[P] {{pendahuluan_politik}}
+[EMPTY P]
+[P] Bidang Sosial Budaya
+[P] {{pendahuluan_sosbud}}
+[EMPTY P]
+[P] Bidang Ekonomi
+[P] {{pendahuluan_ekonomi}}
+[EMPTY P]
+[P] Bidang Keamanan
+[P] {{pendahuluan_keamanan}}
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[P] II. FAKTA .....
+[P] FAKTA-FAKTA
+[EMPTY P]
+[P] Aspek Sosial
+[EMPTY P]
+[P] Sosial Politik
+[P] {{fakta_sosial_politik}}
+[EMPTY P]
+[P] Sosial Ekonomi
+[P] {{fakta_sosial_ekonomi_intro}}
+[EMPTY P]
+[P] Daftar harga kebutuhan pokok di Pasar Kedungmundu dan Pasar Meteseh dilaporkan sebagai berikut:
+[EMPTY P]
+[TABLE START]
+  [ROW] NO | NAMA BARANG | KEMARIN | HARI INI | NAIK/TURUN
+  [ROW] 1 | Beras Medium | {{beras_kemarin}} | {{beras_hari_ini}} | {{beras_selisih}}
+  [ROW] 2 | Kedelai | {{kedelai_kemarin}} | {{kedelai_hari_ini}} | {{kedelai_selisih}}
+  [ROW] 3 | Cabai
+  [ROW]  | Cabai Merah Besar | {{cabai_merah_kemarin}} | {{cabai_merah_hari_ini}} | {{cabai_merah_selisih}}
+  [ROW]  | Rawit Merah | {{cabai_rawit_kemarin}} | {{cabai_rawit_hari_ini}} | {{cabai_rawit_selisih}}
+  [ROW]  | Cabai Tampar | {{cabai_tampar_kemarin}} | {{cabai_tampar_hari_ini}} | {{cabai_tampar_selisih}}
+  [ROW] 4 | Bawang
+  [ROW]  | Merah | {{bawang_merah_kemarin}} | {{bawang_merah_hari_ini}} | {{bawang_merah_selisih}}
+  [ROW]  | Putih | {{bawang_putih_kemarin}} | {{bawang_putih_hari_ini}} | {{bawang_putih_selisih}}
+  [ROW] 5 | Jagung | {{jagung_kemarin}} | {{jagung_hari_ini}} | {{jagung_selisih}}
+  [ROW] 6 | Gula Pasir | {{gula_kemarin}} | {{gula_hari_ini}} | {{gula_selisih}}
+  [ROW] 7 | Minyak Goreng | {{minyak_kemarin}} | {{minyak_hari_ini}} | {{minyak_selisih}}
+  [ROW] 8 | Tepung Terigu | {{terigu_kemarin}} | {{terigu_hari_ini}} | {{terigu_selisih}}
+  [ROW] 9 | Daging Sapi Lokal | {{daging_sapi_kemarin}} | {{daging_sapi_hari_ini}} | {{daging_sapi_selisih}}
+  [ROW] 10 | Daging Ayam Ras | {{daging_ayam_kemarin}} | {{daging_ayam_hari_ini}} | {{daging_ayam_selisih}}
+  [ROW] 11 | Telur Ayam Ras | {{telur_kemarin}} | {{telur_hari_ini}} | {{telur_selisih}}
+  [ROW] 12 | Garam | {{garam_kemarin}} | {{garam_hari_ini}} | {{garam_selisih}}
+  [ROW] 13 | Gas LPG 3 Kg | {{lpg_kemarin}} | {{lpg_hari_ini}} | {{lpg_selisih}}
+[TABLE END]
+[EMPTY P]
+[P] Sosial Budaya
+[P] {{fakta_sosial_budaya}}
+[P] Aspek Keamanan
+[EMPTY P]
+[P] Keamanan Umum
+[EMPTY P]
+[P] Kriminalitas:
+[P] {{kriminalitas_text}}
+[EMPTY P]
+[P] Laka Lantas
+[P] {{laka_lantas_text}}
+[EMPTY P]
+[P] Bencana Alam:
+[P] {{bencana_alam_text}}
+[EMPTY P]
+[P] Keamanan Khusus
+[P] {{tahanan_text}}
+[EMPTY P]
+[P] Pengamanan VVIP/VIP:
+[P] {{vvip_text}}
+[EMPTY P]
+[P] Lain-lain
+[P] {{lain_lain_text}}
+[EMPTY P]
+[P] Semarang, {{tanggal_ttd}}
+[P] UNIT INTELKAM 
+[EMPTY P]
+[EMPTY P]
+[P] Autentikasi:
+[EMPTY P]
+[P] Distribusi:
+[P] Sat Intelkam Polrestabes Semarang
+[P] Kapolsek Tembalang

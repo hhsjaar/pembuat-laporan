@@ -1,0 +1,145 @@
+[P] POLRI DAERAH JAWA TENGAH
+[P] RESOR KOTA BESAR SEMARANG
+[P] POLSEK TEMMBALANG
+[P] Jl. Turus Asri No. 9 Tembalang Semarang
+[P] Nomor: R/LHI/185/VII/REN.4.1.1./2026/Intelkam
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[P] LAPORAN HARIAN INTELIJEN
+[P] Hari Sabtu, Tanggal 04 Juli 2026
+[EMPTY P]
+[EMPTY P]
+[P] PENDAHULUAN
+[EMPTY P]
+[P] Bidang Politik
+[P] Situasi politik nasional pada Juni 2026 berada dalam fase konsolidasi pemerintahan Presiden Prabowo Subianto pasca-Pemilu 2024, dengan isu utama berkisar pada polemik parliamentary threshold dalam pembahasan RUU Pemilu yang akan dimulai Juli–Agustus 2026, serta tekanan dari aksi penyampaian aspirasi elemen mahasiswa dan buruh yang menuntut hapus outsourcing dan revisi UU Sisdiknas. Di tingkat daerah, koordinasi unsur Forkopimda dioptimalkan menjelang dan sesudah May Day 2026 untuk mengantisipasi dinamika protes buruh. Secara umum, situasi politik domestik tetap aman, tertib, dan kondusif meskipun terdapat dinamika politik yang intens.
+[EMPTY P]
+[P] Bidang Sosial Budaya
+[P] Kehidupan sosial budaya masyarakat, termasuk interaksi di lingkungan civitas akademika, berjalan harmonis dengan toleransi yang terjaga baik. Potensi kerentanan yang diwaspadai saat ini adalah penyebaran hoaks dan provokasi isu sensitif melalui media sosial yang dapat memicu gesekan horizontal. Pendekatan persuasif yang melibatkan tokoh masyarakat serta tokoh agama terus dikedepankan sebagai upaya menangkal polarisasi dan menjaga stabilitas sosial.
+[EMPTY P]
+[P] Bidang Ekonomi
+[P] Kondisi ekonomi secara umum relatif stabil dengan pertumbuhan 5,61% (yoy) pada Triwulan I-2026, yang merupakan capaian tertinggi dalam 13 tahun untuk periode kuartal pertama. Inflasi terkendali di 2,49% dan konsumsi rumah tangga tumbuh 5,52%, namun fluktuasi nilai tukar (rupiah melemah ke Rp17.346/USD) dan potensi tekanan biaya hidup tetap memerlukan pengawasan karena dapat memengaruhi daya beli masyarakat, terutama kalangan buruh dan mahasiswa. Langkah pengendalian inflasi dan operasi pasar terus dilakukan untuk mengantisipasi potensi kerawanan sosial akibat tekanan ekonomi.
+[EMPTY P]
+[P] Bidang Keamanan
+[P] Situasi kamtibmas secara umum kondusif, namun deteksi dini terhadap gangguan jalanan kelompok remaja pada malam hari tetap diintensifkan. Di sisi lain, kewaspadaan terhadap ancaman terorisme tetap menjadi prioritas utama di mana penyebaran paham radikal kini masif memanfaatkan algoritma media sosial dan game online untuk mendoktrin anak-anak serta generasi muda secara mandiri.
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[P] II. FAKTA .....
+[P] FAKTA-FAKTA
+[EMPTY P]
+[P] Aspek Sosial
+[EMPTY P]
+[P] Sosial Politik
+[P] Pada hari Sabtu, tanggal 4 Juli 2026 kegiatan maupun kejadian menonjol NIHIL
+[EMPTY P]
+[P] Sosial Ekonomi
+[P] Perkembangan harga sembako di Pasar Kedungmundu dan Pasar Meteseh harga stabil dan tidak ada kelangkaan pasokan. 
+[EMPTY P]
+[P] Daftar harga kebutuhan pokok di Pasar Kedungmundu dan Pasar Meteseh dilaporkan sebagai berikut:
+[EMPTY P]
+[TABLE START]
+  [ROW] NO | NAMA BARANG | KEMARIN | HARI INI | NAIK/TURUN
+  [ROW] 1 | Beras Medium | Rp.   13.200/Kg | Rp. 13.200/Kg | -
+  [ROW] 2 | Kedelai | Rp.   13.000/Kg | Rp. 13.000/Kg | -
+  [ROW] 3 | Cabai
+  [ROW]  | Cabai Merah Besar | Rp  . 47.100/Kg | Rp.  47.100/Kg | -
+  [ROW]  | Rawit Merah | Rp.   72.300/Kg | Rp.  72.300/Kg | -
+  [ROW]  | Cabai Tampar | Rp.   42.900/Kg | Rp.  42.900/Kg | -
+  [ROW] 4 | Bawang
+  [ROW]  | Merah | Rp.   45.400/Kg | Rp.  45.400/Kg | -
+  [ROW]  | Putih | Rp.   35.600/Kg | Rp.  35.600/Kg | -
+  [ROW] 5 | Jagung | Rp.     9.700/Kg | Rp.    9.700/Kg | -
+  [ROW] 6 | Gula Pasir | Rp.   17.700/Kg | Rp.  17.700/Kg | -
+  [ROW] 7 | Minyak Goreng | Rp.   16.300/Liter | Rp.  16.300/Liter | -
+  [ROW] 8 | Tepung Terigu | Rp.   12.100/Kg | Rp.  12.100/Kg | -
+  [ROW] 9 | Daging Sapi Lokal | Rp. 135.000/Kg | Rp.135.000/Kg | -
+  [ROW] 10 | Daging Ayam Ras | Rp.   37.200/Kg | Rp.  37.200/Kg | -
+  [ROW] 11 | Telur Ayam Ras | Rp.   27.700/Kg | Rp.  27.700/Kg | -
+  [ROW] 12 | Garam | Rp. 2.600 (250g) | Rp. 2.600 (250g) | -
+  [ROW] 13 | Gas LPG 3 Kg | Rp. 22.000/Kg | Rp. 22.000/Kg | -
+[TABLE END]
+[EMPTY P]
+[P] Sosial Budaya
+[P] Pada hari Sabtu, tanggal 4 Juli 2026 kejadian menonjol yang dapat dilaporkan :
+[EMPTY P]
+[P] Kegiatan pemberangkatan Calon Warga Baru Persaudaraan Setia Hati Terate (PSHT) Cabang Kota Semarang - Pusat Madiun tahun 2026 ke Magelang dengan titik kumpul di Medan Latihan Drill Teknis dan Taktis Kodam IV / Diponegoro (Lapangan Tembak) Kecamatan Tembalang, Kota Semarang,
+[EMPTY P]
+[P] A. Pada hari Sabtu tanggal 4 Juli 2026 Pukul 14.15 WIB telah berlangsung Kegiatan pemberangkatan Calon Warga Baru Persaudaraan Setia Hati Terate (PSHT) Cabang Kota Semarang - Pusat Madiun tahun 2026 ke Magelang yang diikuti oleh ± 50 peserta dengan penanggungjawab kegiatan bp Suryanto dengan titik peserta pemberangkatan di Medan Latihan Drill Teknis dan Taktis Kodam IV / Diponegoro (Lapangan Tembak) Kecamatan Tembalang, Kota Semarang. 
+[EMPTY P]
+[P] B. Kegiatan pemberangkatan Calon Warga Baru Persaudaraan Setia Hati Terate (PSHT) Cabang Kota Semarang - Pusat Madiun tahun 2026 ke Magelang tersebut sesuai dengan surat pemberitahuan resmi dengan Nomor: 01 / PC – PSHT. A. 016.2 / VII / 2026 tanggal 01 Juli 2026 yang dikeluarkan oleh Pengurus PSHT Cabang Kota Semarang - Pusat Madiun berdasarkan AD/ART PSHT Pusat Madiun Tahun 2026 dan hasil rapat Pengurus Cabang Kota Semarang serta Program Kerja Pengurus Cabang Tahun 2026 , Kegiatan pengesahan warga baru tahun 2026 untuk Cabang Kota Semarang diputuskan bergabung dengan Cabang Magelang, yang akan dilaksanakan di Kabupaten Magelang.
+[EMPTY P]
+[P] C. Guna Keamanan dan keselamatan  serta untuk meminimalisir penggunaan kendaraan roda dua secara massal, Keberangkatan rombongan Sebanyak 34 (tiga puluh empat) orang Calon Warga Baru PSHT Cabang Kota Semarang Pusat Madiun diakomodir menggunakan armada Bus Medium  .
+[EMPTY P]
+[P] D. Pukul 14.00 Wib rombongan Calon Warga Baru PSHT Cabang Kota Semarang Pusat Madiun yang berkumpul di Medan Latihan Drill Teknis dan Taktis Kodam IV / Diponegoro Tembalang telah berangkat ke magelang menggunakan bus no pol AG-7408-UC Kegiatan berlangsung dengan aman terkendali kejadian menonjol nihil
+[EMPTY P]
+[P] Kegiatan Kirab Budaya Warga Rowosari dalam rangka Haul Umum XXXI Sesepuh Rowosari (Mbah Muhsinin, Mbah Citro, Mbah Tego) Kelurahan Rowosari Kecamatan Tembalang Kota Semarang
+[EMPTY P]
+[P] A. Pada hari Sabtu tanggal 4 Juli 2026, mulai pukul 15.30 sd 16.45 WIB bertempat di Halaman Musholla At-Taqwa Jl. At-Taqwa Rt 01/04  Dk. Rowo Tengah Kel. Rowosari Kec. Tembalang Kota Semarang telah berlangsung kegiatan Pembukaan Kirab Budaya Warga Rowosari dalam rangka Haul Umum XXXI Sesepuh Rowosari (Mbah Muhsinin, Mbah Citro, Mbah Tego) Tahun 1448 H / 2026 M dengan tema "MIKUL DUWUR MENDEM JERO " yang diikuti oleh ± 1000 orang dengan penanggungjawab kegiatan bp SETIO BUDI . 
+[EMPTY P]
+[P] B. Kegiatan keagamaan dan kebudayaan tahunan ini diinisiasi oleh Panitia Haul Umum XXXI Sesepuh Rowosari dengan rute Kirab Budaya melintasi jalur protokol kelurahan dengan rincian titik kumpul sebagai berikut:
+[P] 1. Titik Start: Musholla Attaqwa, Jl. At-Taqwa Rowo Tengah RT 04, Kelurahan Rowosari.
+[P] 2. Titik Finish: Makam Mbah Muhsinin, Krasak RT 02 / RW 03, Kelurahan Rowosari.
+[EMPTY P]
+[P] C. Adapun Rundown kegiatan Kirab Budaya Warga Rowosari sebagai berikut:
+[P] 1. Pukul 13.30 – 14.00 WIB: Persiapan akhir oleh jajaran panitia di titik start.
+[P] 2. Pukul 14.00 – 15.00 WIB: Pementasan Seni Budaya guna menghibur warga dan peserta kirab, menampilkan Hadroh Ahbabun Nabi, Drumband New La Tansa, serta pertunjukan Kuda Lumping yang dikombinasikan dengan Drumband.
+[P] 3. Pukul 15.00 – 15.15 WIB: Jeda pelaksanaan Sholat Ashar berjamaah.
+[P] 4. Pukul 15.15 – 15.20 WIB: Pembukaan 
+[P] 5. Pukul 15.20 – 15.25 WIB: Menyanyikan lagu kebangsaan Indonesia Raya 
+[P] 6. Pukul 15.25 – 15.30 WIB: Sambutan dari perwakilan panitia penyelenggara yang disampaikan oleh Drs. KH. Masykur Iskandar.
+[P] 7. Pukul 15.30 – 15.40 WIB: Sambutan dari Anggota DPRD Kota Semarang, H. Syaiful Bahri, S.Sos.I.
+[P] 8. Pukul 15.40 – 15.50 WIB: Sambutan Wakil Wali Kota Semarang, Ir. H. Iswar Aminuddin, M.T., sekaligus membuka jalannya Kirab Budaya secara resmi.
+[P] 9. Pukul 15.50 – 15.55 WIB: Pembacaan doa keberkahan yang dipimpin oleh KH. Ihsan Turmudzi, Ah.
+[P] 10. Pukul 15.55 – 16.10 WIB: Prosesi simbolis penyerahan Luwur makam Sesepuh Rowosari serta penyerahan Pohon Bidara, dilanjutkan dengan pelepasan iring-iringan kirab menuju titik finish.
+[EMPTY P]
+[P] D. Kegiatan Kirab Budaya Warga Rowosari dihadiri oleh :
+[P] 1. Wakil Wali Kota Semarang, Ir. H. Iswar Aminuddin, M.T.,
+[P] 2. Anggota DPRD Kota Semarang, H. Syaiful Bahri, S.Sos.I.
+[P] 3. Kepala Bidang (Kabid) Kebidangan Kebudayaan Ibu Ratri Nugrahaning Widayanti, S.Sos
+[P] 4. Kapolsek Tembalang Kompol Kristiyastuti.H, S.H., M.H
+[P] 5. Sekcam Tembalang ibu Maria Theresia Takndare. 
+[P] 6. Tokoh masyarakat Rowosari H. Darmo Buwono
+[P] 7. Tokoh masyarakat Rowosari KH. Masykur Iskandar
+[P] 8. Tokoh agama Rowosari KH. Ihsan Turmudzi, Ah.
+[EMPTY P]
+[P] E. Guna menjamin kelancaran, ketertiban, dan keamanan selama kegiatan Kirab Budaya berlangsung, Kapolsek Tembalang menugaskan personel pengamanan terbuka maupun tertutup yang dipimpin oleh Pawas Ipda Dody Riyadi SH. Pengamanan difokuskan pada pengaturan arus lalu lintas di sepanjang rute kirab guna mengantisipasi kepadatan volume kendaraan, mengingat tingginya antusiasme warga masyarakat yang menyaksikan pementasan seni drumband di sepanjang jalan.
+[EMPTY P]
+[P] F. Kegiatan berlangsung dengan aman, tertib, lancar, dan kondusif. Kejadian menonjol maupun gangguan kamtibmas nihil
+[EMPTY P]
+[P] Aspek Keamanan
+[EMPTY P]
+[P] Keamanan Umum
+[EMPTY P]
+[P] Kriminalitas:
+[P] Pada hari Sabtu, tanggal 4 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan.
+[EMPTY P]
+[P] Laka Lantas
+[P] Pada hari Sabtu, tanggal 4 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan.
+[EMPTY P]
+[P] Bencana Alam:
+[P] Pada hari Sabtu, tanggal 4 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan.
+[EMPTY P]
+[P] Keamanan Khusus
+[P] Jumlah tahanan di Rutan Polsek Tembalang 2 orang.
+[EMPTY P]
+[P] Pengamanan VVIP/VIP:
+[P] Pada hari Sabtu, tanggal 4 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan
+[EMPTY P]
+[P] Lain-lain
+[P] Pada hari Sabtu, tanggal 4 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan
+[EMPTY P]
+[P] Semarang, 5 Juli 2026
+[P] UNIT INTELKAM 
+[EMPTY P]
+[EMPTY P]
+[P] Autentikasi:
+[EMPTY P]
+[P] Distribusi:
+[P] Sat Intelkam Polrestabes Semarang
+[P] Kapolsek Tembalang

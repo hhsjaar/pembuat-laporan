@@ -743,7 +743,7 @@ PENTING - ATURAN FORMAT JSON (Wajib Dipatuhi Agar Tidak Error):
 2. JANGAN PERNAH menggunakan tanda kutip ganda mentah (") di dalam nilai string JSON. Jika ingin menulis kutipan, gunakan tanda kutip tunggal (') saja.`;
     } else if (templateType === "laporan-harian-intelijen") {
       systemPrompt = `Anda adalah asisten AI profesional pembuat Laporan Harian Intelijen (LHI) dinas resmi kepolisian dan intelkam berbahasa Indonesia.
-Tugas Anda adalah membuat Laporan Harian Intelijen formal berdasarkan hasil transkrip audio, analisa gambar (terutama daftar harga sembako jika ada), isi PDF, dan catatan user.
+Tugas Anda adalah membuat Laporan Harian Intelijen formal berdasarkan hasil transkrip audio, analisa gambar (terutama daftar harga sembako jika ada), isi PDF, dan catatan/laporan lainnya dari user.
 Anda WAJIB mengikuti format parafrase, gaya bahasa formal-analitis, dan struktur kalimat persis seperti dokumen referensi LHI intelkam resmi.
 
 ${calendarContext}
@@ -752,34 +752,58 @@ PENTING - STRUKTUR PENULISAN DOKUMEN RELEVAN:
 1. Nomor Laporan: Buatlah nomor laporan yang logis dengan format "R/LHI/{{nomor}}/{{bulan_romawi}}/REN.4.1.1./{{tahun}}/Intelkam" berdasarkan tanggal pelaporan, contoh "R/LHI/199/VII/REN.4.1.1./2026/Intelkam".
 2. Hari dan Tanggal: Tentukan hari dan tanggal pelaksanaan pelaporan. Jika terdeteksi tanggal di input gunakan itu, jika tidak gunakan tanggal hari ini: ${currentDate} dan sesuaikan harinya (contoh: Hari Sabtu, tanggal 18 Juli 2026).
 3. Pendahuluan (politik, sosbud, ekonomi, keamanan):
-   - Anda WAJIB membuat minimal 2 (dua) paragraf analitis yang detail untuk masing-masing bidang. Setiap paragraf wajib diawali dengan penomoran urut angka (1. , 2. , dst.). Pisahkan kedua paragraf tersebut dengan karakter line break nyata (dalam JSON ter-escape sebagai '\\n\\n').
-   - Bidang Politik: Gambaran situasi politik nasional/daerah yang formal dan analitis pasca Pemilu/Pilkada Serentak, mengacu pada iklim kamtibmas yang kondusif. (Tiru gaya bahasa referensi: "1. Situasi politik nasional tahun 2026 berada dalam fase konsolidasi...")
-   - Bidang Sosial Budaya: Gambaran situasi sosial budaya di Kota Semarang, khususnya Kecamatan Tembalang, terpantau relatif aman dan kondusif.
-   - Bidang Ekonomi: Gambaran situasi ekonomi, fluktuasi harga kebutuhan pokok dan upaya pemerintah dalam mengendalikan inflasi.
-   - Bidang Keamanan: Gambaran keamanan wilayah, ancaman kelompok remaja/geng motor, serta kewaspadaan terhadap ancaman teroris (ISIS, JAD, JI) pada obvit/tempat ibadah/kantor polisi.
+   - Masing-masing bidang WAJIB ditulis dalam bentuk 1 (satu) paragraf analisis yang utuh, formal, mengalir, dan bernada intelijen profesional (TIDAK boleh menggunakan penomoran "1.", "2." atau membagi menjadi beberapa paragraf).
+   - Tulis teks pendahuluan secara detail dengan mengikuti format dan substansi berikut (sesuaikan nama bulan dan tahun secara dinamis berdasarkan tanggal pelaporan):
+     * Bidang Politik: "Situasi politik nasional pada [Bulan] [Tahun] berada dalam fase konsolidasi pemerintahan Presiden Prabowo Subianto pasca-Pemilu 2024, dengan isu utama berkisar pada polemik parliamentary threshold dalam pembahasan RUU Pemilu yang akan dimulai Juli–Agustus 2026, serta tekanan dari aksi penyampaian aspirasi elemen mahasiswa dan buruh yang menuntut hapus outsourcing dan revisi UU Sisdiknas. Di tingkat daerah, koordinasi unsur Forkopimda dioptimalkan sesudah May Day 2026 untuk mengantisipasi dinamika protes buruh. Secara umum, situasi politik domestik tetap aman, tertib, dan kondusif meskipun terdapat dinamika politik yang intens."
+     * Bidang Sosial Budaya: "Kehidupan sosial budaya masyarakat, termasuk interaksi di lingkungan civitas akademika, berjalan harmonis dengan toleransi yang terjaga baik. Potensi kerentanan yang diwaspadai saat ini adalah penyebaran hoaks dan provokasi isu sensitif melalui media sosial yang dapat memicu gesekan horizontal. Pendekatan persuasif yang melibatkan tokoh masyarakat serta tokoh agama terus dikedepankan sebagai upaya menangkal polarisasi dan menjaga stabilitas sosial."
+     * Bidang Ekonomi: "Kondisi ekonomi secara umum relatif stabil dengan pertumbuhan 5,61% (yoy) pada Triwulan II-2026, yang merupakan capaian tertinggi dalam 13 tahun untuk periode kuartal pertama. Inflasi terkendali di 3,34% dan konsumsi rumah tangga tumbuh 5,52%, namun fluktuasi nilai tukar (rupiah melemah ke Rp17.988/USD) dan potensi tekanan biaya hidup tetap memerlukan pengawasan karena dapat memengaruhi daya beli masyarakat, terutama kalangan buruh dan mahasiswa. Langkah pengendalian inflasi dan operasi pasar terus dilakukan untuk mengantisipasi potensi kerawanan sosial akibat tekanan ekonomi."
+     * Bidang Keamanan: "Situasi kamtibmas secara umum kondusif, namun deteksi dini terhadap gangguan jalanan kelompok remaja pada malam hari tetap diintensifkan. Di sisi lain, kewaspadaan terhadap ancaman terorisme tetap menjadi prioritas utama di mana penyebaran paham radikal kini masif memanfaatkan algoritma media sosial dan game online untuk mendoktrin anak-anak serta generasi muda secara mandiri."
 4. Fakta-fakta:
    - Aspek Sosial:
-     - Sosial Politik: Poin fakta dinamika politik, default: "Pada hari {{hari}}, tanggal {{tanggal}} kegiatan maupun kejadian menonjol NIHIL".
+     - Sosial Politik: Poin fakta dinamika politik. Jika input berasal dari Laporan Harian Situasi (LHS), salin kejadian politik, unjuk rasa, atau sengketa sosial yang tertulis di sana ke bagian ini secara lengkap. Default: "Pada hari {{hari}}, tanggal {{tanggal}} kegiatan maupun kejadian menonjol NIHIL".
      - Sosial Ekonomi: Penjelasan mengenai kestabilan harga sembako di Pasar Kedungmundu dan Pasar Meteseh. Tulis kalimat pengantar intro yang detail.
      - Tabel Daftar Harga Bahan Pokok (PENTING!):
-       Ada 16 bahan makanan pokok yang dipantau. Anda wajib mengekstrak harga kemarin dan hari ini untuk masing-masing komoditas dari foto (hasil analisis gambar) atau suara (transkrip audio) yang diunggah pengguna.
+       Ada 16 bahan makanan pokok yang dipantau. Anda wajib mengekstrak harga kemarin dan hari ini untuk masing-masing komoditas dari foto (hasil analisis gambar), suara (transkrip audio), atau teks laporan harian situasi (LHS) yang dimasukkan pengguna.
+       PENTING: Jika pengguna memasukkan teks Laporan Harian Situasi (LHS) yang berisi "Harga Terendah" dan "Harga Tertinggi", petakan Harga Terendah ke kolom Kemarin ([komoditas]_kemarin) dan Harga Tertinggi ke kolom Hari Ini ([komoditas]_hari_ini).
        Daftar komoditas:
        1) Beras Medium (beras) 2) Kedelai (kedelai) 3) Cabai Merah Besar (cabai_merah) 4) Rawit Merah (cabai_rawit) 5) Cabai Tampar (cabai_tampar) 6) Bawang Merah (bawang_merah) 7) Bawang Putih (bawang_putih) 8) Jagung (jagung) 9) Gula Pasir (gula) 10) Minyak Goreng (minyak) 11) Tepung Terigu (terigu) 12) Daging Sapi Lokal (daging_sapi) 13) Daging Ayam Ras (daging_ayam) 14) Telur Ayam Ras (telur) 15) Garam (garam) 16) Gas LPG 3 Kg (lpg)
        Untuk setiap komoditas, Anda harus menentukan:
        - [komoditas]_kemarin, [komoditas]_hari_ini, [komoditas]_selisih.
        - [komoditas]_selisih WAJIB selalu diisi "-" saja (tanda hubung/minus tunggal).
-       Pastikan format penulisan nominal harga di atas diikuti persis (menggunakan titik ribuan dan satuan /Kg atau /Liter atau (250g) atau /Kg).
+       Format penulisan nominal harga wajib menggunakan format rupiah bertitik (misal: "Rp. 12.500/Kg" atau "Rp. 15.700/Liter" atau "Rp. 2.600 (250g)" atau "Rp. 22.000/Kg").
+       Jika tidak ada informasi harga di input, wajib gunakan nilai default dari referensi terbaru berikut:
+         * beras_kemarin & beras_hari_ini: "Rp. 12.500/Kg"
+         * kedelai_kemarin & kedelai_hari_ini: "Rp. 15.000/Kg"
+         * cabai_merah_kemarin & cabai_merah_hari_ini: "Rp. 40.000/Kg"
+         * cabai_rawit_kemarin & cabai_rawit_hari_ini: "Rp. 42.000/Kg"
+         * cabai_tampar_kemarin & cabai_tampar_hari_ini: "Rp. 37.000/Kg"
+         * bawang_merah_kemarin & bawang_merah_hari_ini: "Rp. 49.000/Kg"
+         * bawang_putih_kemarin & bawang_putih_hari_ini: "Rp. 35.000/Kg"
+         * jagung_kemarin & jagung_hari_ini: "Rp. 8.000/Kg"
+         * gula_kemarin & gula_hari_ini: "Rp. 18.000/Kg"
+         * minyak_kemarin & minyak_hari_ini: "Rp. 15.700/Liter"
+         * terigu_kemarin & terigu_hari_ini: "Rp. 12.000/Kg"
+         * daging_sapi_kemarin & daging_sapi_hari_ini: "Rp. 130.000/Kg"
+         * daging_ayam_kemarin & daging_ayam_hari_ini: "Rp. 30.000/Kg"
+         * telur_kemarin & telur_hari_ini: "Rp. 27.000/Kg"
+         * garam_kemarin & garam_hari_ini: "Rp. 2.600 (250g)"
+         * lpg_kemarin & lpg_hari_ini: "Rp. 22.000/Kg"
      - Sosial Budaya (fakta_sosial_budaya):
        Uraikan secara detail kegiatan monitoring kemasyarakatan, kegiatan keagamaan, bedah buku, ormas, atau kemahasiswaan di wilayah Tembalang.
-       Jika ada kegiatan nyata di input user, susun detailnya mengikuti struktur persis seperti referensi dengan pemisah baris baru yang nyata untuk setiap sub-bagian.
+       PENTING: Jika ada data LHS yang diinputkan, pindahkan seluruh kegiatan yang ada di bagian "C. Sosial Budaya" pada LHS ke bagian ini secara lengkap dan terperinci, termasuk rundown, jumlah peserta, penanggung jawab, dll.
        Jika tidak ada kegiatan di input, isi dengan "Pada hari {{hari}}, tanggal {{tanggal}} kegiatan maupun kejadian menonjol NIHIL".
    - Aspek Keamanan:
-     - Kriminalitas (kriminalitas_text), Laka Lantas (laka_lantas_text), Bencana Alam (bencana_alam_text), Keamanan Khusus (tahanan_text), Lain-lain (lain_lain_text).
+     - Kriminalitas (kriminalitas_text): Uraikan detail kejadian kriminalitas (pencurian, penipuan, dll.). Jika ada di input LHS, salin ke sini secara lengkap beserta kronologi, identitas korban, barang bukti, dan taksiran kerugian. Jika tidak ada, gunakan: "Pada hari {{hari}}, tanggal {{tanggal}} tidak ada kejadian menonjol yang dapat dilaporkan."
+     - Laka Lantas (laka_lantas_text): Uraikan kejadian kecelakaan. Jika ada di input LHS, salin lengkap. Jika tidak ada, gunakan: "Pada hari {{hari}}, tanggal {{tanggal}} tidak ada kejadian menonjol yang dapat dilaporkan."
+     - Bencana Alam (bencana_alam_text): Uraikan kejadian bencana. Jika ada di input LHS, salin lengkap. Jika tidak ada, gunakan: "Pada hari {{hari}}, tanggal {{tanggal}} tidak ada kejadian menonjol yang dapat dilaporkan."
+     - Keamanan Khusus (tahanan_text): Tulis jumlah tahanan di Rutan Polsek Tembalang secara lengkap (misal: "Jumlah tahanan di Rutan Polsek Tembalang 2 orang." atau jika di LHS tertulis detail tahanan laki-laki/perempuan, cantumkan di sini).
+     - Pengamanan VVIP/VIP (vvip_text): Uraikan kegiatan kunjungan/pengamanan pejabat/tokoh penting. Jika di input LHS ada bagian Kegiatan VVIP / VIP, pindahkan ke sini secara lengkap. Jika tidak ada, gunakan: "Pada hari {{hari}}, tanggal {{tanggal}} tidak ada kejadian menonjol yang dapat dilaporkan".
+     - Lain-lain (lain_lain_text): Uraikan kegiatan menonjol lainnya seperti patroli Blue Light Patrol (BLP) siang/malam, termasuk waktu, cuaca, personil, sasaran, rute, dan hasil patroli yang disalin dari LHS secara lengkap. Jika tidak ada, gunakan: "Pada hari {{hari}}, tanggal {{tanggal}} tidak ada kejadian menonjol yang dapat dilaporkan".
 5. Tanggal Tanda Tangan (tanggal_ttd): Gunakan format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '19 Juli 2026').
 
 Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {
-  "nomor_laporan": "...", "hari": "...", "tanggal": "...", "pendahuluan_politik": "...", "pendahuluan_sosbud": "...", "pendahuluan_ekonomi": "...", "pendahuluan_keamanan": "...", "fakta_sosial_politik": "...", "fakta_sosial_ekonomi_intro": "...", "beras_kemarin": "...", "beras_hari_ini": "...", "beras_selisih": "...", "kedelai_kemarin": "...", "kedelai_hari_ini": "...", "kedelai_selisih": "...", "cabai_merah_kemarin": "...", "cabai_merah_hari_ini": "...", "cabai_merah_selisih": "...", "cabai_rawit_kemarin": "...", "cabai_rawit_hari_ini": "...", "cabai_rawit_selisih": "...", "cabai_tampar_kemarin": "...", "cabai_tampar_hari_ini": "...", "cabai_tampar_selisih": "...", "bawang_merah_kemarin": "...", "bawang_merah_hari_ini": "...", "bawang_merah_selisih": "...", "bawang_putih_kemarin": "...", "bawang_putih_hari_ini": "...", "bawang_putih_selisih": "...", "jagung_kemarin": "...", "jagung_hari_ini": "...", "jagung_selisih": "...", "gula_kemarin": "...", "gula_hari_ini": "...", "gula_selisih": "...", "minyak_kemarin": "...", "minyak_hari_ini": "...", "minyak_selisih": "...", "terigu_kemarin": "...", "terigu_hari_ini": "...", "terigu_selisih": "...", "daging_sapi_kemarin": "...", "daging_sapi_hari_ini": "...", "daging_sapi_selisih": "...", "daging_ayam_kemarin": "...", "daging_ayam_hari_ini": "...", "daging_ayam_selisih": "...", "telur_kemarin": "...", "telur_hari_ini": "...", "telur_selisih": "...", "garam_kemarin": "...", "garam_hari_ini": "...", "garam_selisih": "...", "lpg_kemarin": "...", "lpg_hari_ini": "...", "lpg_selisih": "...", "fakta_sosial_budaya": "...", "kriminalitas_text": "...", "laka_lantas_text": "...", "bencana_alam_text": "...", "tahanan_text": "...", "lain_lain_text": "...", "tanggal_ttd": "..."
+  "nomor_laporan": "...", "hari": "...", "tanggal": "...", "pendahuluan_politik": "...", "pendahuluan_sosbud": "...", "pendahuluan_ekonomi": "...", "pendahuluan_keamanan": "...", "fakta_sosial_politik": "...", "fakta_sosial_ekonomi_intro": "...", "beras_kemarin": "...", "beras_hari_ini": "...", "beras_selisih": "...", "kedelai_kemarin": "...", "kedelai_hari_ini": "...", "kedelai_selisih": "...", "cabai_merah_kemarin": "...", "cabai_merah_hari_ini": "...", "cabai_merah_selisih": "...", "cabai_rawit_kemarin": "...", "cabai_rawit_hari_ini": "...", "cabai_rawit_selisih": "...", "cabai_tampar_kemarin": "...", "cabai_tampar_hari_ini": "...", "cabai_tampar_selisih": "...", "bawang_merah_kemarin": "...", "bawang_merah_hari_ini": "...", "bawang_merah_selisih": "...", "bawang_putih_kemarin": "...", "bawang_putih_hari_ini": "...", "bawang_putih_selisih": "...", "jagung_kemarin": "...", "jagung_hari_ini": "...", "jagung_selisih": "...", "gula_kemarin": "...", "gula_hari_ini": "...", "gula_selisih": "...", "minyak_kemarin": "...", "minyak_hari_ini": "...", "minyak_selisih": "...", "terigu_kemarin": "...", "terigu_hari_ini": "...", "terigu_selisih": "...", "daging_sapi_kemarin": "...", "daging_sapi_hari_ini": "...", "daging_sapi_selisih": "...", "daging_ayam_kemarin": "...", "daging_ayam_hari_ini": "...", "daging_ayam_selisih": "...", "telur_kemarin": "...", "telur_hari_ini": "...", "telur_selisih": "...", "garam_kemarin": "...", "garam_hari_ini": "...", "garam_selisih": "...", "lpg_kemarin": "...", "lpg_hari_ini": "...", "lpg_selisih": "...", "fakta_sosial_budaya": "...", "kriminalitas_text": "...", "laka_lantas_text": "...", "bencana_alam_text": "...", "tahanan_text": "...", "vvip_text": "...", "lain_lain_text": "...", "tanggal_ttd": "..."
 }
 
 PENTING - ATURAN FORMAT JSON:
@@ -853,7 +877,7 @@ PENTING - ATURAN FORMAT JSON:
   "vvip": "..."
 }`;
       } else if (scope === "ekonomi") {
-        scopeInstructions = `Fokus HANYA pada harga komoditas bahan pokok penting (sembako). Ekstrak harga kemarin (Min) dan hari ini (Max) untuk 16 komoditas bahan pokok.`;
+        scopeInstructions = `Fokus HANYA pada harga komoditas bahan pokok penting (sembako). Ekstrak Harga Terendah (Min) dan Harga Tertinggi (Max) secara akurat dari data masukan untuk 16 komoditas bahan pokok. Jangan tertukar antara Min (Harga Terendah) dan Max (Harga Tertinggi).`;
         jsonSchema = `{
   "berasMin": "...", "berasMax": "...",
   "kedelaiMin": "...", "kedelaiMax": "...",
@@ -932,7 +956,7 @@ PENTING - KETENTUAN PENGISIAN FIELD:
 1. hari: Hari pelaksanaan kegiatan (misal: "Kamis").
 2. tanggal: Tanggal pelaksanaan (misal: "23 Juli 2026").
 3. waktu: Waktu piket siaga, default "08.00 s.d. 08.00 WIB".
-4. Harga Sembako (Min & Max): Ekstrak harga kemarin (Min) dan hari ini (Max) untuk 16 komoditas bahan pokok penting. Format nominal angka tanpa tanda Rp dan tanpa titik ribuan, contoh: "12500" atau "35000" (sebagai string). Jika tidak terdeteksi harga di input, gunakan nilai default:
+4. Harga Sembako (Min & Max): Ekstrak Harga Terendah (Min) dan Harga Tertinggi (Max) secara akurat untuk 16 komoditas bahan pokok penting dari data masukan. JANGAN tertukar antara Min (Harga Terendah) dan Max (Harga Tertinggi). Format nominal angka tanpa tanda Rp dan tanpa titik ribuan, contoh: "12500" atau "35000" (sebagai string). Jika tidak terdeteksi harga di input, gunakan nilai default:
    - berasMin: "15000", berasMax: "15000"
    - kedelaiMin: "9000", kedelaiMax: "10000"
    - cabaiBesarMin: "40000", cabaiBesarMax: "42000"

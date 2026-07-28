@@ -1,0 +1,101 @@
+[P] POLRI DAERAH JAWA TENGAH
+[P] RESOR KOTA BESAR SEMARANG
+[P] POLSEK TEMMBALANG
+[P] Jl. Turus Asri No. 9 Tembalang Semarang
+[P] Nomor: R/LHI/184/VII/REN.4.1.1./2026/Intelkam
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[P] LAPORAN HARIAN INTELIJEN
+[P] Hari Kamis, Tanggal 02 Juli 2026
+[EMPTY P]
+[EMPTY P]
+[P] PENDAHULUAN
+[EMPTY P]
+[P] Bidang Politik
+[P] Situasi politik nasional pada Juli 2026 berada dalam fase konsolidasi pemerintahan Presiden Prabowo Subianto pasca-Pemilu 2024, dengan isu utama berkisar pada polemik parliamentary threshold dalam pembahasan RUU Pemilu yang akan dimulai Juli–Agustus 2026, serta tekanan dari aksi penyampaian aspirasi elemen mahasiswa dan buruh yang menuntut hapus outsourcing dan revisi UU Sisdiknas. Di tingkat daerah, koordinasi unsur Forkopimda dioptimalkan sesudah May Day 2026 untuk mengantisipasi dinamika protes buruh. Secara umum, situasi politik domestik tetap aman, tertib, dan kondusif meskipun terdapat dinamika politik yang intens.
+[EMPTY P]
+[P] Bidang Sosial Budaya
+[P] Kehidupan sosial budaya masyarakat, termasuk interaksi di lingkungan civitas akademika, berjalan harmonis dengan toleransi yang terjaga baik. Potensi kerentanan yang diwaspadai saat ini adalah penyebaran hoaks dan provokasi isu sensitif melalui media sosial yang dapat memicu gesekan horizontal. Pendekatan persuasif yang melibatkan tokoh masyarakat serta tokoh agama terus dikedepankan sebagai upaya menangkal polarisasi dan menjaga stabilitas sosial.
+[EMPTY P]
+[P] Bidang Ekonomi
+[P] Kondisi ekonomi secara umum relatif stabil dengan pertumbuhan 5,61% (yoy) pada Triwulan II-2026, yang merupakan capaian tertinggi dalam 13 tahun untuk periode kuartal pertama. Inflasi terkendali di 3,34% dan konsumsi rumah tangga tumbuh 5,52%, namun fluktuasi nilai tukar (rupiah melemah ke Rp17.988/USD) dan potensi tekanan biaya hidup tetap memerlukan pengawasan karena dapat memengaruhi daya beli masyarakat, terutama kalangan buruh dan mahasiswa. Langkah pengendalian inflasi dan operasi pasar terus dilakukan untuk mengantisipasi potensi kerawanan sosial akibat tekanan ekonomi.
+[EMPTY P]
+[P] Bidang Keamanan
+[P] Situasi kamtibmas secara umum kondusif, namun deteksi dini terhadap gangguan jalanan kelompok remaja pada malam hari tetap diintensifkan. Di sisi lain, kewaspadaan terhadap ancaman terorisme tetap menjadi prioritas utama di mana penyebaran paham radikal kini masif memanfaatkan algoritma media sosial dan game online untuk mendoktrin anak-anak serta generasi muda secara mandiri.
+[EMPTY P]
+[EMPTY P]
+[EMPTY P]
+[P] II. FAKTA .....
+[P] FAKTA-FAKTA
+[EMPTY P]
+[P] Aspek Sosial
+[EMPTY P]
+[P] Sosial Politik
+[P] Pada hari Kamis, tanggal 2 Juli 2026 kegiatan maupun kejadian menonjol NIHIL
+[EMPTY P]
+[P] Sosial Ekonomi
+[P] Perkembangan harga sembako di Pasar Kedungmundu dan Pasar Meteseh harga stabil dan tidak ada kelangkaan pasokan. 
+[EMPTY P]
+[P] Daftar harga kebutuhan pokok di Pasar Kedungmundu dan Pasar Meteseh dilaporkan sebagai berikut:
+[EMPTY P]
+[TABLE START]
+  [ROW] NO | NAMA BARANG | KEMARIN | HARI INI | NAIK/TURUN
+  [ROW] 1 | Beras Medium | Rp.   12.500/Kg | Rp. 12.500/Kg | -
+  [ROW] 2 | Kedelai | Rp.   15.000/Kg | Rp. 15.000/Kg | -
+  [ROW] 3 | Cabai
+  [ROW]  | Cabai Merah Besar | Rp  . 40.000/Kg | Rp.  40.000/Kg | -
+  [ROW]  | Rawit Merah | Rp.   42.000/Kg | Rp.  42.000/Kg | -
+  [ROW]  | Cabai Tampar | Rp.   37.000/Kg | Rp.  37.000/Kg | -
+  [ROW] 4 | Bawang
+  [ROW]  | Merah | Rp.   49.000/Kg | Rp.  49.000/Kg | -
+  [ROW]  | Putih | Rp.   35.000/Kg | Rp.  35.000/Kg | -
+  [ROW] 5 | Jagung | Rp.     8.000/Kg | Rp.    8.000/Kg | -
+  [ROW] 6 | Gula Pasir | Rp.   18.000/Kg | Rp.  18.000/Kg | -
+  [ROW] 7 | Minyak Goreng | Rp.   15.700/Liter | Rp.  15.700/Liter | -
+  [ROW] 8 | Tepung Terigu | Rp.   12.000/Kg | Rp.  12.000/Kg | -
+  [ROW] 9 | Daging Sapi Lokal | Rp. 130.000/Kg | Rp.130.000/Kg | -
+  [ROW] 10 | Daging Ayam Ras | Rp.   30.000/Kg | Rp.  30.000/Kg | -
+  [ROW] 11 | Telur Ayam Ras | Rp.   27.000/Kg | Rp.  27.000/Kg | -
+  [ROW] 12 | Garam | Rp. 2.600 (250g) | Rp. 2.600 (250g) | -
+  [ROW] 13 | Gas LPG 3 Kg | Rp. 22.000/Kg | Rp. 22.000/Kg | -
+[TABLE END]
+[EMPTY P]
+[P] Sosial Budaya
+[P] Pada hari Kamis, tanggal 2 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan.
+[EMPTY P]
+[P] Aspek Keamanan
+[EMPTY P]
+[P] Keamanan Umum
+[EMPTY P]
+[P] Kriminalitas:
+[P] Pada hari Kamis tanggal 2 Juli 2026 pukul 08.00 di rumas kost Athaya Jl. Mulawarman Utara II RT 1 RW 3 Kel. Kramas Ke. Tembalang Kota Semarang telah terjadi tindak pidana pencurian dengan korban Kentaro Kenzie Amarullah, 22 th, Mahasiswa, alamat Jl. Papanggo II A No. 55 Tanjung Priok Jakarta Utara. Kerugian dalam kejadian tersebut berupa 1 Unit Laptop mer Hp warna hitam, 1 unit ssd merk Orico, 1 buah tas warna hitam merk F Jallraven Kanken, 1 buah mouse ditaksir Rp. 40.500.000,-
+[EMPTY P]
+[P] Laka Lantas
+[P] Pada hari Kamis, tanggal 2 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan.
+[EMPTY P]
+[P] Bencana Alam:
+[P] Pada hari Kamis, tanggal 2 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan.
+[EMPTY P]
+[P] Keamanan Khusus
+[P] Jumlah tahanan di Rutan Polsek Tembalang 2 orang.
+[EMPTY P]
+[P] Pengamanan VVIP/VIP:
+[P] Pada hari Kamis, tanggal 2 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan
+[EMPTY P]
+[P] Lain-lain
+[P] Pada hari Kamis, tanggal 2 Juli 2026 tidak ada kejadian menonjol yang dapat dilaporkan
+[EMPTY P]
+[P] Semarang, 03 Juli 2026
+[P] UNIT INTELKAM 
+[EMPTY P]
+[EMPTY P]
+[P] Autentikasi:
+[EMPTY P]
+[P] Distribusi:
+[P] Satintelkam Polrestabes Semarang
+[P] Kapolsek Tembalang

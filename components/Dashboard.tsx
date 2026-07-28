@@ -468,7 +468,9 @@ II. FAKTA-FAKTA
          ${report.tahanan_text || ""}
       3. Bencana Alam:
          ${report.bencana_alam_text || ""}
-      4. Lain-lain:
+      4. Pengamanan VVIP/VIP:
+         ${report.vvip_text || ""}
+      5. Lain-lain:
          ${report.lain_lain_text || ""}
 
 Semarang, ${report.tanggal_ttd || ""}

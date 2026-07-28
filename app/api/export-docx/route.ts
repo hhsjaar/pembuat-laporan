@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
       const otherFields = templateType === "infosus"
         ? ["fakta_fakta", "analisa", "prediksi", "langkah", "rekomendasi"]
         : (templateType === "laporan-harian-intelijen"
-          ? ["pendahuluan_politik", "pendahuluan_sosbud", "pendahuluan_ekonomi", "pendahuluan_keamanan", "fakta_sosial_budaya", "kriminalitas_text", "laka_lantas_text", "bencana_alam_text", "tahanan_text", "lain_lain_text"]
+          ? ["pendahuluan_politik", "pendahuluan_sosbud", "pendahuluan_ekonomi", "pendahuluan_keamanan", "fakta_sosial_budaya", "kriminalitas_text", "laka_lantas_text", "bencana_alam_text", "tahanan_text", "vvip_text", "lain_lain_text"]
           : ["isi_laporan", "analisa", "prediksi", "langkah", "rekomendasi"]);
       otherFields.forEach((field) => {
         const regex = new RegExp(`\\{\\{${field}\\}\\}`, "g");
@@ -215,6 +215,7 @@ export async function POST(req: NextRequest) {
       laka_lantas_text: isXmlTemplate ? convertTextToOpenXml(reportData.laka_lantas_text || "", "", 2268) : (reportData.laka_lantas_text || ""),
       bencana_alam_text: isXmlTemplate ? convertTextToOpenXml(reportData.bencana_alam_text || "", "", 2268) : (reportData.bencana_alam_text || ""),
       tahanan_text: isXmlTemplate ? convertTextToOpenXml(reportData.tahanan_text || "", "", 1701) : (reportData.tahanan_text || ""),
+      vvip_text: isXmlTemplate ? convertTextToOpenXml(reportData.vvip_text || "", "", 1701) : (reportData.vvip_text || ""),
       lain_lain_text: isXmlTemplate ? convertTextToOpenXml(reportData.lain_lain_text || "", "", 1701) : (reportData.lain_lain_text || ""),
     };
 

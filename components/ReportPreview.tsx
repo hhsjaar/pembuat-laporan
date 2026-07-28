@@ -643,7 +643,8 @@ Tembusan:
                         <p className="pl-4 whitespace-pre-line">b. Laka Lantas: {reportData.laka_lantas_text}</p>
                         <p className="whitespace-pre-line"><strong>2. Keamanan Khusus:</strong> {reportData.tahanan_text}</p>
                         <p className="whitespace-pre-line"><strong>3. Bencana Alam:</strong> {reportData.bencana_alam_text}</p>
-                        <p className="whitespace-pre-line"><strong>4. Lain-lain:</strong> {reportData.lain_lain_text}</p>
+                        <p className="whitespace-pre-line"><strong>4. Pengamanan VVIP/VIP:</strong> {reportData.vvip_text}</p>
+                        <p className="whitespace-pre-line"><strong>5. Lain-lain:</strong> {reportData.lain_lain_text}</p>
                       </div>
                     </div>
                   </div>
