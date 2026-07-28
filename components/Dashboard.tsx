@@ -927,8 +927,8 @@ Tembusan:
 
   // The sequential execution engine
   const handleGenerateReport = async () => {
-    // Validation check: must have at least one upload or input (bypassed for laporan-harian and laporan-harian-intelijen)
-    if (templateType !== "laporan-harian" && templateType !== "laporan-harian-intelijen" && images.length === 0 && !pdfFile && !audioFile && !userInput.trim()) {
+    // Validation check: must have at least one upload or input (bypassed for laporan-harian)
+    if (templateType !== "laporan-harian" && images.length === 0 && !pdfFile && !audioFile && !userInput.trim()) {
       addToast("Harap masukkan setidaknya satu input: gambar rundown, berkas PDF guidebook, rekaman suara, atau catatan teks.", "error");
       return;
     }
@@ -1087,7 +1087,7 @@ Tembusan:
           userInput: userInput,
           userPreference: userPreference,
           templateType: templateType,
-          laporanHarianForm: (templateType === "laporan-harian" || templateType === "laporan-harian-intelijen") ? laporanHarianForm : null,
+          laporanHarianForm: templateType === "laporan-harian" ? laporanHarianForm : null,
         }),
       });
 
@@ -1339,7 +1339,7 @@ Tembusan:
               <TemplateSelector selected={templateType} onChange={setTemplateType} />
 
               {/* Laporan Harian Form Section */}
-              {(templateType === "laporan-harian" || templateType === "laporan-harian-intelijen") && (
+              {templateType === "laporan-harian" && (
                 <div className="space-y-4 md:space-y-6 rounded-2xl md:rounded-3xl p-4 md:p-8 border border-neutral-200/50 dark:border-neutral-800/40 bg-white/40 dark:bg-neutral-950/20 glassmorphism shadow-md transition-all duration-300">
                   <div>
                     <h3 className="text-xs md:text-sm font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wide">
@@ -1805,8 +1805,8 @@ Tembusan:
                 </div>
               )}
 
-              {/* Multi-Input Upload Grid Layout (Hidden for laporan-harian and laporan-harian-intelijen) */}
-              {templateType !== "laporan-harian" && templateType !== "laporan-harian-intelijen" && (
+              {/* Multi-Input Upload Grid Layout (Hidden for laporan-harian) */}
+              {templateType !== "laporan-harian" && (
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
                     2. Masukkan Data Fakta Lapangan (Minimal Salah Satu)
@@ -1978,7 +1978,7 @@ Tembusan:
               {/* Box: Preferensi & Arahan Khusus (Opsional) */}
               <div className="space-y-4 pt-2">
                 <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
-                  {(templateType === "laporan-harian" || templateType === "laporan-harian-intelijen") ? "2. Preferensi & Arahan Khusus AI (Opsional)" : "3. Preferensi & Arahan Khusus AI (Opsional)"}
+                  {templateType === "laporan-harian" ? "2. Preferensi & Arahan Khusus AI (Opsional)" : "3. Preferensi & Arahan Khusus AI (Opsional)"}
                 </h3>
                 <div className="flex flex-col space-y-3 rounded-2xl md:rounded-3xl p-4 md:p-7 glassmorphism transition-all duration-300 hover:shadow-lg dark:hover:shadow-white/5 border border-neutral-200/30 dark:border-neutral-800/30 bg-white/30 dark:bg-neutral-950/15">
                   <div className="flex items-center space-x-2 pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
