@@ -14,96 +14,101 @@ interface ImageUploaderProps {
 const compressImage = (file: File): Promise<File> => {
   return new Promise((resolve) => {
     try {
-      if (!file.type.startsWith("image/")) {
+      const fileType = file.type || "";
+      const fileName = file.name || "";
+      const isImage = fileType.startsWith("image/") || /\.(jpe?g|png|webp|gif|bmp)$/i.test(fileName);
+      
+      if (!isImage) {
         resolve(file);
         return;
       }
 
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
+      // Use URL.createObjectURL instead of FileReader for maximum memory efficiency on mobile
+      const objectUrl = URL.createObjectURL(file);
+      const img = new window.Image();
+      
+      // Set onload and onerror BEFORE setting src to prevent race conditions on fast loaded URLs
+      img.onload = () => {
         try {
-          const img = new window.Image();
-          // Set onload and onerror BEFORE setting src to prevent race conditions on fast loaded URLs
-          img.onload = () => {
-            try {
-              const canvas = document.createElement("canvas");
-              const MAX_WIDTH = 1000;
-              const MAX_HEIGHT = 1000;
-              let width = img.width;
-              let height = img.height;
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1000;
+          const MAX_HEIGHT = 1000;
+          let width = img.width;
+          let height = img.height;
 
-              if (width > height) {
-                if (width > MAX_WIDTH) {
-                  height = Math.round((height * MAX_WIDTH) / width);
-                  width = MAX_WIDTH;
-                }
-              } else {
-                if (height > MAX_HEIGHT) {
-                  width = Math.round((width * MAX_HEIGHT) / height);
-                  height = MAX_HEIGHT;
-                }
-              }
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
 
-              canvas.width = width;
-              canvas.height = height;
+          canvas.width = width;
+          canvas.height = height;
 
-              const ctx = canvas.getContext("2d");
-              if (!ctx) {
-                resolve(file);
-                return;
-              }
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            URL.revokeObjectURL(objectUrl);
+            resolve(file);
+            return;
+          }
 
-              ctx.drawImage(img, 0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
 
-              canvas.toBlob(
-                (blob) => {
+          canvas.toBlob(
+            (blob) => {
+              try {
+                URL.revokeObjectURL(objectUrl);
+                if (blob) {
+                  let compressedFile: File;
                   try {
-                    if (blob) {
-                      let compressedFile: File;
-                      try {
-                        compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-                          type: "image/jpeg",
-                          lastModified: Date.now(),
-                        });
-                      } catch (fileErr) {
-                        // Fallback for older mobile browsers that do not fully support File constructor
-                        const anyBlob = blob as any;
-                        anyBlob.name = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
-                        anyBlob.lastModified = Date.now();
-                        compressedFile = anyBlob as File;
-                      }
-                      
-                      if (compressedFile.size < file.size || file.size > 1024 * 1024) {
-                        console.log(`[Image Compressor] Compressed ${file.name}: ${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
-                        resolve(compressedFile);
-                      } else {
-                        resolve(file);
-                      }
-                    } else {
-                      resolve(file);
-                    }
-                  } catch (e) {
-                    console.error("Error in toBlob callback:", e);
+                    compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                      type: "image/jpeg",
+                      lastModified: Date.now(),
+                    });
+                  } catch (fileErr) {
+                    // Fallback for older mobile browsers that do not fully support File constructor
+                    const anyBlob = blob as any;
+                    anyBlob.name = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+                    anyBlob.lastModified = Date.now();
+                    compressedFile = anyBlob as File;
+                  }
+                  
+                  if (compressedFile.size < file.size || file.size > 1024 * 1024) {
+                    console.log(`[Image Compressor] Compressed ${file.name}: ${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+                    resolve(compressedFile);
+                  } else {
                     resolve(file);
                   }
-                },
-                "image/jpeg",
-                0.7 // compress quality
-              );
-            } catch (e) {
-              console.error("Error in img.onload:", e);
-              resolve(file);
-            }
-          };
-          img.onerror = () => resolve(file);
-          img.src = event.target?.result as string;
+                } else {
+                  resolve(file);
+                }
+              } catch (e) {
+                console.error("Error in toBlob callback:", e);
+                resolve(file);
+              }
+            },
+            "image/jpeg",
+            0.7 // compress quality
+          );
         } catch (e) {
-          console.error("Error inside reader.onload:", e);
+          console.error("Error in img.onload:", e);
+          URL.revokeObjectURL(objectUrl);
           resolve(file);
         }
       };
-      reader.onerror = () => resolve(file);
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(file);
+      };
+
+      img.src = objectUrl;
     } catch (e) {
       console.error("Error starting image compression:", e);
       resolve(file);
@@ -139,7 +144,9 @@ export default function ImageUploader({ images, onChange, onError }: ImageUpload
     const validImages: File[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (file.type.startsWith("image/")) {
+      const fileType = file.type || "";
+      const fileName = file.name || "";
+      if (fileType.startsWith("image/") || /\.(jpe?g|png|webp|gif|bmp)$/i.test(fileName)) {
         validImages.push(file);
       }
     }
@@ -147,7 +154,13 @@ export default function ImageUploader({ images, onChange, onError }: ImageUpload
     if (validImages.length > 0) {
       setIsCompressing(true);
       try {
-        const compressedImages = await Promise.all(validImages.map(compressImage));
+        // Sequential compression instead of Promise.all to avoid browser OOM crashes on mobile
+        const compressedImages: File[] = [];
+        for (const file of validImages) {
+          const compressed = await compressImage(file);
+          compressedImages.push(compressed);
+        }
+        
         const newImagesList = [...images, ...compressedImages];
         const totalSize = newImagesList.reduce((acc, img) => acc + img.size, 0);
         
