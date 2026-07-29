@@ -5,10 +5,6 @@ import { Download, X, Share2, Plus } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
-// In-memory variable to track if the prompt has been dismissed during this active page load.
-// It will reset back to false upon page refresh, allowing users to see the prompt again.
-let hasDismissedInSession = false;
-
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -68,7 +64,8 @@ export default function PWAInstallPrompt() {
     // Clear legacy localStorage blocker to immediately show to the user during testing
     localStorage.removeItem("pwa_prompt_dismissed_until");
 
-    const isDismissed = hasDismissedInSession;
+    // Use window object to store state across client renders. This is destroyed on page refresh.
+    const isDismissed = (window as any).__pwa_prompt_dismissed === true;
 
     if (!isDismissed && !isStandaloneMode) {
       const timer = setTimeout(() => {
@@ -83,31 +80,36 @@ export default function PWAInstallPrompt() {
   }, []);
 
   const handleInstallClick = async () => {
-    if (isIOS) {
-      return;
-    }
+    try {
+      if (isIOS) {
+        return;
+      }
 
-    if (!deferredPrompt) {
-      // Native prompt not supported or ready yet, display browser instructions instead
+      if (!deferredPrompt) {
+        // Native prompt not supported or ready yet, display browser instructions instead
+        setShowInstructions(true);
+        return;
+      }
+
+      // Show the browser's install prompt
+      deferredPrompt.prompt();
+
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to install prompt: ${outcome}`);
+
+      // We no longer need the prompt, clear it
+      setDeferredPrompt(null);
+      setShowPrompt(false);
+    } catch (err) {
+      console.error("Gagal memicu install prompt PWA:", err);
       setShowInstructions(true);
-      return;
     }
-
-    // Show the browser's install prompt
-    deferredPrompt.prompt();
-
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to install prompt: ${outcome}`);
-
-    // We no longer need the prompt, clear it
-    setDeferredPrompt(null);
-    setShowPrompt(false);
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    hasDismissedInSession = true;
+    (window as any).__pwa_prompt_dismissed = true;
   };
 
   if (isStandalone) return null;
