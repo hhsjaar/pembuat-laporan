@@ -212,6 +212,7 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
             type="file"
             accept="audio/*, video/mpeg, video/mp4, video/webm, .mp3, .wav, .m4a, .mpeg, .ogg, .opus, .aac, .mpg, .mp4, .webm"
             onChange={handleFileInputChange}
+            onClick={(e) => e.stopPropagation()}
             className="hidden"
             disabled={!!audioFile}
           />

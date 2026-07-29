@@ -85,6 +85,7 @@ export default function PdfUploader({ pdfFile, onChange, onError }: PdfUploaderP
             type="file"
             accept="application/pdf"
             onChange={handleFileInputChange}
+            onClick={(e) => e.stopPropagation()}
             className="hidden"
           />
           <div className="flex flex-col items-center justify-center space-y-2">
