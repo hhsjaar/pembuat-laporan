@@ -239,10 +239,30 @@ export async function POST(req: NextRequest) {
       console.error("Failed to cache API generated document:", err);
     }
 
+    const getSvrExportFilename = (type: string) => {
+      // Get current date in WIB (UTC+7)
+      const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
+      if (type === "rencana-kegiatan") {
+        const targetDate = new Date(wibDate);
+        targetDate.setDate(targetDate.getDate() + 1);
+        const day = String(targetDate.getUTCDate()).padStart(2, '0');
+        const month = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
+        const year = String(targetDate.getUTCFullYear()).slice(-2);
+        return `REN-${day}${month}${year}.docx`;
+      }
+      if (type === "laporan-harian-intelijen") {
+        const day = String(wibDate.getUTCDate()).padStart(2, '0');
+        const month = String(wibDate.getUTCMonth() + 1).padStart(2, '0');
+        const year = String(wibDate.getUTCFullYear()).slice(-2);
+        return `LAPHAR-${day}${month}${year}.docx`;
+      }
+      return `${type}-${Date.now()}.docx`;
+    };
+
     // Set headers to trigger a browser download
     const headers = new Headers();
     headers.set("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-    headers.set("Content-Disposition", `attachment; filename="${templateType}-${Date.now()}.docx"`);
+    headers.set("Content-Disposition", `attachment; filename="${getSvrExportFilename(templateType)}"`);
     headers.set("Content-Length", buffer.length.toString());
 
     return new NextResponse(new Uint8Array(buffer), {

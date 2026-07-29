@@ -430,6 +430,26 @@ export default function Dashboard() {
     }
   };
 
+  const getExportFilename = (type: string, createdAt?: string) => {
+    if (type === "rencana-kegiatan") {
+      const baseDate = createdAt ? new Date(createdAt) : new Date();
+      const targetDate = new Date(baseDate);
+      targetDate.setDate(targetDate.getDate() + 1);
+      const day = String(targetDate.getDate()).padStart(2, '0');
+      const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const year = String(targetDate.getFullYear()).slice(-2);
+      return `REN-${day}${month}${year}.docx`;
+    }
+    if (type === "laporan-harian-intelijen") {
+      const baseDate = createdAt ? new Date(createdAt) : new Date();
+      const day = String(baseDate.getDate()).padStart(2, '0');
+      const month = String(baseDate.getMonth() + 1).padStart(2, '0');
+      const year = String(baseDate.getFullYear()).slice(-2);
+      return `LAPHAR-${day}${month}${year}.docx`;
+    }
+    return null;
+  };
+
   const handleDownloadHistoryDocx = async (item: any) => {
     const rawReport = item.meta_data?.raw_report;
     if ((item.template_type !== "laporan-informasi" && item.template_type !== "laporan-harian-khusus" && item.template_type !== "infosus" && item.template_type !== "laporan-harian-intelijen" && item.template_type !== "rencana-kegiatan") || !rawReport) {
@@ -456,7 +476,14 @@ export default function Dashboard() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `${item.template_type}-${item.id.slice(0, 8)}.docx`);
+      
+      let filename = `${item.template_type}-${item.id.slice(0, 8)}.docx`;
+      const customFilename = getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp);
+      if (customFilename) {
+        filename = customFilename;
+      }
+      
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -1460,7 +1487,14 @@ Tembusan:
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `${templateType}-${Date.now()}.docx`);
+      
+      let filename = `${templateType}-${Date.now()}.docx`;
+      const customFilename = getExportFilename(templateType);
+      if (customFilename) {
+        filename = customFilename;
+      }
+      
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       
@@ -2517,9 +2551,9 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                         minute: "2-digit",
                       });
 
-                      // Badge colors & label mapping
                       let badgeLabel = "";
                       let badgeStyles = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+
                       if (item.template_type === "laporan-informasi") {
                         badgeLabel = "Laporan Informasi";
                       } else if (item.template_type === "laporan-harian-khusus") {
@@ -2531,6 +2565,12 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                       } else if (item.template_type === "infosus") {
                         badgeLabel = "Informasi Khusus";
                         badgeStyles = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+                      } else if (item.template_type === "laporan-harian-intelijen") {
+                        badgeLabel = "LHI (Intelijen)";
+                        badgeStyles = "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20";
+                      } else if (item.template_type === "rencana-kegiatan") {
+                        badgeLabel = "Rencana Kegiatan";
+                        badgeStyles = "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20";
                       } else {
                         badgeLabel = "Laporan Lainnya";
                       }
@@ -2623,6 +2663,10 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                         ? "Laporan Kegiatan"
                         : selectedHistoryItem.template_type === "infosus"
                         ? "Informasi Khusus"
+                        : selectedHistoryItem.template_type === "laporan-harian-intelijen"
+                        ? "LHI (Intelijen)"
+                        : selectedHistoryItem.template_type === "rencana-kegiatan"
+                        ? "Rencana Kegiatan"
                         : "Laporan Harian"}
                     </span>
                     <span className="text-[10px] text-neutral-400 font-medium">
@@ -2735,7 +2779,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                   <span>
                     {isDownloading 
                       ? "Mengunduh..." 
-                      : (selectedHistoryItem.template_type === "laporan-informasi" || selectedHistoryItem.template_type === "laporan-harian-khusus" || selectedHistoryItem.template_type === "infosus") && selectedHistoryItem.meta_data?.raw_report
+                      : (selectedHistoryItem.template_type === "laporan-informasi" || selectedHistoryItem.template_type === "laporan-harian-khusus" || selectedHistoryItem.template_type === "infosus" || selectedHistoryItem.template_type === "laporan-harian-intelijen" || selectedHistoryItem.template_type === "rencana-kegiatan") && selectedHistoryItem.meta_data?.raw_report
                       ? "Unduh (.docx)" 
                       : "Unduh (.txt)"}
                   </span>
