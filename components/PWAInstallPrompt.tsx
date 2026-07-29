@@ -5,6 +5,10 @@ import { Download, X, Share2, Plus } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
+// In-memory variable to track if the prompt has been dismissed during this active page load.
+// It will reset back to false upon page refresh, allowing users to see the prompt again.
+let hasDismissedInSession = false;
+
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -64,8 +68,7 @@ export default function PWAInstallPrompt() {
     // Clear legacy localStorage blocker to immediately show to the user during testing
     localStorage.removeItem("pwa_prompt_dismissed_until");
 
-    const dismissedUntil = sessionStorage.getItem("pwa_prompt_dismissed_until");
-    const isDismissed = dismissedUntil === "true";
+    const isDismissed = hasDismissedInSession;
 
     if (!isDismissed && !isStandaloneMode) {
       const timer = setTimeout(() => {
@@ -104,7 +107,7 @@ export default function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    sessionStorage.setItem("pwa_prompt_dismissed_until", "true");
+    hasDismissedInSession = true;
   };
 
   if (isStandalone) return null;
