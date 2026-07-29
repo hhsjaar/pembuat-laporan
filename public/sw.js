@@ -1,4 +1,4 @@
-const CACHE_NAME = "pembuat-laporan-v1";
+const CACHE_NAME = "pembuat-laporan-v2";
 const ASSETS_TO_CACHE = [
   "/",
   "/manifest.json",
