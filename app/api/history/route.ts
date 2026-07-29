@@ -72,6 +72,47 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function PUT(req: NextRequest) {
+  try {
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json(
+        { error: "Supabase belum dikonfigurasi di berkas .env.local Anda." },
+        { status: 400 }
+      );
+    }
+
+    const { id, content, meta_data, perihal } = await req.json();
+
+    if (!id || !content) {
+      return NextResponse.json(
+        { error: "Parameter wajib tidak lengkap (id, content)." },
+        { status: 400 }
+      );
+    }
+
+    const updateData: any = { content };
+    if (meta_data) updateData.meta_data = meta_data;
+    if (perihal) updateData.perihal = perihal;
+
+    const { data, error } = await supabase
+      .from("report_history")
+      .update(updateData)
+      .eq("id", id)
+      .select();
+
+    if (error) throw error;
+
+    return NextResponse.json(data[0]);
+  } catch (error: any) {
+    console.error("PUT /api/history error:", error);
+    return NextResponse.json(
+      { error: error.message || "Gagal memperbarui riwayat laporan." },
+      { status: 500 }
+    );
+  }
+}
+
+
 export async function DELETE(req: NextRequest) {
   try {
     if (!isSupabaseConfigured()) {

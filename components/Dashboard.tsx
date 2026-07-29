@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders, FileSpreadsheet, Zap } from "lucide-react";
+import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders, FileSpreadsheet, Zap, GripVertical } from "lucide-react";
 import TemplateSelector, { TemplateType } from "./TemplateSelector";
 import ImageUploader from "./ImageUploader";
 import AudioUploader from "./AudioUploader";
@@ -91,6 +91,260 @@ export default function Dashboard() {
   const [isCopiedHistoryId, setIsCopiedHistoryId] = useState<string | null>(null);
   const [supabaseConfigured, setSupabaseConfigured] = useState(false);
 
+  // Guest reordering states
+  const [parsedGuests, setParsedGuests] = useState<any[]>([]);
+  const [isNumberedList, setIsNumberedList] = useState(false);
+  const [isBulletedList, setIsBulletedList] = useState(false);
+  const [guestListStartIndex, setGuestListStartIndex] = useState(-1);
+  const [guestListEndIndex, setGuestListEndIndex] = useState(-1);
+  const [reportLines, setReportLines] = useState<string[]>([]);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  // Helper to parse guest list out of the report text content
+  const parseGuests = (content: string) => {
+    const lines = content.split('\n');
+    const headerRegex = /^(?:[a-zA-Z\d\-\*\.\s]+)?(?:hadir|dihadiri|tamu\s+undangan|daftar\s+undangan|pejabat\s+dan\s+tamu|undangan\s+yang\s+hadir)/i;
+    const isTimeLine = /(?:pukul|\d{2}[:\.]\d{2})/i;
+    
+    let headerIndex = -1;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (headerRegex.test(line) && !isTimeLine.test(line)) {
+        headerIndex = i;
+        break;
+      }
+    }
+    
+    if (headerIndex === -1) {
+      return { hasGuests: false, guests: [], lines, headerIndex, startIndex: -1, endIndex: -1, isNumbered: false, isBulleted: false };
+    }
+    
+    const guestLines: { index: number; text: string }[] = [];
+    let endIndex = -1;
+    for (let j = headerIndex + 1; j < lines.length; j++) {
+      const line = lines[j];
+      const trimmed = line.trim();
+      
+      if (trimmed === "") {
+        endIndex = j;
+        break;
+      }
+      
+      if (/^(?:[a-zA-Z]\.|[IVXLCDM]+\.)\s+/i.test(trimmed)) {
+        endIndex = j;
+        break;
+      }
+      
+      if (/^\*?DUMP\*?/i.test(trimmed) || /^Kapolsek Tembalang/i.test(trimmed) || /^Tembusan/i.test(trimmed)) {
+        endIndex = j;
+        break;
+      }
+      
+      guestLines.push({ index: j, text: line });
+    }
+    
+    if (endIndex === -1) {
+      endIndex = lines.length;
+    }
+    
+    if (guestLines.length === 0) {
+      return { hasGuests: false, guests: [], lines, headerIndex, startIndex: -1, endIndex: -1, isNumbered: false, isBulleted: false };
+    }
+    
+    // Analyze numbering/bullet pattern
+    const numberPattern = /^(\s*)(\d+)([\.\)])\s+(.*)$/;
+    const bulletPattern = /^(\s*)([\-\*\u2022])\s+(.*)$/;
+    
+    let isNumbered = false;
+    let isBulleted = false;
+    let numCount = 0;
+    let bulletCount = 0;
+    
+    guestLines.forEach((gl) => {
+      if (numberPattern.test(gl.text)) numCount++;
+      else if (bulletPattern.test(gl.text)) bulletCount++;
+    });
+    
+    if (numCount > guestLines.length / 2) {
+      isNumbered = true;
+    } else if (bulletCount > guestLines.length / 2) {
+      isBulleted = true;
+    }
+    
+    const parsedGuests = guestLines.map((gl) => {
+      const text = gl.text;
+      let cleanText = text;
+      let leadingSpace = "";
+      let separator = ". ";
+      
+      if (isNumbered) {
+        const match = text.match(numberPattern);
+        if (match) {
+          leadingSpace = match[1];
+          separator = match[3] + " ";
+          cleanText = match[4];
+        }
+      } else if (isBulleted) {
+        const match = text.match(bulletPattern);
+        if (match) {
+          leadingSpace = match[1];
+          separator = match[2] + " ";
+          cleanText = match[3];
+        }
+      } else {
+        const match = text.match(/^(\s*)(.*)$/);
+        if (match) {
+          leadingSpace = match[1];
+          cleanText = match[2];
+        }
+      }
+      
+      return {
+        originalText: text,
+        cleanText,
+        leadingSpace,
+        separator
+      };
+    });
+    
+    return {
+      hasGuests: true,
+      headerIndex,
+      startIndex: headerIndex + 1,
+      endIndex,
+      isNumbered,
+      isBulleted,
+      guests: parsedGuests,
+      lines
+    };
+  };
+
+  // Helper to rebuild content text string with reordered guests
+  const rebuildContent = (
+    lines: string[],
+    startIndex: number,
+    endIndex: number,
+    newGuests: any[],
+    isNumbered: boolean,
+    isBulleted: boolean
+  ) => {
+    const formattedGuestLines = newGuests.map((guest, idx) => {
+      const leading = guest.leadingSpace || "";
+      if (isNumbered) {
+        const sep = guest.separator || ". ";
+        return `${leading}${idx + 1}${sep}${guest.cleanText}`;
+      } else if (isBulleted) {
+        const sep = guest.separator || "- ";
+        return `${leading}${sep}${guest.cleanText}`;
+      } else {
+        return `${leading}${guest.cleanText}`;
+      }
+    });
+    
+    const before = lines.slice(0, startIndex);
+    const after = lines.slice(endIndex);
+    
+    return [...before, ...formattedGuestLines, ...after].join('\n');
+  };
+
+  const updateHistoryItemContent = async (itemId: string, newContent: string, newMetaData: any) => {
+    try {
+      const res = await fetch("/api/history", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: itemId,
+          content: newContent,
+          meta_data: newMetaData
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Gagal memperbarui laporan di server.");
+      }
+
+      const updatedItem = await res.json();
+      
+      // Update local state historyList
+      setHistoryList((prev) =>
+        prev.map((item) => (item.id === itemId ? updatedItem : item))
+      );
+      
+      // Update selectedHistoryItem state
+      setSelectedHistoryItem(updatedItem);
+      
+      addToast("Urutan tamu undangan berhasil diperbarui!", "success");
+    } catch (err: any) {
+      console.error("Gagal update riwayat:", err);
+      addToast(err.message || "Gagal memperbarui urutan tamu undangan.", "error");
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      handleDragEnd();
+      return;
+    }
+
+    const updatedGuests = [...parsedGuests];
+    const [draggedItem] = updatedGuests.splice(draggedIndex, 1);
+    updatedGuests.splice(targetIndex, 0, draggedItem);
+
+    setParsedGuests(updatedGuests);
+    handleDragEnd();
+
+    // Rebuild content and update
+    if (selectedHistoryItem) {
+      const newContent = rebuildContent(
+        reportLines,
+        guestListStartIndex,
+        guestListEndIndex,
+        updatedGuests,
+        isNumberedList,
+        isBulletedList
+      );
+
+      let updatedMetaData = { ...selectedHistoryItem.meta_data };
+      if (updatedMetaData.raw_report && updatedMetaData.raw_report.isi_laporan) {
+        const rawIsiLaporan = updatedMetaData.raw_report.isi_laporan;
+        const parsedRaw = parseGuests(rawIsiLaporan);
+        if (parsedRaw.hasGuests) {
+          const newRawIsiLaporan = rebuildContent(
+            parsedRaw.lines,
+            parsedRaw.startIndex,
+            parsedRaw.endIndex,
+            updatedGuests,
+            parsedRaw.isNumbered || false,
+            parsedRaw.isBulleted || false
+          );
+          updatedMetaData.raw_report.isi_laporan = newRawIsiLaporan;
+        }
+      }
+
+      await updateHistoryItemContent(selectedHistoryItem.id, newContent, updatedMetaData);
+    }
+  };
+
+
   useEffect(() => {
     // Check configuration
     import("@/lib/supabase").then(({ isSupabaseConfigured }) => {
@@ -98,9 +352,29 @@ export default function Dashboard() {
     });
   }, []);
 
+  // Sync parsed guests with selectedHistoryItem
+  useEffect(() => {
+    if (selectedHistoryItem && selectedHistoryItem.template_type === "laporan-kegiatan") {
+      const parsed = parseGuests(selectedHistoryItem.content);
+      if (parsed.hasGuests) {
+        setParsedGuests(parsed.guests);
+        setIsNumberedList(parsed.isNumbered);
+        setIsBulletedList(parsed.isBulleted);
+        setGuestListStartIndex(parsed.startIndex);
+        setGuestListEndIndex(parsed.endIndex);
+        setReportLines(parsed.lines);
+      } else {
+        setParsedGuests([]);
+      }
+    } else {
+      setParsedGuests([]);
+    }
+  }, [selectedHistoryItem]);
+
   const fetchHistory = async () => {
     setIsLoadingHistory(true);
     try {
+
       const res = await fetch("/api/history");
       if (res.ok) {
         const data = await res.json();
@@ -2376,8 +2650,57 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
 
               {/* Modal Body */}
               <div className="flex-grow p-6 overflow-y-auto font-sans text-xs text-neutral-700 dark:text-neutral-300 space-y-4 select-text">
-                <div className="bg-neutral-50 dark:bg-neutral-950/40 rounded-2xl p-5 border border-neutral-100 dark:border-neutral-800/40 whitespace-pre-wrap leading-relaxed font-mono text-[11px]">
-                  {selectedHistoryItem.content}
+                {selectedHistoryItem.template_type === "laporan-kegiatan" && parsedGuests.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200 flex items-center space-x-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                        <span>Atur Urutan Tamu Undangan</span>
+                      </h4>
+                      <span className="text-[10px] text-neutral-400 font-medium bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-md">
+                        Geser (Drag &amp; Drop)
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                      {parsedGuests.map((guest, idx) => (
+                        <div
+                          key={idx}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, idx)}
+                          onDragOver={(e) => handleDragOver(e, idx)}
+                          onDrop={(e) => handleDrop(e, idx)}
+                          onDragEnd={handleDragEnd}
+                          className={`flex items-center space-x-3 p-2.5 rounded-xl border transition-all select-none cursor-grab active:cursor-grabbing ${
+                            draggedIndex === idx
+                              ? "bg-purple-500/10 border-purple-500/40 opacity-50 scale-[0.99] shadow-inner"
+                              : dragOverIndex === idx
+                              ? "bg-purple-50/50 dark:bg-purple-950/20 border-purple-500 border-dashed scale-[1.01] shadow-md"
+                              : "bg-white/40 dark:bg-neutral-900/40 border-neutral-200/60 dark:border-neutral-800/60 hover:border-purple-500/30 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30"
+                          }`}
+                        >
+                          <div className="text-neutral-400 cursor-grab active:cursor-grabbing hover:text-purple-500 transition-colors">
+                            <GripVertical className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="flex-grow font-mono text-[11px] text-neutral-800 dark:text-neutral-200">
+                            {isNumberedList && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">{idx + 1}.</span>}
+                            {isBulletedList && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">-</span>}
+                            {guest.cleanText}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="border-b border-neutral-100 dark:border-neutral-800/60 my-4" />
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200 flex items-center space-x-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600" />
+                    <span>Pratinjau Laporan</span>
+                  </h4>
+                  <div className="bg-neutral-50 dark:bg-neutral-950/40 rounded-2xl p-5 border border-neutral-100 dark:border-neutral-800/40 whitespace-pre-wrap leading-relaxed font-mono text-[11px]">
+                    {selectedHistoryItem.content}
+                  </div>
                 </div>
               </div>
 
