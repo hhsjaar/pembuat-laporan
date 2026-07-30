@@ -430,21 +430,57 @@ export default function Dashboard() {
     }
   };
 
-  const getExportFilename = (type: string, createdAt?: string) => {
-    if (type === "rencana-kegiatan") {
+  const parseIndonesianDate = (dateStr: string): Date | null => {
+    if (!dateStr) return null;
+    const months: Record<string, number> = {
+      januari: 0, februari: 1, maret: 2, april: 3, mei: 4, juni: 5,
+      juli: 6, agustus: 7, september: 8, oktober: 9, november: 10, desember: 11,
+      jan: 0, feb: 1, mar: 2, apr: 3, jun: 5, jul: 6, agu: 7, agt: 7, sep: 8, okt: 9, nov: 10, des: 11
+    };
+
+    const cleanStr = dateStr.toLowerCase();
+    const match = cleanStr.match(/(\d{1,2})\s+([a-z]+)\s+(\d{2,4})/);
+    if (match) {
+      const day = parseInt(match[1], 10);
+      const monthName = match[2];
+      let year = parseInt(match[3], 10);
+      const month = months[monthName];
+      if (month !== undefined && !isNaN(day) && !isNaN(year)) {
+        if (year < 100) year += 2000;
+        return new Date(year, month, day);
+      }
+    }
+    return null;
+  };
+
+  const getExportFilename = (type: string, createdAt?: string, reportData?: any) => {
+    let dateObj: Date | null = null;
+
+    if (reportData) {
+      if (type === "rencana-kegiatan" && reportData.hari_tanggal) {
+        dateObj = parseIndonesianDate(reportData.hari_tanggal);
+      } else if (type === "laporan-harian-intelijen" && reportData.tanggal) {
+        dateObj = parseIndonesianDate(reportData.tanggal);
+      }
+    }
+
+    if (!dateObj) {
       const baseDate = createdAt ? new Date(createdAt) : new Date();
-      const targetDate = new Date(baseDate);
-      targetDate.setDate(targetDate.getDate() + 1);
-      const day = String(targetDate.getDate()).padStart(2, '0');
-      const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-      const year = String(targetDate.getFullYear()).slice(-2);
+      if (type === "rencana-kegiatan") {
+        dateObj = new Date(baseDate.getTime() + 24 * 60 * 60 * 1000);
+      } else {
+        dateObj = baseDate;
+      }
+    }
+
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = String(dateObj.getFullYear()).slice(-2);
+
+    if (type === "rencana-kegiatan") {
       return `REN-${day}${month}${year}.docx`;
     }
     if (type === "laporan-harian-intelijen") {
-      const baseDate = createdAt ? new Date(createdAt) : new Date();
-      const day = String(baseDate.getDate()).padStart(2, '0');
-      const month = String(baseDate.getMonth() + 1).padStart(2, '0');
-      const year = String(baseDate.getFullYear()).slice(-2);
       return `LAPHAR-${day}${month}${year}.docx`;
     }
     return null;
@@ -478,7 +514,7 @@ export default function Dashboard() {
       link.href = url;
       
       let filename = `${item.template_type}-${item.id.slice(0, 8)}.docx`;
-      const customFilename = getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp);
+      const customFilename = getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, rawReport);
       if (customFilename) {
         filename = customFilename;
       }
@@ -775,14 +811,13 @@ II. FAKTA-FAKTA
          ${report.lain_lain_text || ""}
 
 Semarang, ${report.tanggal_ttd || ""}
-LHI UNIT INTELKAM
+UNIT INTELKAM
 
 Autentikasi:
-Kanit Intelkam Polsek Tembalang
 
 Distribusi:
-1. Sat Intelkam Polrestabes Semarang
-2. Kapolsek Tembalang`;
+Sat Intelkam Polrestabes Semarang
+Kapolsek Tembalang`;
       } else if (type === "rencana-kegiatan") {
         formattedContent = `POLRI DAERAH JAWA TENGAH
 RESOR KOTA BESAR SEMARANG
@@ -1489,7 +1524,7 @@ Tembusan:
       link.href = url;
       
       let filename = `${templateType}-${Date.now()}.docx`;
-      const customFilename = getExportFilename(templateType);
+      const customFilename = getExportFilename(templateType, undefined, reportData);
       if (customFilename) {
         filename = customFilename;
       }

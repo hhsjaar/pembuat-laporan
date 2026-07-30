@@ -797,7 +797,7 @@ Tembusan:
                   <div className="text-center space-y-12">
                     <div style={{ fontFamily: "Calibri, sans-serif" }}>
                       <p className="text-neutral-800">Semarang, {reportData.tanggal_ttd}</p>
-                      <p className="font-bold tracking-wide text-neutral-950">LHI UNIT INTELKAM</p>
+                      <p className="font-bold tracking-wide text-neutral-950">UNIT INTELKAM</p>
                     </div>
                   </div>
                 </>
