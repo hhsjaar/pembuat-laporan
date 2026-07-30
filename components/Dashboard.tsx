@@ -64,6 +64,22 @@ const getIndoFormattedDate = (date: Date): string => {
   });
 };
 
+interface ListBlock {
+  id: number;
+  headerText: string;
+  headerIndex: number;
+  startIndex: number;
+  endIndex: number;
+  isNumbered: boolean;
+  isBulleted: boolean;
+  items: {
+    originalText: string;
+    cleanText: string;
+    leadingSpace: string;
+    separator: string;
+  }[];
+}
+
 export default function Dashboard() {
   // Theme state (system default fallback to light mode)
   const [darkMode, setDarkMode] = useState(false);
@@ -91,7 +107,7 @@ export default function Dashboard() {
   const [isCopiedHistoryId, setIsCopiedHistoryId] = useState<string | null>(null);
   const [supabaseConfigured, setSupabaseConfigured] = useState(false);
 
-  // Guest reordering states
+  // Guest and generic list reordering states
   const [parsedGuests, setParsedGuests] = useState<any[]>([]);
   const [isNumberedList, setIsNumberedList] = useState(false);
   const [isBulletedList, setIsBulletedList] = useState(false);
@@ -101,122 +117,136 @@ export default function Dashboard() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
-  // Helper to parse guest list out of the report text content
-  const parseGuests = (content: string) => {
+  const [parsedLists, setParsedLists] = useState<any[]>([]);
+  const [selectedListId, setSelectedListId] = useState<number>(0);
+
+  // Helper to parse all list blocks out of the report text content
+  const parseAllLists = (content: string): ListBlock[] => {
+    if (!content) return [];
     const lines = content.split('\n');
-    const headerRegex = /^(?:[a-zA-Z\d\-\*\.\s]+)?(?:hadir|dihadiri|tamu\s+undangan|daftar\s+undangan|pejabat\s+dan\s+tamu|undangan\s+yang\s+hadir)/i;
-    const isTimeLine = /(?:pukul|\d{2}[:\.]\d{2})/i;
+    const lists: ListBlock[] = [];
     
-    let headerIndex = -1;
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (headerRegex.test(line) && !isTimeLine.test(line)) {
-        headerIndex = i;
-        break;
-      }
-    }
-    
-    if (headerIndex === -1) {
-      return { hasGuests: false, guests: [], lines, headerIndex, startIndex: -1, endIndex: -1, isNumbered: false, isBulleted: false };
-    }
-    
-    const guestLines: { index: number; text: string }[] = [];
-    let endIndex = -1;
-    for (let j = headerIndex + 1; j < lines.length; j++) {
-      const line = lines[j];
-      const trimmed = line.trim();
-      
-      if (trimmed === "") {
-        endIndex = j;
-        break;
-      }
-      
-      if (/^(?:[a-zA-Z]\.|[IVXLCDM]+\.)\s+/i.test(trimmed)) {
-        endIndex = j;
-        break;
-      }
-      
-      if (/^\*?DUMP\*?/i.test(trimmed) || /^Kapolsek Tembalang/i.test(trimmed) || /^Tembusan/i.test(trimmed)) {
-        endIndex = j;
-        break;
-      }
-      
-      guestLines.push({ index: j, text: line });
-    }
-    
-    if (endIndex === -1) {
-      endIndex = lines.length;
-    }
-    
-    if (guestLines.length === 0) {
-      return { hasGuests: false, guests: [], lines, headerIndex, startIndex: -1, endIndex: -1, isNumbered: false, isBulleted: false };
-    }
-    
-    // Analyze numbering/bullet pattern
     const numberPattern = /^(\s*)(\d+)([\.\)])\s+(.*)$/;
     const bulletPattern = /^(\s*)([\-\*\u2022])\s+(.*)$/;
     
-    let isNumbered = false;
-    let isBulleted = false;
-    let numCount = 0;
-    let bulletCount = 0;
+    let i = 0;
+    let listIdCounter = 0;
     
-    guestLines.forEach((gl) => {
-      if (numberPattern.test(gl.text)) numCount++;
-      else if (bulletPattern.test(gl.text)) bulletCount++;
-    });
-    
-    if (numCount > guestLines.length / 2) {
-      isNumbered = true;
-    } else if (bulletCount > guestLines.length / 2) {
-      isBulleted = true;
+    while (i < lines.length) {
+      const line = lines[i];
+      const isNumbered = numberPattern.test(line);
+      const isBulleted = bulletPattern.test(line);
+      
+      if (isNumbered || isBulleted) {
+        const startIndex = i;
+        const items: any[] = [];
+        
+        while (i < lines.length) {
+          const currentLine = lines[i];
+          const mNum = currentLine.match(numberPattern);
+          const mBullet = currentLine.match(bulletPattern);
+          
+          if (mNum) {
+            items.push({
+              originalText: currentLine,
+              cleanText: mNum[4],
+              leadingSpace: mNum[1],
+              separator: mNum[3] + " ",
+              type: 'numbered'
+            });
+            i++;
+          } else if (mBullet) {
+            items.push({
+              originalText: currentLine,
+              cleanText: mBullet[3],
+              leadingSpace: mBullet[1],
+              separator: mBullet[2] + " ",
+              type: 'bulleted'
+            });
+            i++;
+          } else {
+            break;
+          }
+        }
+        
+        const endIndex = i;
+        const numCount = items.filter(item => item.type === 'numbered').length;
+        const bulletCount = items.filter(item => item.type === 'bulleted').length;
+        const finalIsNumbered = numCount >= bulletCount;
+        const finalIsBulleted = !finalIsNumbered;
+        
+        let headerIndex = startIndex - 1;
+        while (headerIndex >= 0 && lines[headerIndex].trim() === "") {
+          headerIndex--;
+        }
+        
+        let headerText = "Daftar";
+        if (headerIndex >= 0) {
+          const rawHeader = lines[headerIndex].trim();
+          headerText = rawHeader;
+          if (headerText.length > 50) {
+            const cleanHeader = rawHeader.replace(/[:\.\s]+$/, '');
+            const lastPunct = Math.max(
+              cleanHeader.lastIndexOf(','),
+              cleanHeader.lastIndexOf('.'),
+              cleanHeader.lastIndexOf(';'),
+              cleanHeader.lastIndexOf(':')
+            );
+            if (lastPunct !== -1 && lastPunct < cleanHeader.length - 5) {
+              headerText = rawHeader.substring(lastPunct + 1).trim();
+            } else {
+              headerText = "..." + rawHeader.substring(rawHeader.length - 45);
+            }
+          }
+        }
+        
+        lists.push({
+          id: listIdCounter++,
+          headerText: headerText || "Daftar",
+          headerIndex,
+          startIndex,
+          endIndex,
+          isNumbered: finalIsNumbered,
+          isBulleted: finalIsBulleted,
+          items: items.map(item => ({
+            originalText: item.originalText,
+            cleanText: item.cleanText,
+            leadingSpace: item.leadingSpace,
+            separator: item.separator
+          }))
+        });
+      } else {
+        i++;
+      }
     }
     
-    const parsedGuests = guestLines.map((gl) => {
-      const text = gl.text;
-      let cleanText = text;
-      let leadingSpace = "";
-      let separator = ". ";
-      
-      if (isNumbered) {
-        const match = text.match(numberPattern);
-        if (match) {
-          leadingSpace = match[1];
-          separator = match[3] + " ";
-          cleanText = match[4];
-        }
-      } else if (isBulleted) {
-        const match = text.match(bulletPattern);
-        if (match) {
-          leadingSpace = match[1];
-          separator = match[2] + " ";
-          cleanText = match[3];
-        }
-      } else {
-        const match = text.match(/^(\s*)(.*)$/);
-        if (match) {
-          leadingSpace = match[1];
-          cleanText = match[2];
-        }
-      }
-      
+    return lists;
+  };
+
+  const parseGuests = (content: string) => {
+    const lists = parseAllLists(content);
+    if (lists.length > 0) {
+      const firstList = lists[0];
       return {
-        originalText: text,
-        cleanText,
-        leadingSpace,
-        separator
+        hasGuests: true,
+        headerIndex: firstList.headerIndex,
+        startIndex: firstList.startIndex,
+        endIndex: firstList.endIndex,
+        isNumbered: firstList.isNumbered,
+        isBulleted: firstList.isBulleted,
+        guests: firstList.items,
+        lines: content.split('\n')
       };
-    });
-    
+    }
     return {
-      hasGuests: true,
-      headerIndex,
-      startIndex: headerIndex + 1,
-      endIndex,
-      isNumbered,
-      isBulleted,
-      guests: parsedGuests,
-      lines
+      hasGuests: false,
+      guests: [],
+      lines: content.split('\n'),
+      headerIndex: -1,
+      startIndex: -1,
+      endIndex: -1,
+      isNumbered: false,
+      isBulleted: false
     };
   };
 
@@ -275,10 +305,10 @@ export default function Dashboard() {
       // Update selectedHistoryItem state
       setSelectedHistoryItem(updatedItem);
       
-      addToast("Urutan tamu undangan berhasil diperbarui!", "success");
+      addToast("Urutan daftar berhasil diperbarui!", "success");
     } catch (err: any) {
       console.error("Gagal update riwayat:", err);
-      addToast(err.message || "Gagal memperbarui urutan tamu undangan.", "error");
+      addToast(err.message || "Gagal memperbarui urutan daftar.", "error");
     }
   };
 
@@ -305,36 +335,51 @@ export default function Dashboard() {
       return;
     }
 
-    const updatedGuests = [...parsedGuests];
-    const [draggedItem] = updatedGuests.splice(draggedIndex, 1);
-    updatedGuests.splice(targetIndex, 0, draggedItem);
+    const currentList = parsedLists.find(l => l.id === selectedListId) || parsedLists[0];
+    if (!currentList) {
+      handleDragEnd();
+      return;
+    }
 
-    setParsedGuests(updatedGuests);
+    const updatedItems = [...currentList.items];
+    const [draggedItem] = updatedItems.splice(draggedIndex, 1);
+    updatedItems.splice(targetIndex, 0, draggedItem);
+
+    // Update parsedLists state locally
+    const updatedLists = parsedLists.map(l => {
+      if (l.id === currentList.id) {
+        return { ...l, items: updatedItems };
+      }
+      return l;
+    });
+    setParsedLists(updatedLists);
     handleDragEnd();
 
     // Rebuild content and update
     if (selectedHistoryItem) {
       const newContent = rebuildContent(
-        reportLines,
-        guestListStartIndex,
-        guestListEndIndex,
-        updatedGuests,
-        isNumberedList,
-        isBulletedList
+        selectedHistoryItem.content.split('\n'),
+        currentList.startIndex,
+        currentList.endIndex,
+        updatedItems,
+        currentList.isNumbered,
+        currentList.isBulleted
       );
 
       let updatedMetaData = { ...selectedHistoryItem.meta_data };
       if (updatedMetaData.raw_report && updatedMetaData.raw_report.isi_laporan) {
-        const rawIsiLaporan = updatedMetaData.raw_report.isi_laporan;
-        const parsedRaw = parseGuests(rawIsiLaporan);
-        if (parsedRaw.hasGuests) {
+        const parsedRaw = parseAllLists(updatedMetaData.raw_report.isi_laporan);
+        // Find list with the same relative index
+        const listIdxInParsed = parsedLists.findIndex(l => l.id === currentList.id);
+        const matchingRawList = parsedRaw[listIdxInParsed];
+        if (matchingRawList) {
           const newRawIsiLaporan = rebuildContent(
-            parsedRaw.lines,
-            parsedRaw.startIndex,
-            parsedRaw.endIndex,
-            updatedGuests,
-            parsedRaw.isNumbered || false,
-            parsedRaw.isBulleted || false
+            updatedMetaData.raw_report.isi_laporan.split('\n'),
+            matchingRawList.startIndex,
+            matchingRawList.endIndex,
+            updatedItems,
+            matchingRawList.isNumbered,
+            matchingRawList.isBulleted
           );
           updatedMetaData.raw_report.isi_laporan = newRawIsiLaporan;
         }
@@ -352,9 +397,10 @@ export default function Dashboard() {
     });
   }, []);
 
-  // Sync parsed guests with selectedHistoryItem
+  // Sync parsed guests & generic lists with selectedHistoryItem
   useEffect(() => {
     if (selectedHistoryItem && selectedHistoryItem.template_type === "laporan-kegiatan") {
+      // Keep parsedGuests fallback compatibility
       const parsed = parseGuests(selectedHistoryItem.content);
       if (parsed.hasGuests) {
         setParsedGuests(parsed.guests);
@@ -366,8 +412,23 @@ export default function Dashboard() {
       } else {
         setParsedGuests([]);
       }
+
+      // Sync new generic list blocks
+      const lists = parseAllLists(selectedHistoryItem.content);
+      setParsedLists(lists);
+      if (lists.length > 0) {
+        // Default to the first list if the current selectedListId is invalid
+        setSelectedListId(prev => {
+          if (lists.some(l => l.id === prev)) return prev;
+          return lists[0].id;
+        });
+      } else {
+        setSelectedListId(0);
+      }
     } else {
       setParsedGuests([]);
+      setParsedLists([]);
+      setSelectedListId(0);
     }
   }, [selectedHistoryItem]);
 
@@ -2729,45 +2790,79 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
 
               {/* Modal Body */}
               <div className="flex-grow p-6 overflow-y-auto font-sans text-xs text-neutral-700 dark:text-neutral-300 space-y-4 select-text">
-                {selectedHistoryItem.template_type === "laporan-kegiatan" && parsedGuests.length > 0 && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                {selectedHistoryItem.template_type === "laporan-kegiatan" && parsedLists.length > 0 && (
+                  <div className="space-y-3 bg-neutral-50/50 dark:bg-neutral-900/40 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800/60 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-neutral-100 dark:border-neutral-800/40">
                       <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200 flex items-center space-x-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                        <span>Atur Urutan Tamu Undangan</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                        <span>Atur Urutan Informasi ({parsedLists.length} Daftar Terdeteksi)</span>
                       </h4>
-                      <span className="text-[10px] text-neutral-400 font-medium bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-md">
-                        Geser (Drag &amp; Drop)
+                      <span className="self-start sm:self-auto text-[10px] text-purple-600 dark:text-purple-400 font-bold bg-purple-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <GripVertical className="w-3 h-3" /> Geser &amp; Urutkan
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 gap-2 max-h-[220px] overflow-y-auto pr-1">
-                      {parsedGuests.map((guest, idx) => (
-                        <div
-                          key={idx}
-                          draggable
-                          onDragStart={(e) => handleDragStart(e, idx)}
-                          onDragOver={(e) => handleDragOver(e, idx)}
-                          onDrop={(e) => handleDrop(e, idx)}
-                          onDragEnd={handleDragEnd}
-                          className={`flex items-center space-x-3 p-2.5 rounded-xl border transition-all select-none cursor-grab active:cursor-grabbing ${
-                            draggedIndex === idx
-                              ? "bg-purple-500/10 border-purple-500/40 opacity-50 scale-[0.99] shadow-inner"
-                              : dragOverIndex === idx
-                              ? "bg-purple-50/50 dark:bg-purple-950/20 border-purple-500 border-dashed scale-[1.01] shadow-md"
-                              : "bg-white/40 dark:bg-neutral-900/40 border-neutral-200/60 dark:border-neutral-800/60 hover:border-purple-500/30 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30"
-                          }`}
-                        >
-                          <div className="text-neutral-400 cursor-grab active:cursor-grabbing hover:text-purple-500 transition-colors">
-                            <GripVertical className="w-3.5 h-3.5" />
-                          </div>
-                          <div className="flex-grow font-mono text-[11px] text-neutral-800 dark:text-neutral-200">
-                            {isNumberedList && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">{idx + 1}.</span>}
-                            {isBulletedList && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">-</span>}
-                            {guest.cleanText}
+
+                    {parsedLists.length > 1 && (
+                      <div className="flex flex-wrap gap-1.5 py-1">
+                        {parsedLists.map((list) => (
+                          <button
+                            key={list.id}
+                            type="button"
+                            onClick={() => setSelectedListId(list.id)}
+                            className={`px-3 py-1.5 text-[10px] font-bold rounded-lg border transition-all truncate max-w-[200px] ${
+                              selectedListId === list.id
+                                ? "bg-purple-500 text-white border-purple-500 shadow-md shadow-purple-500/15 font-extrabold"
+                                : "bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700"
+                            }`}
+                            title={list.headerText}
+                          >
+                            {list.headerText}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {(() => {
+                      const currentList = parsedLists.find(l => l.id === selectedListId) || parsedLists[0];
+                      if (!currentList) return null;
+                      return (
+                        <div className="space-y-2">
+                          {parsedLists.length === 1 && (
+                            <div className="text-[10px] text-neutral-400 font-medium italic">
+                              Daftar: {currentList.headerText}
+                            </div>
+                          )}
+                          <div className="grid grid-cols-1 gap-1.5 max-h-[220px] overflow-y-auto pr-1">
+                            {currentList.items.map((item: any, idx: number) => (
+                              <div
+                                key={idx}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, idx)}
+                                onDragOver={(e) => handleDragOver(e, idx)}
+                                onDrop={(e) => handleDrop(e, idx)}
+                                onDragEnd={handleDragEnd}
+                                className={`flex items-center space-x-3 p-2.5 rounded-xl border transition-all select-none cursor-grab active:cursor-grabbing ${
+                                  draggedIndex === idx
+                                    ? "bg-purple-500/10 border-purple-500/40 opacity-50 scale-[0.99] shadow-inner"
+                                    : dragOverIndex === idx
+                                    ? "bg-purple-50/50 dark:bg-purple-950/20 border-purple-500 border-dashed scale-[1.01] shadow-md"
+                                    : "bg-white/60 dark:bg-neutral-800/60 border-neutral-200/60 dark:border-neutral-800/60 hover:border-purple-500/30 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30"
+                                }`}
+                              >
+                                <div className="text-neutral-400 cursor-grab active:cursor-grabbing hover:text-purple-500 transition-colors">
+                                  <GripVertical className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="flex-grow font-mono text-[11px] text-neutral-800 dark:text-neutral-200">
+                                  {currentList.isNumbered && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">{idx + 1}.</span>}
+                                  {currentList.isBulleted && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">-</span>}
+                                  {item.cleanText}
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })()}
                     <div className="border-b border-neutral-100 dark:border-neutral-800/60 my-4" />
                   </div>
                 )}
