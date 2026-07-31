@@ -594,83 +594,81 @@ export default function Dashboard() {
     }
   };
 
-  const saveReportToHistory = async (report: any, type: string) => {
-    try {
-      let title = "";
-      let body = "";
-      let kapolsek = report.kapolsek_nama || "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H.";
+  const compileFormattedContent = (report: any, type: string) => {
+    let title = "";
+    let body = "";
+    let kapolsek = report.kapolsek_nama || "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H.";
 
-      if (type === "laporan-informasi") {
-        title = report.perihal || "LAPORAN INFORMASI";
-        if (report.isi_laporan) {
-          body = report.isi_laporan;
-        } else {
-          const parts = [];
-          if (report.A) parts.push(`A. ${report.A}`);
-          if (report.B) parts.push(`B. ${report.B}`);
-          if (report.C) parts.push(`C. ${report.C}`);
-          if (report.D) parts.push(`D. ${report.D}`);
-          if (report.E) parts.push(`E. ${report.E}`);
-          if (report.F) parts.push(`F. ${report.F}`);
-          body = parts.join("\n\n");
-        }
-      } else if (type === "laporan-harian-khusus") {
-        title = report.perihal || "LAPORAN HARIAN KHUSUS";
-        body = report.isi_laporan || "";
-      } else if (type === "infosus") {
-        title = report.perihal || "INFORMASI KHUSUS";
-        body = report.fakta_fakta || "";
-      } else if (type === "laporan-kegiatan") {
-        let perihal = report.perihal || "KEGIATAN";
-        if (/^laporan\s+kegiatan/i.test(perihal.trim())) {
-          perihal = perihal.trim().replace(/^laporan\s+/i, "");
-        }
-        title = perihal;
-        body = report.isi_laporan || "";
-      } else if (type === "laporan-harian") {
-        title = report.perihal || "LAPORAN HARIAN SITUASI KAMTIBMAS";
-        body = report.isi_laporan || "";
-      } else if (type === "laporan-harian-intelijen") {
-        title = report.perihal || "LAPORAN HARIAN INTELIJEN";
-        body = report.fakta_sosial_budaya || "";
-      } else if (type === "rencana-kegiatan") {
-        title = `RENCANA KEGIATAN INTELKAM - ${report.hari_tanggal || ""}`;
-        body = (report.kegiatan_list || []).map((k: any) => `${k.no} ${k.waktu_lokasi} - Giat: ${k.kegiatan} - Hasil: ${k.hasil}`).join("\n");
+    if (type === "laporan-informasi") {
+      title = report.perihal || "LAPORAN INFORMASI";
+      if (report.isi_laporan) {
+        body = report.isi_laporan;
       } else {
-        title = report.judul || "LAPORAN RESMI";
-        body = report.isi_laporan || "";
+        const parts = [];
+        if (report.A) parts.push(`A. ${report.A}`);
+        if (report.B) parts.push(`B. ${report.B}`);
+        if (report.C) parts.push(`C. ${report.C}`);
+        if (report.D) parts.push(`D. ${report.D}`);
+        if (report.E) parts.push(`E. ${report.E}`);
+        if (report.F) parts.push(`F. ${report.F}`);
+        body = parts.join("\n\n");
+      }
+    } else if (type === "laporan-harian-khusus") {
+      title = report.perihal || "LAPORAN HARIAN KHUSUS";
+      body = report.isi_laporan || "";
+    } else if (type === "infosus") {
+      title = report.perihal || "INFORMASI KHUSUS";
+      body = report.fakta_fakta || "";
+    } else if (type === "laporan-kegiatan") {
+      let perihal = report.perihal || "KEGIATAN";
+      if (/^laporan\s+kegiatan/i.test(perihal.trim())) {
+        perihal = perihal.trim().replace(/^laporan\s+/i, "");
+      }
+      title = perihal;
+      body = report.isi_laporan || "";
+    } else if (type === "laporan-harian") {
+      title = report.perihal || "LAPORAN HARIAN SITUASI KAMTIBMAS";
+      body = report.isi_laporan || "";
+    } else if (type === "laporan-harian-intelijen") {
+      title = report.perihal || "LAPORAN HARIAN INTELIJEN";
+      body = report.fakta_sosial_budaya || "";
+    } else if (type === "rencana-kegiatan") {
+      title = `RENCANA KEGIATAN INTELKAM - ${report.hari_tanggal || ""}`;
+      body = (report.kegiatan_list || []).map((k: any) => `${k.no} ${k.waktu_lokasi} - Giat: ${k.kegiatan} - Hasil: ${k.hasil}`).join("\n");
+    } else {
+      title = report.judul || "LAPORAN RESMI";
+      body = report.isi_laporan || "";
+    }
+
+    let formattedContent = body;
+    if (type === "laporan-informasi") {
+      const stripPrefix = (text: string, prefix: string) => {
+        if (!text) return "";
+        const trimmed = text.trim();
+        const regex = new RegExp(`^${prefix}\\s*`, "i");
+        return trimmed.replace(regex, "");
+      };
+
+      let mainBody = body;
+      if (!report.isi_laporan) {
+        const cleanA = stripPrefix(report.A, "A\\.");
+        const cleanB = stripPrefix(report.B, "B\\.");
+        const cleanC = stripPrefix(report.C, "C\\.");
+        const cleanD = stripPrefix(report.D, "D\\.");
+        const cleanE = stripPrefix(report.E, "E\\.");
+        const cleanF = stripPrefix(report.F, "F\\.");
+        
+        const parts = [];
+        if (cleanA) parts.push(`A. ${cleanA}`);
+        if (cleanB) parts.push(`B. ${cleanB}`);
+        if (cleanC) parts.push(`C. ${cleanC}`);
+        if (cleanD) parts.push(`D. ${cleanD}`);
+        if (cleanE) parts.push(`E. ${cleanE}`);
+        if (cleanF) parts.push(`F. ${cleanF}`);
+        mainBody = parts.join("\n\n");
       }
 
-      // Format report exactly as shown in ReportPreview.tsx (unless it's laporan-harian which is already pre-formatted by LLM)
-      let formattedContent = body;
-      if (type === "laporan-informasi") {
-        const stripPrefix = (text: string, prefix: string) => {
-          if (!text) return "";
-          const trimmed = text.trim();
-          const regex = new RegExp(`^${prefix}\\s*`, "i");
-          return trimmed.replace(regex, "");
-        };
-
-        let mainBody = body;
-        if (!report.isi_laporan) {
-          const cleanA = stripPrefix(report.A, "A\\.");
-          const cleanB = stripPrefix(report.B, "B\\.");
-          const cleanC = stripPrefix(report.C, "C\\.");
-          const cleanD = stripPrefix(report.D, "D\\.");
-          const cleanE = stripPrefix(report.E, "E\\.");
-          const cleanF = stripPrefix(report.F, "F\\.");
-          
-          const parts = [];
-          if (cleanA) parts.push(`A. ${cleanA}`);
-          if (cleanB) parts.push(`B. ${cleanB}`);
-          if (cleanC) parts.push(`C. ${cleanC}`);
-          if (cleanD) parts.push(`D. ${cleanD}`);
-          if (cleanE) parts.push(`E. ${cleanE}`);
-          if (cleanF) parts.push(`F. ${cleanF}`);
-          mainBody = parts.join("\n\n");
-        }
-
-        formattedContent = `POLRI DAERAH JAWA TENGAH
+      formattedContent = `POLRI DAERAH JAWA TENGAH
 RESOR KOTA BESAR SEMARANG
 SEKTOR TEMBALANG
 Jl. Turus Asri no 9 Tembalang Semarang
@@ -708,8 +706,8 @@ III. PENDAPAT PELAPOR
 
 Semarang, ${report.tanggal || ""}
 PELAPOR`;
-      } else if (type === "laporan-harian-khusus") {
-        formattedContent = `KEPOLISIAN NEGARA REPUBLIK INDONESIA
+    } else if (type === "laporan-harian-khusus") {
+      formattedContent = `KEPOLISIAN NEGARA REPUBLIK INDONESIA
 DAERAH JAWA TENGAH
 RESOR KOTA BESAR SEMARANG
 SEKTOR TEMBALANG
@@ -767,8 +765,8 @@ Distribusi:
 
 Kasatintelkam Polrestabes Semarang
 Kapolsek Tembalang`;
-      } else if (type === "infosus") {
-        formattedContent = `POLRI DAERAH JAWA TENGAH
+    } else if (type === "infosus") {
+      formattedContent = `POLRI DAERAH JAWA TENGAH
 RESOR KOTA BESAR SEMARANG
 SEKTOR TEMBALANG
 Jl. Turus Asri No. 9, Semarang 50245
@@ -810,8 +808,8 @@ Authentikasi :.......................
 Distribusi :
 1. Kapolsek Tembalang.
 2. Kasatintelkam Polrestabes Semarang.`;
-      } else if (type === "laporan-harian-intelijen") {
-        formattedContent = `POLRI DAERAH JAWA TENGAH
+    } else if (type === "laporan-harian-intelijen") {
+      formattedContent = `POLRI DAERAH JAWA TENGAH
 RESOR KOTA BESAR SEMARANG
 POLSEK TEMMBALANG
 Jl. Turus Asri No. 9 Tembalang Semarang
@@ -879,8 +877,8 @@ Autentikasi:
 Distribusi:
 Sat Intelkam Polrestabes Semarang
 Kapolsek Tembalang`;
-      } else if (type === "rencana-kegiatan") {
-        formattedContent = `POLRI DAERAH JAWA TENGAH
+    } else if (type === "rencana-kegiatan") {
+      formattedContent = `POLRI DAERAH JAWA TENGAH
 RESOR KOTA BESAR SEMARANG
 SEKTOR TEMBALANG
 ===================================
@@ -895,8 +893,8 @@ ${report.jabatan_ttd || "BA SIAGA INTELKAM"}
 
 ${report.nama_ttd || "YUDHA M.P."}
 ${report.pangkat_nrp_ttd || "AIPDA NRP 86040324"}`;
-      } else if (type !== "laporan-harian") {
-        formattedContent = `POLRESTABES SEMARANG
+    } else if (type !== "laporan-harian") {
+      formattedContent = `POLRESTABES SEMARANG
 POLSEK TEMBALANG
 =======================
 
@@ -923,9 +921,16 @@ Tembusan:
 1. Waka Polrestabes Semarang.
 2. KabagOps Polrestabes Semarang.
 3. KasatIntelkam Polrestabes Semarang.`;
-      }
+    }
 
-      await fetch("/api/history", {
+    return { title, formattedContent, kapolsek };
+  };
+
+  const saveReportToHistory = async (report: any, type: string) => {
+    try {
+      const { title, formattedContent, kapolsek } = compileFormattedContent(report, type);
+
+      const res = await fetch("/api/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -940,6 +945,10 @@ Tembusan:
           }
         })
       });
+      if (res.ok) {
+        const savedItem = await res.json();
+        return savedItem;
+      }
     } catch (err) {
       console.error("Gagal menyimpan ke riwayat:", err);
     }
@@ -1006,7 +1015,38 @@ Tembusan:
 
   // Result state
   const [reportData, setReportData] = useState<any | null>(null);
+  const [generatedHistoryId, setGeneratedHistoryId] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // Debounced sync to history database when reportData is edited in-place
+  useEffect(() => {
+    if (!reportData || !generatedHistoryId) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const { title, formattedContent } = compileFormattedContent(reportData, templateType);
+        
+        await fetch("/api/history", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: generatedHistoryId,
+            content: formattedContent,
+            perihal: title,
+            meta_data: {
+              timestamp: new Date().toISOString(),
+              date_input: reportData.tanggal || "",
+              raw_report: reportData
+            }
+          })
+        });
+      } catch (err) {
+        console.error("Gagal melakukan autosave ke database:", err);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [reportData, generatedHistoryId, templateType]);
 
   // Custom Toast notification states
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -1510,7 +1550,10 @@ Tembusan:
 
       // Save report data state
       setReportData(generatedReport);
-      saveReportToHistory(generatedReport, templateType);
+      const savedItem = await saveReportToHistory(generatedReport, templateType);
+      if (savedItem && savedItem.id) {
+        setGeneratedHistoryId(savedItem.id);
+      }
       
       // Auto-trigger word packaging state as complete
       updateStepStatus("export-docx", "success");
@@ -1624,6 +1667,7 @@ Tembusan:
 
   const handleReset = () => {
     setReportData(null);
+    setGeneratedHistoryId(null);
     setAudioFile(null);
     setPdfFile(null);
     setImages([]);
@@ -2428,6 +2472,7 @@ Tembusan:
                 onDownload={handleDownloadDocx}
                 onReset={handleReset}
                 isDownloading={isDownloading}
+                onUpdateReportData={setReportData}
               />
               </motion.div>
             )}
