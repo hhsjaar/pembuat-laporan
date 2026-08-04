@@ -23,8 +23,8 @@ const geminiClient = new OpenAI({
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 });
 
-// Read real input from laphar/referensi-laphar5.txt
-const realInput = fs.readFileSync(path.join(__dirname, "..", "laphar", "referensi-laphar5.txt"), "utf-8");
+// Read real input from scratch/user_prompt_input.txt
+const realInput = fs.readFileSync(path.join(__dirname, "user_prompt_input.txt"), "utf-8");
 
 async function testCall() {
   const calendarContext = `
@@ -87,6 +87,7 @@ MASUKAN DARI USER (KATA KUNCI & RINCIANNYA):
       ],
       response_format: { type: "json_object" },
       temperature: 0.3,
+      max_tokens: 8192,
     });
     
     console.log("Response received:");
