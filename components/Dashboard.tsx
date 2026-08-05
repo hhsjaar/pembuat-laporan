@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders, FileSpreadsheet, Zap, GripVertical } from "lucide-react";
+import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders, FileSpreadsheet, Zap, GripVertical, Pencil } from "lucide-react";
 import TemplateSelector, { TemplateType } from "./TemplateSelector";
 import ImageUploader from "./ImageUploader";
 import AudioUploader from "./AudioUploader";
@@ -119,6 +119,8 @@ export default function Dashboard() {
 
   const [parsedLists, setParsedLists] = useState<any[]>([]);
   const [selectedListId, setSelectedListId] = useState<number>(0);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editItemValue, setEditItemValue] = useState<string>("");
 
   // Helper to parse all list blocks out of the report text content
   const parseAllLists = (content: string): ListBlock[] => {
@@ -389,6 +391,79 @@ export default function Dashboard() {
     }
   };
 
+  const handleSaveEditListItem = async (listId: number, index: number, value: string) => {
+    const currentList = parsedLists.find(l => l.id === listId);
+    if (!currentList) return;
+
+    const updatedItems = [...currentList.items];
+    const itemToUpdate = updatedItems[index];
+    const leading = itemToUpdate.leadingSpace || "";
+    const separator = itemToUpdate.separator || (currentList.isNumbered ? ". " : "- ");
+    
+    let originalText = "";
+    if (currentList.isNumbered) {
+      originalText = `${leading}${index + 1}${separator}${value}`;
+    } else if (currentList.isBulleted) {
+      originalText = `${leading}${separator}${value}`;
+    } else {
+      originalText = `${leading}${value}`;
+    }
+
+    updatedItems[index] = {
+      ...itemToUpdate,
+      cleanText: value,
+      originalText: originalText
+    };
+
+    // Update parsedLists state locally
+    const updatedLists = parsedLists.map(l => {
+      if (l.id === currentList.id) {
+        return { ...l, items: updatedItems };
+      }
+      return l;
+    });
+    setParsedLists(updatedLists);
+    setEditingItemId(null);
+
+    // Rebuild content and update
+    if (selectedHistoryItem) {
+      const newContent = rebuildContent(
+        selectedHistoryItem.content.split('\n'),
+        currentList.startIndex,
+        currentList.endIndex,
+        updatedItems,
+        currentList.isNumbered,
+        currentList.isBulleted
+      );
+
+      let updatedMetaData = { ...selectedHistoryItem.meta_data };
+      if (updatedMetaData.raw_report && updatedMetaData.raw_report.isi_laporan) {
+        const parsedRaw = parseAllLists(updatedMetaData.raw_report.isi_laporan);
+        // Find list with the same relative index
+        const listIdxInParsed = parsedLists.findIndex(l => l.id === currentList.id);
+        const matchingRawList = parsedRaw[listIdxInParsed];
+        if (matchingRawList) {
+          const newRawIsiLaporan = rebuildContent(
+            updatedMetaData.raw_report.isi_laporan.split('\n'),
+            matchingRawList.startIndex,
+            matchingRawList.endIndex,
+            updatedItems,
+            matchingRawList.isNumbered,
+            matchingRawList.isBulleted
+          );
+          updatedMetaData.raw_report.isi_laporan = newRawIsiLaporan;
+        }
+      }
+
+      try {
+        await updateHistoryItemContent(selectedHistoryItem.id, newContent, updatedMetaData);
+      } catch (err: any) {
+        console.error("Gagal update riwayat setelah edit list item:", err);
+        addToast(err.message || "Gagal memperbarui item daftar.", "error");
+      }
+    }
+  };
+
 
   useEffect(() => {
     // Check configuration
@@ -399,7 +474,7 @@ export default function Dashboard() {
 
   // Sync parsed guests & generic lists with selectedHistoryItem
   useEffect(() => {
-    if (selectedHistoryItem && selectedHistoryItem.template_type === "laporan-kegiatan") {
+    if (selectedHistoryItem) {
       // Keep parsedGuests fallback compatibility
       const parsed = parseGuests(selectedHistoryItem.content);
       if (parsed.hasGuests) {
@@ -2835,7 +2910,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
 
               {/* Modal Body */}
               <div className="flex-grow p-6 overflow-y-auto font-sans text-xs text-neutral-700 dark:text-neutral-300 space-y-4 select-text">
-                {selectedHistoryItem.template_type === "laporan-kegiatan" && parsedLists.length > 0 && (
+                {parsedLists.length > 0 && (
                   <div className="space-y-3 bg-neutral-50/50 dark:bg-neutral-900/40 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800/60 shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-neutral-100 dark:border-neutral-800/40">
                       <h4 className="text-xs font-bold text-neutral-800 dark:text-neutral-200 flex items-center space-x-1.5">
@@ -2878,32 +2953,92 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                             </div>
                           )}
                           <div className="grid grid-cols-1 gap-1.5 max-h-[220px] overflow-y-auto pr-1">
-                            {currentList.items.map((item: any, idx: number) => (
-                              <div
-                                key={idx}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, idx)}
-                                onDragOver={(e) => handleDragOver(e, idx)}
-                                onDrop={(e) => handleDrop(e, idx)}
-                                onDragEnd={handleDragEnd}
-                                className={`flex items-center space-x-3 p-2.5 rounded-xl border transition-all select-none cursor-grab active:cursor-grabbing ${
-                                  draggedIndex === idx
-                                    ? "bg-purple-500/10 border-purple-500/40 opacity-50 scale-[0.99] shadow-inner"
-                                    : dragOverIndex === idx
-                                    ? "bg-purple-50/50 dark:bg-purple-950/20 border-purple-500 border-dashed scale-[1.01] shadow-md"
-                                    : "bg-white/60 dark:bg-neutral-800/60 border-neutral-200/60 dark:border-neutral-800/60 hover:border-purple-500/30 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30"
-                                }`}
-                              >
-                                <div className="text-neutral-400 cursor-grab active:cursor-grabbing hover:text-purple-500 transition-colors">
-                                  <GripVertical className="w-3.5 h-3.5" />
+                            {currentList.items.map((item: any, idx: number) => {
+                              const isEditing = editingItemId === `${currentList.id}-${idx}`;
+                              return (
+                                <div
+                                  key={idx}
+                                  draggable={!isEditing}
+                                  onDragStart={(e) => !isEditing && handleDragStart(e, idx)}
+                                  onDragOver={(e) => !isEditing && handleDragOver(e, idx)}
+                                  onDrop={(e) => !isEditing && handleDrop(e, idx)}
+                                  onDragEnd={handleDragEnd}
+                                  className={`group flex items-center space-x-3 p-2.5 rounded-xl border transition-all select-none ${
+                                    isEditing
+                                      ? "bg-purple-50/10 dark:bg-purple-950/10 border-purple-500 scale-[0.99] shadow-inner"
+                                      : draggedIndex === idx
+                                      ? "bg-purple-500/10 border-purple-500/40 opacity-50 scale-[0.99] shadow-inner cursor-grab"
+                                      : dragOverIndex === idx
+                                      ? "bg-purple-50/50 dark:bg-purple-950/20 border-purple-500 border-dashed scale-[1.01] shadow-md cursor-grab"
+                                      : "bg-white/60 dark:bg-neutral-800/60 border-neutral-200/60 dark:border-neutral-800/60 hover:border-purple-500/30 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30 cursor-grab active:cursor-grabbing"
+                                  }`}
+                                >
+                                  {!isEditing && (
+                                    <div className="text-neutral-400 cursor-grab active:cursor-grabbing hover:text-purple-500 transition-colors">
+                                      <GripVertical className="w-3.5 h-3.5" />
+                                    </div>
+                                  )}
+                                  <div className="flex-grow font-mono text-[11px] text-neutral-800 dark:text-neutral-200 flex items-center space-x-1.5 flex-wrap">
+                                    {currentList.isNumbered && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">{idx + 1}.</span>}
+                                    {currentList.isBulleted && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">-</span>}
+                                    {isEditing ? (
+                                      <input
+                                        type="text"
+                                        value={editItemValue}
+                                        onChange={(e) => setEditItemValue(e.target.value)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter") {
+                                            handleSaveEditListItem(currentList.id, idx, editItemValue);
+                                          } else if (e.key === "Escape") {
+                                            setEditingItemId(null);
+                                          }
+                                        }}
+                                        className="flex-grow bg-transparent border-b border-purple-400 outline-none text-[11px] text-neutral-900 dark:text-white px-1 py-0.5 font-mono"
+                                        autoFocus
+                                      />
+                                    ) : (
+                                      <span className="flex-grow">{item.cleanText}</span>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Actions: Edit/Save/Cancel */}
+                                  <div className="flex items-center space-x-1">
+                                    {isEditing ? (
+                                      <>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleSaveEditListItem(currentList.id, idx, editItemValue)}
+                                          className="p-1 rounded bg-purple-500 text-white hover:bg-purple-600 transition-colors"
+                                          title="Simpan"
+                                        >
+                                          <Check className="w-3 h-3" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setEditingItemId(null)}
+                                          className="p-1 rounded bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-300 transition-colors"
+                                          title="Batal"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setEditingItemId(`${currentList.id}-${idx}`);
+                                          setEditItemValue(item.cleanText);
+                                        }}
+                                        className="p-1 rounded text-neutral-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                        title="Edit Teks"
+                                      >
+                                        <Pencil className="w-3.5 h-3.5" />
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
-                                <div className="flex-grow font-mono text-[11px] text-neutral-800 dark:text-neutral-200">
-                                  {currentList.isNumbered && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">{idx + 1}.</span>}
-                                  {currentList.isBulleted && <span className="font-bold text-purple-600 dark:text-purple-400 mr-1.5">-</span>}
-                                  {item.cleanText}
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       );
