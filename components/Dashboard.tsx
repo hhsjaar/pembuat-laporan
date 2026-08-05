@@ -619,6 +619,25 @@ export default function Dashboard() {
     if (type === "laporan-harian-intelijen") {
       return `LAPHAR-${day}${month}${year}.docx`;
     }
+
+    const sanitize = (text?: string) => {
+      if (!text) return "tanpa-perihal";
+      return text.replace(/[\/\\:\*\?"<>\|]/g, "_").trim();
+    };
+
+    if (type === "laporan-informasi") {
+      const perihal = reportData?.perihal || reportData?.judul || "tanpa-perihal";
+      return `LI-${sanitize(perihal)}.docx`;
+    }
+    if (type === "laporan-harian-khusus") {
+      const perihal = reportData?.perihal || reportData?.judul || "tanpa-perihal";
+      return `LAPHARSUS-${sanitize(perihal)}.docx`;
+    }
+    if (type === "infosus") {
+      const perihal = reportData?.perihal || reportData?.judul || "tanpa-perihal";
+      return `INFOSUS-${sanitize(perihal)}.docx`;
+    }
+
     return null;
   };
 
