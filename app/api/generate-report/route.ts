@@ -689,12 +689,17 @@ Aturan Penulisan & Pengisian:
 2. Untuk [ISI_POLITIK], [KEGIATAN_SOSBUD], [ISI_SOSIAL_KEAMANAN], [KEGIATAN_VVIP], analisis unggahan transkrip/berkas dari user. Jika tidak ada yang terdeteksi, default-kan ke 'Tidak ada hal yang dapat dilaporkan' atau 'Tidak ada kegiatan untuk dilaporkan' atau 'NIHIL'.
 3. Jika ADA peristiwa politik, sosial budaya (perayaan ibadah, misa, haul), sosial keamanan (eksekusi lahan, unras), kegiatan VVIP (kunjungan walikota, gubernur), jelaskan secara detail dan komprehensif memakai diksi intelkam resmi yang luwes dan dinamis (tidak monoton/stiff/robotik).
 4. Untuk [KAPOLSEK_NAMA], selalu gunakan nama "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H." (Jangan pernah menggunakan nama KOMPOL WAHDAH M., S.H., S.I.K. untuk template Laporan Harian ini).
-5. Untuk bagian *C. Sosial Budaya*, jika ada kegiatan, gunakan format penomoran:
-   1. [JUDUL KEGIATAN INDIKATIF] (dimulai dengan *_Monitoring Dan Pengamanan Kegiatan..._* atau sejenisnya, tebal dan miring menggunakan *_ dan _*)
+5. Untuk bagian *C. Sosial Budaya*, jika ada kegiatan, Anda WAJIB mengekstrak SELURUH topik/kegiatan sosial budaya yang ada pada masukan pengguna tanpa ada yang terlewat (contoh: jika ada 3 kegiatan utama seperti PMB Undip, Seminar Lemhannas, dan Sosialisasi Bawaslu, Anda WAJIB memuat narasi untuk KETIGA-TIGANYA!). Gunakan format penomoran:
+   1. [JUDUL KEGIATAN INDIKATIF PERTAMA] (dimulai dengan *_Monitoring Dan Pengamanan Kegiatan..._* atau sejenisnya, tebal dan miring menggunakan *_ dan _*)
    a. Rincian pelaksanaan, hari, tanggal, waktu, tempat, penyelenggara, pemateri/tokoh, jumlah jemaat/peserta.
    b. Dasar pengamanan (Undang-Undang No 2 Tahun 2002, surat perintah/sprin jika terdeteksi atau simulasikan nomor sprin logis yang valid).
    c. Jalannya pengamanan, situasi akhir, dan nihil kejadian menonjol.
    d. Dan seterusnya. Jika ada hal yang panjang dan kompleks yang mengharuskan ada poin E, F, dan seterusnya, eksekusilah, jangan terpatok pada poin A-D saja.
+   2. [JUDUL KEGIATAN INDIKATIF KEDUA] (*_Monitoring Dan Pengamanan Kegiatan..._*)
+   a. Rincian pelaksanaan, dst.
+   3. [JUDUL KEGIATAN INDIKATIF KETIGA] (*_Monitoring Dan Pengamanan Kegiatan..._*)
+   a. Rincian pelaksanaan, dst.
+   PENTING: Pindai teks masukan sampai selesai! Jangan terkecoh oleh penomoran jam rundown internal (misal 1. Pukul 05.30 dst.) di dalam kegiatan pertama, pastikan seluruh Judul Kegiatan Utama (1, 2, 3, dst.) tercover semua!
 
 Kembalikan respons JSON:
 {
@@ -779,13 +784,14 @@ PENTING - STRUKTUR PENULISAN DOKUMEN RELEVAN:
        Format penulisan nominal harga wajib menggunakan format rupiah bertitik (misal: "Rp. 12.500/Kg" atau "Rp. 15.700/Liter" atau "Rp. 2.600 (250g)" atau "Rp. 22.000/Kg").
      - Sosial Budaya (fakta_sosial_budaya):
         ATURAN MUTLAK SOSIAL BUDAYA:
-        1. SELURUH TOPIK WAJIB TERINPUT SEMUA (DILARANG MENGHILANGKAN TOPIK): Jika di dalam masukan/laporan pengguna terdapat N topik/kegiatan sosial budaya (contoh: 3 topik/kegiatan), Anda WAJIB memuat dan menuliskan SELURUH N topik tersebut (ketiga-tiganya) secara komprehensif. DILARANG KERAS memotong atau mengabaikan topik apa pun!
-        2. FORMAT PENOMORAN (WAJIB JIKA LEBIH DARI 1 TOPIK): Jika terdapat lebih dari 1 topik/kegiatan sosial budaya (misalnya 2, 3, atau lebih topik), Anda WAJIB memberikan penomoran urut angka pada setiap awal topik/kegiatan sebagai berikut:
+        1. SELURUH TOPIK WAJIB TERINPUT SEMUA (DILARANG MENGHILANGKAN TOPIK): Jika di dalam masukan/laporan pengguna terdapat N topik/kegiatan sosial budaya (contoh: 3 topik/kegiatan), Anda WAJIB memuat dan menuliskan SELURUH N topik tersebut (ketiga-tiganya) secara komprehensif. DILARANG KERAS memotong, mengabaikan, atau terhenti di topik pertama!
+        2. PENTING - MEMBEDAKAN TOPIK UTAMA DENGAN RUNDOWN JAM: Masukan pengguna mungkin berisi daftar rundown jam-demi-jam (seperti "1. Pukul 05.30...", "2. Pukul 07.30...", dst.) atau daftar nama pejabat di bawah satu kegiatan. Angka jam/rundown tersebut ADALAH SUB-RINCIAN INTERNAL kegiatan, BUKAN topik tersendiri. Pindai seluruh teks dari awal hingga akhir untuk mengidentifikasi SEMUA kegiatan utama (seperti kegiatan "1. Upacara PMB Undip...", kegiatan "2. Seminar Kebangsaan Lemhannas...", dan kegiatan "3. Sosialisasi Anti Politik Uang Bawaslu...").
+        3. FORMAT PENOMORAN (WAJIB JIKA LEBIH DARI 1 TOPIK): Jika terdapat lebih dari 1 topik/kegiatan sosial budaya (misalnya 2, 3, atau lebih topik), Anda WAJIB memberikan penomoran urut angka pada setiap awal topik/kegiatan sebagai berikut:
            1. [Uraian narasi detail topik/kegiatan pertama...]
            2. [Uraian narasi detail topik/kegiatan kedua...]
            3. [Uraian narasi detail topik/kegiatan ketiga...]
            Setiap nomor topik dipisahkan dengan karakter escape '\\n'. Jika hanya ada 1 topik/kegiatan, tulis sebagai 1 paragraf narasi.
-        3. SUBSTANSI NARASI: Pindahkan seluruh rincian penting kegiatan sosial budaya (hari, tanggal, waktu, tempat, penyelenggara, tokoh/pejabat yang hadir, jumlah peserta, jalannya pengamanan, dan situasi akhir aman terkendali) dalam bentuk narasi intelijen yang detail, formal, dan mengalir. Dilarang menyalin rundown jam-demi-jam mentah agar menghemat token. Jika tidak ada kegiatan sosial budaya di input, cukup isi dengan "-".
+        4. SUBSTANSI NARASI: Pindahkan seluruh rincian penting kegiatan sosial budaya (hari, tanggal, waktu, tempat, penyelenggara, tokoh/pejabat yang hadir, jumlah peserta, jalannya pengamanan, dan situasi akhir aman terkendali) dalam bentuk narasi intelijen yang detail, formal, dan mengalir. Dilarang menyalin rundown jam-demi-jam mentah agar menghemat token. Jika tidak ada kegiatan sosial budaya di input, cukup isi dengan "-".
    - Aspek Keamanan:
      - Kriminalitas (kriminalitas_text): Uraikan detail kejadian kriminalitas (pencurian, penipuan, dll.). Jika ada di input LHS, salin ke sini secara lengkap beserta kronologi, identitas korban, barang bukti, dan taksiran kerugian. Jika tidak ada, cukup isi dengan "-".
      - Laka Lantas (laka_lantas_text): Uraikan kejadian kecelakaan. Jika ada di input LHS, salin lengkap. Jika tidak ada, cukup isi dengan "-".
@@ -896,7 +902,7 @@ PENTING - ATURAN FORMAT JSON:
   "politik": "..."
 }`;
       } else if (scope === "sosbud") {
-        scopeInstructions = `Fokus HANYA pada informasi kegiatan Sosial Budaya (keagamaan, kemasyarakatan, aksi sosial, kuliah umum, dll.) di wilayah hukum Polsek Tembalang. Ekstrak SELURUH topik/kegiatan yang ada di masukan pengguna tanpa ada yang terlewat. Jika terdapat lebih dari 1 topik/kegiatan, WAJIB memberikan penomoran urut (1. ..., 2. ..., 3. ..., dst) untuk masing-masing topik. Tiru gaya bahasa referensi resmi kepolisian. Jika tidak ada informasi sosial budaya sama sekali, gunakan default 'Tidak ada hal yang dapat dilaporkan'.`;
+        scopeInstructions = `Fokus HANYA pada informasi kegiatan Sosial Budaya (keagamaan, kemasyarakatan, aksi sosial, kuliah umum, dll.) di wilayah hukum Polsek Tembalang. Ekstrak SELURUH topik/kegiatan yang ada di masukan pengguna tanpa ada yang terlewat (misal: jika ada 3 kegiatan utama seperti PMB Undip, Seminar Lemhannas, dan Sosialisasi Bawaslu, WAJIB memuat KETIGA-TIGANYA!). PENTING: Pindai masukan hingga akhir dan jangan terkecoh oleh penomoran rundown jam internal (seperti 1. Pukul 05.30, 2. Pukul 07.30) di dalam rincian acara. Tetap temukan seluruh topik utama (1. Kegiatan..., 2. Kegiatan..., 3. Kegiatan...). Jika terdapat lebih dari 1 topik/kegiatan, WAJIB memberikan penomoran urut (1. ..., 2. ..., 3. ..., dst) untuk masing-masing topik. Tiru gaya bahasa referensi resmi kepolisian. Jika tidak ada informasi sosial budaya sama sekali, gunakan default 'Tidak ada hal yang dapat dilaporkan'.`;
         jsonSchema = `{
   "sosbud": "..."
 }`;
@@ -912,7 +918,7 @@ PENTING - ATURAN FORMAT JSON:
   "rencanaHari": "...", "rencanaTanggal": "...", "rencanaWaktu": "...", "rencanaSasaran": "...", "rencanaKegiatan": "...", "rencanaHasil": "...", "rencanaKeterangan": "..."
 }`;
       } else {
-        scopeInstructions = `Ekstrak seluruh informasi laporan harian secara lengkap.`;
+        scopeInstructions = `Ekstrak seluruh informasi laporan harian secara lengkap. PENTING UNTUK BIDANG SOSIAL BUDAYA ('sosbud'): Anda WAJIB mengekstrak SELURUH topik/kegiatan sosial budaya yang ada pada masukan pengguna tanpa ada yang terlewat (contoh: jika ada 3 kegiatan utama, sertakan ketiga-tiganya dengan penomoran urut 1., 2., 3.). Pindai seluruh teks masukan sampai selesai dan DILARANG KERAS terhenti pada topik pertama meskipun topik pertama memiliki rincian rundown jam yang panjang.`;
         jsonSchema = `{
   "hari": "...", "tanggal": "...", "waktu": "...",
   "politik": "...", "sosbud": "...",
