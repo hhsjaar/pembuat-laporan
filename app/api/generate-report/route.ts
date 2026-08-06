@@ -778,7 +778,14 @@ PENTING - STRUKTUR PENULISAN DOKUMEN RELEVAN:
        - [komoditas]_selisih WAJIB selalu diisi "-" saja (tanda hubung/minus tunggal).
        Format penulisan nominal harga wajib menggunakan format rupiah bertitik (misal: "Rp. 12.500/Kg" atau "Rp. 15.700/Liter" atau "Rp. 2.600 (250g)" atau "Rp. 22.000/Kg").
      - Sosial Budaya (fakta_sosial_budaya):
-       PENTING: Jika ada data LHS yang diinputkan, pindahkan seluruh kegiatan yang ada di bagian "C. Sosial Budaya" pada LHS ke bagian ini secara lengkap dan komprehensif. Anda harus menyertakan rincian penting seperti hari/tanggal/waktu, lokasi, penanggung jawab, jumlah jemaah/peserta, tokoh penting/pejabat yang hadir, poin-poin keputusan/pemilihan penting, serta jalannya pengamanan dan situasi akhir. Namun, untuk menghemat token agar tidak terpotong (truncated), Anda dilarang menulis ulang jadwal rundown jam-demi-jam secara mentah atau menulis ulang instruksi apel yang sangat panjang kata-per-kata. Tuliskan dalam bentuk paragraf narasi intelijen yang detail, profesional, dan mengalir untuk masing-masing kegiatan. Jika tidak ada kegiatan di input, cukup isi dengan "-".
+        ATURAN MUTLAK SOSIAL BUDAYA:
+        1. SELURUH TOPIK WAJIB TERINPUT SEMUA (DILARANG MENGHILANGKAN TOPIK): Jika di dalam masukan/laporan pengguna terdapat N topik/kegiatan sosial budaya (contoh: 3 topik/kegiatan), Anda WAJIB memuat dan menuliskan SELURUH N topik tersebut (ketiga-tiganya) secara komprehensif. DILARANG KERAS memotong atau mengabaikan topik apa pun!
+        2. FORMAT PENOMORAN (WAJIB JIKA LEBIH DARI 1 TOPIK): Jika terdapat lebih dari 1 topik/kegiatan sosial budaya (misalnya 2, 3, atau lebih topik), Anda WAJIB memberikan penomoran urut angka pada setiap awal topik/kegiatan sebagai berikut:
+           1. [Uraian narasi detail topik/kegiatan pertama...]
+           2. [Uraian narasi detail topik/kegiatan kedua...]
+           3. [Uraian narasi detail topik/kegiatan ketiga...]
+           Setiap nomor topik dipisahkan dengan karakter escape '\\n'. Jika hanya ada 1 topik/kegiatan, tulis sebagai 1 paragraf narasi.
+        3. SUBSTANSI NARASI: Pindahkan seluruh rincian penting kegiatan sosial budaya (hari, tanggal, waktu, tempat, penyelenggara, tokoh/pejabat yang hadir, jumlah peserta, jalannya pengamanan, dan situasi akhir aman terkendali) dalam bentuk narasi intelijen yang detail, formal, dan mengalir. Dilarang menyalin rundown jam-demi-jam mentah agar menghemat token. Jika tidak ada kegiatan sosial budaya di input, cukup isi dengan "-".
    - Aspek Keamanan:
      - Kriminalitas (kriminalitas_text): Uraikan detail kejadian kriminalitas (pencurian, penipuan, dll.). Jika ada di input LHS, salin ke sini secara lengkap beserta kronologi, identitas korban, barang bukti, dan taksiran kerugian. Jika tidak ada, cukup isi dengan "-".
      - Laka Lantas (laka_lantas_text): Uraikan kejadian kecelakaan. Jika ada di input LHS, salin lengkap. Jika tidak ada, cukup isi dengan "-".
@@ -889,7 +896,7 @@ PENTING - ATURAN FORMAT JSON:
   "politik": "..."
 }`;
       } else if (scope === "sosbud") {
-        scopeInstructions = `Fokus HANYA pada informasi kegiatan Sosial Budaya (keagamaan, kemasyarakatan, aksi sosial, kuliah umum, dll.) di wilayah hukum Polsek Tembalang. Ekstrak deskripsi kejadian secara detail, panjang, dan komprehensif, tiru gaya bahasa referensi resmi kepolisian (misal: 'Kegiatan Kuliah umum... Pada hari... pukul... bertempat di... telah berlangsung... Rundown:... Dihadiri oleh:... Substansi:... Pengamanan...'). Jika tidak ada informasi sosial budaya sama sekali, gunakan default 'Tidak ada hal yang dapat dilaporkan'.`;
+        scopeInstructions = `Fokus HANYA pada informasi kegiatan Sosial Budaya (keagamaan, kemasyarakatan, aksi sosial, kuliah umum, dll.) di wilayah hukum Polsek Tembalang. Ekstrak SELURUH topik/kegiatan yang ada di masukan pengguna tanpa ada yang terlewat. Jika terdapat lebih dari 1 topik/kegiatan, WAJIB memberikan penomoran urut (1. ..., 2. ..., 3. ..., dst) untuk masing-masing topik. Tiru gaya bahasa referensi resmi kepolisian. Jika tidak ada informasi sosial budaya sama sekali, gunakan default 'Tidak ada hal yang dapat dilaporkan'.`;
         jsonSchema = `{
   "sosbud": "..."
 }`;

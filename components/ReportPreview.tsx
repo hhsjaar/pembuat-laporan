@@ -597,7 +597,7 @@ Tembusan:
                   />
                 </div>
                 <div className="text-center my-6">
-                  <h2 className="font-bold tracking-wide text-neutral-955 uppercase" style={{ fontSize: "14pt" }}>
+                  <h2 className="font-bold tracking-wide text-neutral-955 uppercase underline inline-block pb-0.5" style={{ fontSize: "14pt" }}>
                     LAPORAN HARIAN INTELIJEN
                   </h2>
                   <div className="flex items-center justify-center font-semibold text-neutral-700 text-center" style={{ fontSize: "11pt" }}>
