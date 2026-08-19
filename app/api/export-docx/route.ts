@@ -55,14 +55,26 @@ export async function POST(req: NextRequest) {
     const convertTextToOpenXml = (text: string, prefix: string = "", leftIndent: number = 1134): string => {
       if (!text) return "";
       
-      const lines = text.split(/\r?\n/);
-      const escapedLines = lines.map((line) => {
-        return line
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;");
-      });
-      
+      // 1. Normalize literal \n, \r, and escaped characters
+      let normalized = text
+        .replace(/\\r\\n/g, "\n")
+        .replace(/\\n/g, "\n")
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n");
+
+      // 2. Split lines if numbering was concatenated without newlines (e.g., "kondusif. 2. Pada hari...")
+      normalized = normalized.replace(/([.!?])\s+([0-9]+\.\s+)/g, "$1\n$2");
+
+      const rawLines = normalized.split("\n");
+      const lines: string[] = [];
+      for (const line of rawLines) {
+        if (line.trim() !== "") {
+          lines.push(line.trim());
+        } else if (lines.length > 0 && lines[lines.length - 1] !== "") {
+          lines.push("");
+        }
+      }
+
       let xml = "";
       
       // Determine font family and size dynamically based on template type
@@ -74,18 +86,42 @@ export async function POST(req: NextRequest) {
       const rPrXml = `<w:rPr>${fontXml}${szXml}</w:rPr>`;
       const pPrRPrXml = `<w:rPr>${fontXml}${szXml}</w:rPr>`;
       
-      for (let i = 0; i < escapedLines.length; i++) {
-        const line = escapedLines[i];
+      for (let i = 0; i < lines.length; i++) {
+        const rawLine = lines[i];
         
-        if (i === 0 && prefix) {
-          // First line with bullet prefix and tab, matching police report margins (inheriting font family/size)
-          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}" w:hanging="567"/><w:jc w:val="both"/>${pPrRPrXml}</w:pPr><w:r>${rPrXml}<w:t xml:space="preserve">${prefix}</w:t><w:tab/><w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
-        } else if (line.trim() === "") {
+        if (rawLine === "") {
           // Empty paragraph spacing
-          xml += `<w:p><w:pPr><w:spacing w:after="120"/>${pPrRPrXml}</w:pPr></w:p>`;
+          xml += `<w:p><w:pPr><w:spacing w:after="100"/>${pPrRPrXml}</w:pPr></w:p>`;
+          continue;
+        }
+
+        const escaped = rawLine
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+
+        if (i === 0 && prefix) {
+          // First line with bullet prefix and tab, matching police report margins
+          xml += `<w:p><w:pPr><w:tabs><w:tab w:val="left" w:pos="${leftIndent}"/></w:tabs><w:spacing w:after="80" w:line="240" w:lineRule="auto"/><w:ind w:left="${leftIndent}" w:hanging="567"/><w:jc w:val="both"/>${pPrRPrXml}</w:pPr><w:r>${rPrXml}<w:t xml:space="preserve">${prefix}</w:t><w:tab/><w:t xml:space="preserve">${escaped}</w:t></w:r></w:p>`;
+          continue;
+        }
+
+        // Check if line starts with a list marker e.g., '1. ', '2. ', '1) ', 'a. ', 'b. ', etc.
+        const listMatch = rawLine.match(/^(([0-9]+|[a-zA-Z])[\.\)])\s+(.*)$/);
+        if (listMatch) {
+          const numLabel = listMatch[1];
+          const bodyText = listMatch[3]
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+          const itemLeft = leftIndent + 567;
+          const hangingVal = 567;
+
+          xml += `<w:p><w:pPr><w:tabs><w:tab w:val="left" w:pos="${itemLeft}"/></w:tabs><w:spacing w:after="80" w:line="240" w:lineRule="auto"/><w:ind w:left="${itemLeft}" w:hanging="${hangingVal}"/><w:jc w:val="both"/>${pPrRPrXml}</w:pPr><w:r>${rPrXml}<w:t xml:space="preserve">${numLabel}</w:t><w:tab/><w:t xml:space="preserve">${bodyText}</w:t></w:r></w:p>`;
         } else {
           // Regular paragraph matching police report indentation and custom font family/size
-          xml += `<w:p><w:pPr><w:ind w:left="${leftIndent}"/><w:jc w:val="both"/>${pPrRPrXml}</w:pPr><w:r>${rPrXml}<w:t xml:space="preserve">${line}</w:t></w:r></w:p>`;
+          xml += `<w:p><w:pPr><w:spacing w:after="80" w:line="240" w:lineRule="auto"/><w:ind w:left="${leftIndent}"/><w:jc w:val="both"/>${pPrRPrXml}</w:pPr><w:r>${rPrXml}<w:t xml:space="preserve">${escaped}</w:t></w:r></w:p>`;
         }
       }
       return xml;

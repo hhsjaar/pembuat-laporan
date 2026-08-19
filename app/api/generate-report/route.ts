@@ -62,7 +62,7 @@ function correctWeekdaysInObject(obj: any): any {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => correctWeekdaysInObject(item));
+    return obj.map((item) => correctWeekdaysInObject(item));
   }
 
   if (typeof obj === "object") {
@@ -77,6 +77,39 @@ function correctWeekdaysInObject(obj: any): any {
 
   return obj;
 }
+
+function normalizeReportTextNewlines(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+
+  if (typeof obj === "string") {
+    let text = obj
+      .replace(/\\r\\n/g, "\n")
+      .replace(/\\n/g, "\n")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n");
+    // Also split any concatenated numbering points like "aman. 2. Pada hari..."
+    text = text.replace(/([.!?])\s+([0-9]+\.\s+)/g, "$1\n$2");
+    return text;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => normalizeReportTextNewlines(item));
+  }
+
+  if (typeof obj === "object") {
+    const result: any = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        result[key] = normalizeReportTextNewlines(obj[key]);
+      }
+    }
+    return result;
+  }
+
+  return obj;
+}
+
+
 
 function sanitizeJsonString(str: string): string {
   // Normalize line endings
@@ -770,7 +803,7 @@ PENTING - STRUKTUR PENULISAN DOKUMEN RELEVAN:
      * Bidang Keamanan: "Situasi kamtibmas secara umum kondusif, namun deteksi dini terhadap gangguan jalanan kelompok remaja pada malam hari tetap diintensifkan. Di sisi lain, kewaspadaan terhadap ancaman terorisme tetap menjadi prioritas utama di mana penyebaran paham radikal kini masif memanfaatkan algoritma media sosial and game online untuk mendoktrin anak-anak serta generasi muda secara mandiri."
 4. Fakta-fakta:
    - Aspek Sosial:
-     - Sosial Politik: Poin fakta dinamika politik. Jika input berasal dari Laporan Harian Situasi (LHS), salin kejadian politik, unjuk rasa, atau sengketa sosial yang tertulis di sana ke bagian ini secara lengkap. Jika tidak ada kejadian, cukup gunakan "-".
+     - Sosial Politik: Poin fakta dinamika politik. Jika input berasal dari Laporan Harian Situasi (LHS), salin kejadian politik, unjuk rasa, atau sengketa sosial yang tertulis di sana ke bagian ini secara lengkap. Jika ada lebih dari 1 kejadian, gunakan penomoran urut angka (1., 2., dst.) dipisahkan dengan baris baru '\n'. Jika tidak ada kejadian, cukup gunakan "-".
      - Sosial Ekonomi:
        * Kalimat Pengantar (fakta_sosial_ekonomi_intro): Gunakan kalimat pengantar berikut secara persis: "Perkembangan harga sembako di Pasar Kedungmundu dan Pasar Meteseh harga stabil dan tidak ada kelangkaan pasokan." (Atau cukup isi "-" jika tidak ada masukan khusus).
      - Tabel Daftar Harga Bahan Pokok (PENTING!):
@@ -784,22 +817,22 @@ PENTING - STRUKTUR PENULISAN DOKUMEN RELEVAN:
        Format penulisan nominal harga wajib menggunakan format rupiah bertitik (misal: "Rp. 12.500/Kg" atau "Rp. 15.700/Liter" atau "Rp. 2.600 (250g)" atau "Rp. 22.000/Kg").
      - Sosial Budaya (fakta_sosial_budaya):
         ATURAN MUTLAK SOSIAL BUDAYA:
-        1. SELURUH TOPIK WAJIB TERINPUT SEMUA (DILARANG MENGHILANGKAN TOPIK): Jika di dalam masukan/laporan pengguna terdapat N topik/kegiatan sosial budaya (contoh: 3 topik/kegiatan), Anda WAJIB memuat dan menuliskan SELURUH N topik tersebut (ketiga-tiganya) secara komprehensif. DILARANG KERAS memotong, mengabaikan, atau terhenti di topik pertama!
-        2. PENTING - MEMBEDAKAN TOPIK UTAMA DENGAN RUNDOWN JAM: Masukan pengguna mungkin berisi daftar rundown jam-demi-jam (seperti "1. Pukul 05.30...", "2. Pukul 07.30...", dst.) atau daftar nama pejabat di bawah satu kegiatan. Angka jam/rundown tersebut ADALAH SUB-RINCIAN INTERNAL kegiatan, BUKAN topik tersendiri. Pindai seluruh teks dari awal hingga akhir untuk mengidentifikasi SEMUA kegiatan utama (seperti kegiatan "1. Upacara PMB Undip...", kegiatan "2. Seminar Kebangsaan Lemhannas...", dan kegiatan "3. Sosialisasi Anti Politik Uang Bawaslu...").
-        3. FORMAT PENOMORAN (WAJIB JIKA LEBIH DARI 1 TOPIK): Jika terdapat lebih dari 1 topik/kegiatan sosial budaya (misalnya 2, 3, atau lebih topik), Anda WAJIB memberikan penomoran urut angka pada setiap awal topik/kegiatan sebagai berikut:
+        1. SELURUH TOPIK WAJIB TERINPUT SEMUA (DILARANG MENGHILANGKAN TOPIK): Jika di dalam masukan/laporan pengguna terdapat N topik/kegiatan sosial budaya (contoh: 3 topik/kegiatan), Anda WAJIB memuat dan menuliskan SELURUH N topik tersebut secara komprehensif. DILARANG KERAS memotong, mengabaikan, atau terhenti di topik pertama!
+        2. PENTING - MEMBEDAKAN TOPIK UTAMA DENGAN RUNDOWN JAM: Masukan pengguna mungkin berisi daftar rundown jam-demi-jam atau daftar nama pejabat di bawah satu kegiatan. Angka jam/rundown tersebut ADALAH SUB-RINCIAN INTERNAL kegiatan, BUKAN topik tersendiri. Pindai seluruh teks dari awal hingga akhir untuk mengidentifikasi SEMUA kegiatan utama.
+        3. FORMAT PENOMORAN (WAJIB JIKA LEBIH DARI 1 TOPIK): Jika terdapat lebih dari 1 topik/kegiatan sosial budaya (misalnya 2, 3, atau lebih topik), Anda WAJIB memberikan penomoran urut angka (1., 2., 3., dst) pada setiap awal topik/kegiatan sebagai berikut:
            1. [Uraian narasi detail topik/kegiatan pertama...]
            2. [Uraian narasi detail topik/kegiatan kedua...]
            3. [Uraian narasi detail topik/kegiatan ketiga...]
-           Setiap nomor topik dipisahkan dengan karakter escape '\\n'. Jika hanya ada 1 topik/kegiatan, tulis sebagai 1 paragraf narasi.
+           Setiap nomor topik WAJIB dipisahkan dengan karakter escape '\\n'. Jika hanya ada 1 topik/kegiatan, tulis sebagai 1 paragraf narasi.
         4. SUBSTANSI NARASI: Pindahkan seluruh rincian penting kegiatan sosial budaya (hari, tanggal, waktu, tempat, penyelenggara, tokoh/pejabat yang hadir, jumlah peserta, jalannya pengamanan, dan situasi akhir aman terkendali) dalam bentuk narasi intelijen yang detail, formal, dan mengalir. Dilarang menyalin rundown jam-demi-jam mentah agar menghemat token. Jika tidak ada kegiatan sosial budaya di input, cukup isi dengan "-".
    - Aspek Keamanan:
-     - Kriminalitas (kriminalitas_text): Uraikan detail kejadian kriminalitas (pencurian, penipuan, dll.). Jika ada di input LHS, salin ke sini secara lengkap beserta kronologi, identitas korban, barang bukti, dan taksiran kerugian. Jika tidak ada, cukup isi dengan "-".
-     - Laka Lantas (laka_lantas_text): Uraikan kejadian kecelakaan. Jika ada di input LHS, salin lengkap. Jika tidak ada, cukup isi dengan "-".
-     - Bencana Alam (bencana_alam_text): Uraikan kejadian bencana. Jika ada di input LHS, salin lengkap. Jika tidak ada, cukup isi dengan "-".
+     - Kriminalitas (kriminalitas_text): Uraikan detail kejadian kriminalitas (pencurian, penipuan, dll.). Jika ada lebih dari 1 kejadian, gunakan penomoran urut angka (1., 2., dst.) dipisahkan dengan '\\n'. Jika tidak ada, cukup isi dengan "-".
+     - Laka Lantas (laka_lantas_text): Uraikan kejadian kecelakaan. Jika ada lebih dari 1 kejadian, gunakan penomoran urut angka (1., 2., dst.) dipisahkan dengan '\\n'. Jika tidak ada, cukup isi dengan "-".
+     - Bencana Alam (bencana_alam_text): Uraikan kejadian bencana. Jika ada lebih dari 1 kejadian, gunakan penomoran urut angka (1., 2., dst.) dipisahkan dengan '\\n'. Jika tidak ada, cukup isi dengan "-".
      - Keamanan Khusus (tahanan_text): Tulis jumlah tahanan di Rutan Polsek Tembalang secara lengkap (misal: "Jumlah tahanan di Rutan Polsek Tembalang 2 orang." atau jika tidak ada tahanan yang dilaporkan/kosong, cukup isi dengan "-").
-     - Pengamanan VVIP/VIP (vvip_text): Uraikan kegiatan kunjungan/pengamanan pejabat/tokoh penting. Jika di input LHS ada bagian Kegiatan VVIP / VIP, pindahkan ke sini secara lengkap. Jika tidak ada, cukup isi dengan "-".
-     - Lain-lain (lain_lain_text): Pindahkan kegiatan patroli Blue Light Patrol (BLP) siang/malam dari LHS. Tulis secara ringkas dan padat. Untuk setiap patroli (siang/malam), cukup cantumkan waktu, cuaca, personel, sasaran, rute, dan hasil secara singkat dalam satu paragraf terpadu yang efisien, tidak perlu menggunakan format daftar berbaris-baris panjang agar menghemat token dan mencegah teks terpotong. Jika tidak ada, cukup isi dengan "-".
-5. Tanggal Tanda Tangan (tanggal_ttd): Gunakan format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '19 Juli 2026').
+     - Pengamanan VVIP/VIP (vvip_text): Uraikan kegiatan kunjungan/pengamanan pejabat/tokoh penting. Jika ada lebih dari 1 kegiatan, gunakan penomoran urut angka (1., 2., dst.) dipisahkan dengan '\\n'. Jika tidak ada, cukup isi dengan "-".
+     - Lain-lain (lain_lain_text): Pindahkan kegiatan patroli Blue Light Patrol (BLP) siang/malam dari LHS. Jika ada kegiatan patroli terpisah (misal patroli siang dan patroli malam), pisahkan dalam poin bernomor (1. Patroli Siang..., 2. Patroli Malam...) dipisahkan dengan '\\n'. Jika tidak ada, cukup isi dengan "-".
+4. Tanggal Tanda Tangan (tanggal_ttd): Gunakan format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '19 Juli 2026').
 
 Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {
@@ -1152,6 +1185,9 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
 
     // Apply dynamic calendar corrector to ensure 100% precision for any day/date combination
     reportData = correctWeekdaysInObject(reportData);
+
+    // Normalize all text newlines and split glued numbered list markers
+    reportData = normalizeReportTextNewlines(reportData);
 
     // Force all sembako selisih fields to be "-" and apply robust missing field fallbacks for LHI
     if (templateType === "laporan-harian-intelijen" && reportData) {
