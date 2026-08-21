@@ -589,7 +589,7 @@ export default function Dashboard() {
     return null;
   };
 
-  const getExportFilename = (type: string, createdAt?: string, reportData?: any) => {
+  const getExportFilename = (type: string, createdAt?: string, reportData?: any, ext: "docx" | "pdf" = "docx") => {
     let dateObj: Date | null = null;
 
     if (reportData) {
@@ -614,10 +614,10 @@ export default function Dashboard() {
     const year = String(dateObj.getFullYear()).slice(-2);
 
     if (type === "rencana-kegiatan") {
-      return `REN-${day}${month}${year}.docx`;
+      return `REN-${day}${month}${year}.${ext}`;
     }
     if (type === "laporan-harian-intelijen") {
-      return `LAPHAR-${day}${month}${year}.docx`;
+      return `LAPHAR-${day}${month}${year}.${ext}`;
     }
 
     const sanitize = (text?: string) => {
@@ -627,18 +627,65 @@ export default function Dashboard() {
 
     if (type === "laporan-informasi") {
       const perihal = reportData?.perihal || reportData?.judul || "tanpa-perihal";
-      return `LI-${sanitize(perihal)}.docx`;
+      return `LI-${sanitize(perihal)}.${ext}`;
     }
     if (type === "laporan-harian-khusus") {
       const perihal = reportData?.perihal || reportData?.judul || "tanpa-perihal";
-      return `LAPHARSUS-${sanitize(perihal)}.docx`;
+      return `LAPHARSUS-${sanitize(perihal)}.${ext}`;
     }
     if (type === "infosus") {
       const perihal = reportData?.perihal || reportData?.judul || "tanpa-perihal";
-      return `INFOSUS-${sanitize(perihal)}.docx`;
+      return `INFOSUS-${sanitize(perihal)}.${ext}`;
     }
 
     return null;
+  };
+
+  const handleDownloadHistoryPdf = async (item: any) => {
+    const rawReport = item.meta_data?.raw_report;
+    if ((item.template_type !== "laporan-informasi" && item.template_type !== "laporan-harian-khusus" && item.template_type !== "infosus" && item.template_type !== "laporan-harian-intelijen" && item.template_type !== "rencana-kegiatan") || !rawReport) {
+      handleDownloadHistoryTxt(item);
+      return;
+    }
+
+    setIsDownloadingPdf(true);
+    try {
+      const response = await fetch("/api/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          templateType: item.template_type,
+          reportData: rawReport,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal mengemas berkas PDF dari riwayat.");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      
+      let filename = `${item.template_type}-${item.id.slice(0, 8)}.pdf`;
+      const customFilename = getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, rawReport, "pdf");
+      if (customFilename) {
+        filename = customFilename;
+      }
+      
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      addToast("Berkas Dokumen PDF (.pdf) berhasil diunduh!", "success");
+    } catch (err: any) {
+      console.error(err);
+      addToast(err.message || "Gagal mengunduh berkas PDF.", "error");
+    } finally {
+      setIsDownloadingPdf(false);
+    }
   };
 
   const handleDownloadHistoryDocx = async (item: any) => {
@@ -669,7 +716,7 @@ export default function Dashboard() {
       link.href = url;
       
       let filename = `${item.template_type}-${item.id.slice(0, 8)}.docx`;
-      const customFilename = getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, rawReport);
+      const customFilename = getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, rawReport, "docx");
       if (customFilename) {
         filename = customFilename;
       }
@@ -1111,6 +1158,7 @@ Tembusan:
   const [reportData, setReportData] = useState<any | null>(null);
   const [generatedHistoryId, setGeneratedHistoryId] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   // Debounced sync to history database when reportData is edited in-place
   useEffect(() => {
@@ -1756,6 +1804,77 @@ Tembusan:
       addToast(err.message || "Gagal mengunduh berkas Word.", "error");
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  // Export filled document to PDF
+  const handleDownloadPdf = async () => {
+    if (!reportData) return;
+    setIsDownloadingPdf(true);
+
+    try {
+      const response = await fetch("/api/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          templateType,
+          reportData,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Gagal membuat berkas PDF (.pdf).";
+        try {
+          const errData = await response.json();
+          errorMessage = errData.error || errorMessage;
+        } catch {
+          try {
+            const errText = await response.text();
+            errorMessage = errText || `Error ${response.status}: ${response.statusText}`;
+          } catch {
+            errorMessage = `Error ${response.status}: ${response.statusText}`;
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      let filename = `${templateType}-${Date.now()}.pdf`;
+      const customFilename = getExportFilename(templateType, undefined, reportData, "pdf");
+      if (customFilename) {
+        filename = customFilename;
+      }
+
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      addToast("Berkas Dokumen PDF (.pdf) berhasil diunduh!", "success");
+
+      confetti({
+        particleCount: 80,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+      });
+      confetti({
+        particleCount: 80,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+      });
+    } catch (err: any) {
+      console.error(err);
+      addToast(err.message || "Gagal mengunduh berkas PDF.", "error");
+    } finally {
+      setIsDownloadingPdf(false);
     }
   };
 
@@ -2564,8 +2683,10 @@ Tembusan:
                 reportData={reportData}
                 templateType={templateType}
                 onDownload={handleDownloadDocx}
+                onDownloadPdf={handleDownloadPdf}
                 onReset={handleReset}
                 isDownloading={isDownloading}
+                isDownloadingPdf={isDownloadingPdf}
                 onUpdateReportData={setReportData}
               />
               </motion.div>
@@ -3078,7 +3199,7 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end space-x-2.5 p-5 border-t border-neutral-100 dark:border-neutral-800/60 bg-neutral-50/50 dark:bg-neutral-950/20">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 p-5 border-t border-neutral-100 dark:border-neutral-800/60 bg-neutral-50/50 dark:bg-neutral-950/20">
                 <button
                   onClick={() => handleCopyHistoryContent(selectedHistoryItem)}
                   className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl border border-neutral-200/60 dark:border-neutral-800/60 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all font-semibold text-xs shadow-sm"
@@ -3095,9 +3216,25 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                     </>
                   )}
                 </button>
+
+                {(selectedHistoryItem.template_type === "laporan-informasi" || selectedHistoryItem.template_type === "laporan-harian-khusus" || selectedHistoryItem.template_type === "infosus" || selectedHistoryItem.template_type === "laporan-harian-intelijen" || selectedHistoryItem.template_type === "rencana-kegiatan") && selectedHistoryItem.meta_data?.raw_report && (
+                  <button
+                    onClick={() => handleDownloadHistoryPdf(selectedHistoryItem)}
+                    disabled={isDownloadingPdf || isDownloading}
+                    className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl border border-red-200/80 dark:border-red-900/60 bg-red-50/80 dark:bg-red-950/40 text-red-700 dark:text-red-300 hover:bg-red-100/80 dark:hover:bg-red-900/60 active:scale-95 disabled:opacity-50 transition-all font-bold text-xs shadow-sm"
+                  >
+                    {isDownloadingPdf ? (
+                      <span className="w-3.5 h-3.5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Download className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
+                    )}
+                    <span>{isDownloadingPdf ? "Membuat PDF..." : "Unduh (.pdf)"}</span>
+                  </button>
+                )}
+
                 <button
                   onClick={() => handleDownloadHistoryDocx(selectedHistoryItem)}
-                  disabled={isDownloading}
+                  disabled={isDownloading || isDownloadingPdf}
                   className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:opacity-90 disabled:opacity-50 transition-all font-bold text-xs shadow-sm"
                 >
                   {isDownloading ? (

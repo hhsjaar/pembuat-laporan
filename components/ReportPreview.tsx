@@ -44,8 +44,10 @@ interface ReportPreviewProps {
   reportData: ReportData;
   templateType: string;
   onDownload: () => void;
+  onDownloadPdf?: () => void;
   onReset: () => void;
   isDownloading: boolean;
+  isDownloadingPdf?: boolean;
   onUpdateReportData?: (updatedData: ReportData) => void;
 }
 
@@ -90,8 +92,10 @@ export default function ReportPreview({
   reportData,
   templateType,
   onDownload,
+  onDownloadPdf,
   onReset,
   isDownloading,
+  isDownloadingPdf = false,
   onUpdateReportData,
 }: ReportPreviewProps) {
   const [copied, setCopied] = useState(false);
@@ -510,19 +514,37 @@ Tembusan:
               </button>
             </>
           ) : (
-            <button
-              type="button"
-              onClick={onDownload}
-              disabled={isDownloading}
-              className="flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-accent text-white hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all text-xs font-semibold shadow-lg shadow-accent/20 w-full sm:w-auto font-bold"
-            >
-              {isDownloading ? (
-                <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Download className="w-3.5 h-3.5" />
+            <>
+              {onDownloadPdf && (
+                <button
+                  type="button"
+                  onClick={onDownloadPdf}
+                  disabled={isDownloadingPdf || isDownloading}
+                  className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl border border-red-200/80 dark:border-red-900/60 bg-red-50/80 dark:bg-red-950/40 text-red-700 dark:text-red-300 hover:bg-red-100/80 dark:hover:bg-red-900/60 active:scale-95 disabled:opacity-50 transition-all text-xs font-bold w-full sm:w-auto shadow-sm"
+                >
+                  {isDownloadingPdf ? (
+                    <span className="w-3.5 h-3.5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
+                  )}
+                  <span>{isDownloadingPdf ? "Membuat PDF..." : "Unduh PDF (.pdf)"}</span>
+                </button>
               )}
-              <span>{isDownloading ? "Mengekspor..." : "Unduh Dokumen (.docx)"}</span>
-            </button>
+
+              <button
+                type="button"
+                onClick={onDownload}
+                disabled={isDownloading || isDownloadingPdf}
+                className="flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-accent text-white hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all text-xs font-semibold shadow-lg shadow-accent/20 w-full sm:w-auto font-bold"
+              >
+                {isDownloading ? (
+                  <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
+                <span>{isDownloading ? "Mengekspor..." : "Unduh Word (.docx)"}</span>
+              </button>
+            </>
           )}
         </div>
       </div>
