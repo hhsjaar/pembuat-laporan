@@ -10,6 +10,7 @@ import AudioUploader from "./AudioUploader";
 import PdfUploader from "./PdfUploader";
 import ProcessingModal, { ProcessingStep, StepId } from "./ProcessingModal";
 import ReportPreview from "./ReportPreview";
+import { exportReportToPdfClient } from "@/lib/clientPdfExport";
 // import VoiceAssistant from "./VoiceAssistant";
 
 interface Toast {
@@ -650,38 +651,21 @@ export default function Dashboard() {
 
     setIsDownloadingPdf(true);
     try {
-      const response = await fetch("/api/export-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          templateType: item.template_type,
-          reportData: rawReport,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Gagal mengemas berkas PDF dari riwayat.");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      
       let filename = `${item.template_type}-${item.id.slice(0, 8)}.pdf`;
       const customFilename = getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, rawReport, "pdf");
       if (customFilename) {
         filename = customFilename;
       }
-      
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+
+      await exportReportToPdfClient({
+        templateType: item.template_type,
+        reportData: rawReport,
+        filename,
+      });
+
       addToast("Berkas Dokumen PDF (.pdf) berhasil diunduh!", "success");
     } catch (err: any) {
-      console.error(err);
+      console.error("History PDF Export Error:", err);
       addToast(err.message || "Gagal mengunduh berkas PDF.", "error");
     } finally {
       setIsDownloadingPdf(false);
@@ -1813,48 +1797,17 @@ Tembusan:
     setIsDownloadingPdf(true);
 
     try {
-      const response = await fetch("/api/export-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          templateType,
-          reportData,
-        }),
-      });
-
-      if (!response.ok) {
-        let errorMessage = "Gagal membuat berkas PDF (.pdf).";
-        try {
-          const errData = await response.json();
-          errorMessage = errData.error || errorMessage;
-        } catch {
-          try {
-            const errText = await response.text();
-            errorMessage = errText || `Error ${response.status}: ${response.statusText}`;
-          } catch {
-            errorMessage = `Error ${response.status}: ${response.statusText}`;
-          }
-        }
-        throw new Error(errorMessage);
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-
       let filename = `${templateType}-${Date.now()}.pdf`;
       const customFilename = getExportFilename(templateType, undefined, reportData, "pdf");
       if (customFilename) {
         filename = customFilename;
       }
 
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      await exportReportToPdfClient({
+        templateType,
+        reportData,
+        filename,
+      });
 
       addToast("Berkas Dokumen PDF (.pdf) berhasil diunduh!", "success");
 
@@ -1871,7 +1824,7 @@ Tembusan:
         origin: { x: 1 },
       });
     } catch (err: any) {
-      console.error(err);
+      console.error("Client PDF Export Error:", err);
       addToast(err.message || "Gagal mengunduh berkas PDF.", "error");
     } finally {
       setIsDownloadingPdf(false);

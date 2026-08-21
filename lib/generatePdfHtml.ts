@@ -265,6 +265,61 @@ export function generatePdfHtml(templateType: string, reportData: ReportData): s
     .avoid-break {
       page-break-inside: avoid;
     }
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 18mm 18mm 18mm 18mm;
+      }
+      html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+        font-size: 11pt;
+        line-height: 1.35;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .kop-header,
+      .meta-table,
+      .section-title {
+        page-break-inside: avoid;
+        page-break-after: avoid;
+      }
+      .signoff-container {
+        page-break-inside: avoid;
+      }
+      .table-data {
+        page-break-inside: auto;
+      }
+      .table-data tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+      .table-data th, .table-data td {
+        border: 1px solid #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .table-data th {
+        background-color: #f2f2f2 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .kop-divider {
+        border-bottom: 1.5px solid #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .doc-title-main {
+        border-bottom: 1.5px solid #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
   `;
 
   // 1. LAPORAN INFORMASI
