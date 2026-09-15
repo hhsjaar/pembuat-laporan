@@ -347,7 +347,7 @@ PANDUAN EKSTRAPOLASI KREATIF & SIMULASI LOGIS (JIKA DATA MASUKAN TIDAK LENGKAP):
 Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {
   "bidang": "Kategori bidang laporan (Kapital penuh, misal: KEAMANAN, POLITIK, IDEOLOGI / SOSIAL POLITIK, SOSIAL BUDAYA)",
-  "perihal": "Informasi kejadian/kegiatan secara KAPITAL PENUH and sangat deskriptif dimulai dengan kata 'INFORMASI KEGIATAN...' (sesuaikan dengan kegiatan nyata di masukan pengguna)",
+  "perihal": "Informasi kejadian/kegiatan secara KAPITAL PENUH and sangat deskriptif dimulai dengan kata 'KEGIATAN...' (JANGAN PERNAH diawali dengan kata 'INFORMASI', langsung 'KEGIATAN...'; sesuaikan dengan kegiatan nyata di masukan pengguna)",
   "cara-mendapatkan-informasi": "Bagaimana data/informasi didapatkan (misal: Observasi lapangan dan koordinasi dengan pihak panitia., Monitoring dan wawancara., dsb.)",
   "waktu-mendapatkan-informasi": "Hari dan tanggal mendapatkan informasi (misal: Sabtu tanggal 16 Mei 2026 atau sesuai dokumen masukan)",
   "isi_laporan": "Teks rincian fakta lapangan yang SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF. Anda WAJIB membaginya ke dalam poin-poin terstruktur menggunakan urutan alfabet kapital (A., B., C., D., E., F., dst.). Pisahkan setiap poin utama alfabet (seperti A., B., C., D., dst.) dengan baris baru ganda (\\n\\n). Jika isi poin tersebut HANYA terdiri dari 1 paragraf penjelasan/fakta, Anda DILARANG KERAS memberi judul/label/topik di awal poin (contoh: tulis langsung 'A. Pada hari Senin tanggal...', dan JANGAN PERNAH menulis seperti 'A. Penemuan Korban: Pada hari...' atau 'A. Waktu Kejadian \\n Pada hari...'). Jika poin tersebut memperkenalkan daftar (saksi, rundown/kronologi, hasil otopsi/pemeriksaan, dsb.), tulis kalimat pengantar setelah huruf alfabet (contoh: 'D. Saksi dalam kejadian tersebut antara lain sebagai berikut :'), lalu cantumkan item-itemnya sebagai sub-poin angka (1., 2., 3., dst.) pada baris baru di bawahnya. Untuk seluruh sub-poin (saksi-saksi, kronologi kejadian, hasil pemeriksaan awal, otopsi, dsb.), Anda WAJIB memisahkan kalimat pengantar, sub-poin pertama, dan antar sub-poin berikutnya hanya dengan baris baru tunggal (\\n) agar tidak terlalu renggang. Setiap paragraf penjelasan harus ringkas, padat informasi, formal, dan tidak terlalu panjang (jangan monoton atau seperti tulisan robot/template mati). Gunakan bahasa dinas intelkam resmi kepolisian yang baku dan berwibawa.",
@@ -443,7 +443,7 @@ PENTING:
 1. Susun seluruh isi laporan 100% secara dinamis dan faktual berdasarkan data nyata yang disediakan di masukan pengguna (gambar dokumen, PDF guidebook, transkrip, catatan teks). Jangan pernah berasumsi atau menyalin detail acara lain jika masukan berbeda!
 2. Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {
-  "perihal": "Informasi kejadian/kegiatan secara ringkas namun deskriptif. PENTING: JANGAN PERNAH diawali dengan kata 'Laporan', tetapi harus langsung diawali dengan kata 'Kegiatan' (misal: Kegiatan Monitoring Giat Nobar Pesta Babi... di Beranda FH Undip Kec. Tembalang atau Kegiatan Silaturahmi...)",
+  "perihal": "Informasi kejadian/kegiatan secara ringkas namun deskriptif. PENTING: JANGAN PERNAH diawali dengan kata 'Laporan', tetapi harus langsung diawali dengan kata 'Kegiatan' (misal: Kegiatan Nobar Pesta Babi... di Beranda FH Undip Kec. Tembalang atau Kegiatan Silaturahmi...). JANGAN PERNAH menyisipkan kata 'Monitoring dan Pengamanan' setelah kata 'Kegiatan', langsung diikuti nama kegiatannya.",
   "isi_laporan": "Teks lengkap rincian fakta lapangan. Susun dalam alfabet penomoran (A., B., C., D... dst.) secara dinamis dan fleksibel (tidak dipatok harus A s.d F, sesuaikan dengan kompleksitas masukan pengguna). Setiap poin dipisahkan baris baru ganda (\\n\\n). Gunakan bahasa baku resmi Indonesia yang dinamis, tidak monoton, luwes, dan mengalir secara alami (tidak kaku seperti tulisan robot/template mati). Pelajari dan tiru susunan format dari 4 contoh referensi di bawah.",
   "kapolsek_nama": "Nama dan gelar Kapolsek Tembalang yang menandatangani laporan. PENTING: Selalu gunakan nama 'KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H.'."
 }
@@ -1308,7 +1308,14 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
       if (/^laporan\s+kegiatan/i.test(perihal)) {
         perihal = perihal.replace(/^laporan\s+/i, "");
       }
+      // Hilangkan "Monitoring dan Pengamanan" setelah kata "Kegiatan" di awal perihal
+      perihal = perihal.replace(/^(kegiatan\s+)monitoring\s+dan\s+pengamanan\s+/i, "$1");
       reportData.perihal = perihal;
+    }
+
+    // Hilangkan kata "Informasi" di awal perihal (harus langsung diawali "Kegiatan...") untuk "laporan-informasi" template
+    if (templateType === "laporan-informasi" && reportData && typeof reportData.perihal === "string") {
+      reportData.perihal = reportData.perihal.trim().replace(/^informasi\s+/i, "");
     }
 
     console.log("Report narrative generated and calendar-synchronized successfully via Gemini!");

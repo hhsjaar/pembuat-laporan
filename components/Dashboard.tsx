@@ -807,13 +807,13 @@ BIDANG                      : ${report.bidang || ""}
 PERIHAL                     : ${title}
 
 I. PENDAHULUAN
-   1. Sumber Informasi          : Pelapor
+   1. Sumber Informasi          : Ada pada pelapor
    2. Hubungan dengan Sasaran   : -
    3. Cara Mendapatkan Info     : ${report["cara-mendapatkan-informasi"] || ""}
    4. Waktu Mendapatkan Info    : ${report["waktu-mendapatkan-informasi"] || ""}
    5. Nilai Informasi           : A - 1
 
-II. HAL-HAL YANG DILAPORKAN
+II. FAKTA-FAKTA
 ${mainBody}
 
 III. PENDAPAT PELAPOR

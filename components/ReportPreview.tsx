@@ -247,13 +247,13 @@ BIDANG                      : ${reportData.bidang || ""}
 PERIHAL                     : ${reportData.perihal || ""}
 
 I. PENDAHULUAN
-   1. Sumber Informasi          : Pelapor
+   1. Sumber Informasi          : Ada pada pelapor
    2. Hubungan dengan Sasaran   : -
    3. Cara Mendapatkan Info     : ${reportData["cara-mendapatkan-informasi"] || ""}
    4. Waktu Mendapatkan Info    : ${reportData["waktu-mendapatkan-informasi"] || ""}
    5. Nilai Informasi           : A - 1
 
-II. HAL-HAL YANG DILAPORKAN
+II. FAKTA-FAKTA
 ${mainBody}
 
 III. PENDAPAT PELAPOR
@@ -971,7 +971,7 @@ Tembusan:
                 <div className="grid grid-cols-[180px_10px_1fr] gap-x-2 gap-y-1.5 pl-3 font-sans text-neutral-800" style={{ fontSize: "11pt", fontFamily: "Calibri, sans-serif" }}>
                   <span className="text-neutral-500">1. Sumber Informasi</span>
                   <span className="text-neutral-400">:</span>
-                  <span className="font-semibold text-neutral-950">Pelapor.</span>
+                  <span className="font-semibold text-neutral-950">Ada pada pelapor.</span>
 
                   <span className="text-neutral-500">2. Hubungan Sumber dengan sasaran</span>
                   <span className="text-neutral-400">:</span>
@@ -1006,7 +1006,7 @@ Tembusan:
             {templateType !== "rencana-kegiatan" && templateType !== "laporan-harian-intelijen" && (
               <div className="space-y-4">
                 <h3 className="font-bold text-neutral-955 tracking-wide border-b border-neutral-200 pb-1 uppercase" style={{ fontSize: "12pt" }}>
-                  {templateType === "laporan-harian-khusus" ? "I. FAKTA – FAKTA :" : templateType === "infosus" ? "FAKTA – FAKTA :" : "HAL-HAL YANG DILAPORKAN"}
+                  {templateType === "laporan-harian-khusus" ? "I. FAKTA – FAKTA :" : templateType === "infosus" ? "FAKTA – FAKTA :" : templateType === "laporan-informasi" ? "II. FAKTA-FAKTA" : "HAL-HAL YANG DILAPORKAN"}
                 </h3>
 
                 <div className="pl-3 text-justify leading-relaxed">

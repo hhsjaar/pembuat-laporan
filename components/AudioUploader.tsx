@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Square, Upload, Play, Trash2, CheckCircle2, Pause } from "lucide-react";
+import { Mic, Square, Upload, Play, Trash2, CheckCircle2, Pause, FileText, Loader2 } from "lucide-react";
 
 interface AudioUploaderProps {
   audioFile: File | null;
@@ -10,16 +10,37 @@ interface AudioUploaderProps {
   onError?: (message: string) => void;
 }
 
+// Vercel Serverless Functions hard-cap the request body at ~4.5MB (not adjustable on Hobby/Pro).
+// A single-shot upload of a long recording blows past that, so live recordings are split into
+// small segments and transcribed as they're captured — each request stays tiny no matter how
+// long the user records.
+const CHUNK_INTERVAL_MS = 60_000;
+
 export default function AudioUploader({ audioFile, onChange, onError }: AudioUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
   const [isDragActive, setIsDragActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [completedDurationSeconds, setCompletedDurationSeconds] = useState<number | null>(null);
+  const [chunkStatus, setChunkStatus] = useState({ processed: 0, failed: 0 });
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [transcriptPreview, setTranscriptPreview] = useState("");
+  const [showTranscript, setShowTranscript] = useState(false);
   const audioPlaybackRef = useRef<HTMLAudioElement | null>(null);
+
+  // Live long-recording state
+  const streamRef = useRef<MediaStream | null>(null);
+  const currentRecorderRef = useRef<MediaRecorder | null>(null);
+  const isRecordingRef = useRef(false);
+  const loopPromiseRef = useRef<Promise<void> | null>(null);
+  const pendingUploadsRef = useRef<Promise<void>[]>([]);
+  const transcriptPartsRef = useRef<string[]>([]);
+  const chunkCounterRef = useRef(0);
+
+  const isTranscriptResult = !!audioFile && audioFile.type === "text/plain";
+  const isBusy = isRecording || isFinalizing;
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -34,7 +55,7 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
   }, [isRecording]);
 
   useEffect(() => {
-    if (audioFile) {
+    if (audioFile && audioFile.type !== "text/plain") {
       const url = URL.createObjectURL(audioFile);
       setAudioUrl(url);
       return () => URL.revokeObjectURL(url);
@@ -42,6 +63,15 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
       setAudioUrl(null);
     }
   }, [audioFile]);
+
+  useEffect(() => {
+    if (isTranscriptResult && audioFile) {
+      audioFile.text().then(setTranscriptPreview).catch(() => setTranscriptPreview(""));
+    } else {
+      setTranscriptPreview("");
+      setShowTranscript(false);
+    }
+  }, [audioFile, isTranscriptResult]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -54,16 +84,16 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
   };
   const processFile = (file: File) => {
     const validTypes = [
-      "audio/mp3", "audio/mpeg", "audio/wav", "audio/x-wav", 
-      "audio/m4a", "audio/x-m4a", "audio/mp4", "audio/ogg", 
+      "audio/mp3", "audio/mpeg", "audio/wav", "audio/x-wav",
+      "audio/m4a", "audio/x-m4a", "audio/mp4", "audio/ogg",
       "audio/opus", "audio/aac", "audio/x-aac",
       "video/mpeg", "video/mp4", "video/webm"
     ];
     const fileExt = file.name.toLowerCase();
-    const hasValidExt = 
-      fileExt.endsWith(".m4a") || fileExt.endsWith(".mp3") || 
-      fileExt.endsWith(".wav") || fileExt.endsWith(".mpeg") || 
-      fileExt.endsWith(".ogg") || fileExt.endsWith(".opus") || 
+    const hasValidExt =
+      fileExt.endsWith(".m4a") || fileExt.endsWith(".mp3") ||
+      fileExt.endsWith(".wav") || fileExt.endsWith(".mpeg") ||
+      fileExt.endsWith(".ogg") || fileExt.endsWith(".opus") ||
       fileExt.endsWith(".aac") || fileExt.endsWith(".mpg") ||
       fileExt.endsWith(".mp4") || fileExt.endsWith(".webm");
 
@@ -95,55 +125,118 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
     }
   };
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunksRef.current = [];
-      
+  // Records exactly one small segment on the given stream and resolves with it once it stops
+  // (either from the interval timeout below, or from an early call to stopRecording()).
+  const recordOneChunk = (stream: MediaStream, maxMs: number): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const parts: Blob[] = [];
       const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
-      mediaRecorderRef.current = recorder;
+      currentRecorderRef.current = recorder;
 
       recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
-        }
+        if (e.data && e.data.size > 0) parts.push(e.data);
       };
 
       recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/mp3" });
-        const file = new File([audioBlob], `rekaman-${Date.now()}.mp3`, { type: "audio/mp3" });
-        
-        if (file.size > 150 * 1024 * 1024) {
-          const errMsg = "Ukuran rekaman suara melebihi batas 150MB. Harap rekam dalam durasi yang lebih singkat.";
-          if (onError) {
-            onError(errMsg);
-          } else {
-            alert(errMsg);
-          }
-          // Stop all media tracks to release the hardware
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-
-        onChange(file);
-        
-        // Stop all media tracks to release the hardware
-        stream.getTracks().forEach((track) => track.stop());
+        currentRecorderRef.current = null;
+        clearTimeout(timer);
+        resolve(new Blob(parts, { type: "audio/webm" }));
       };
 
       recorder.start();
+      const timer = setTimeout(() => {
+        if (recorder.state !== "inactive") recorder.stop();
+      }, maxMs);
+    });
+  };
+
+  const uploadAndTranscribeChunk = async (blob: Blob, seq: number) => {
+    try {
+      const file = new File([blob], `rekaman-bagian-${seq}.webm`, { type: "audio/webm" });
+      const fd = new FormData();
+      fd.append("file", file);
+
+      const res = await fetch("/api/transcribe", { method: "POST", body: fd });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+      transcriptPartsRef.current[seq - 1] = (data.text || "").trim();
+    } catch (err) {
+      console.error(`Gagal mentranskripsi bagian rekaman ke-${seq}:`, err);
+      transcriptPartsRef.current[seq - 1] = "";
+      setChunkStatus((s) => ({ ...s, failed: s.failed + 1 }));
+    } finally {
+      setChunkStatus((s) => ({ ...s, processed: s.processed + 1 }));
+    }
+  };
+
+  // Keeps recording back-to-back segments until stopRecording() flips isRecordingRef off.
+  // The just-finished segment is always uploaded before checking the flag, so the final
+  // (possibly short) segment triggered by "Hentikan Rekam" is never dropped.
+  const runRecordingLoop = async (stream: MediaStream) => {
+    while (true) {
+      const blob = await recordOneChunk(stream, CHUNK_INTERVAL_MS);
+      if (blob.size > 0) {
+        const seq = ++chunkCounterRef.current;
+        pendingUploadsRef.current.push(uploadAndTranscribeChunk(blob, seq));
+      }
+      if (!isRecordingRef.current) break;
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      transcriptPartsRef.current = [];
+      pendingUploadsRef.current = [];
+      chunkCounterRef.current = 0;
+      setChunkStatus({ processed: 0, failed: 0 });
+      setCompletedDurationSeconds(null);
+
+      isRecordingRef.current = true;
       setIsRecording(true);
+      loopPromiseRef.current = runRecordingLoop(stream);
     } catch (err) {
       console.error("Microphone hardware error:", err);
       alert("Gagal mengakses mikrofon. Harap berikan izin akses mikrofon di peramban Anda.");
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+  const stopRecording = async () => {
+    if (!isRecordingRef.current) return;
+
+    const totalSeconds = recordingSeconds;
+    isRecordingRef.current = false;
+    setIsRecording(false);
+    setIsFinalizing(true);
+
+    // Cuts the in-progress segment short instead of waiting up to CHUNK_INTERVAL_MS for it to end.
+    if (currentRecorderRef.current && currentRecorderRef.current.state !== "inactive") {
+      currentRecorderRef.current.stop();
     }
+
+    try {
+      await loopPromiseRef.current;
+      await Promise.all(pendingUploadsRef.current);
+    } finally {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
+    const finalText = transcriptPartsRef.current.filter(Boolean).join(" ").trim();
+
+    if (!finalText) {
+      const errMsg = "Transkripsi rekaman gagal atau kosong. Silakan coba rekam ulang.";
+      if (onError) onError(errMsg); else alert(errMsg);
+      setIsFinalizing(false);
+      return;
+    }
+
+    const transcriptFile = new File([finalText], `rekaman-${Date.now()}.txt`, { type: "text/plain" });
+    setCompletedDurationSeconds(totalSeconds);
+    setIsFinalizing(false);
+    onChange(transcriptFile);
   };
 
   const togglePlayback = () => {
@@ -168,6 +261,9 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
       audioPlaybackRef.current = null;
     }
     setIsPlaying(false);
+    setCompletedDurationSeconds(null);
+    setChunkStatus({ processed: 0, failed: 0 });
+    transcriptPartsRef.current = [];
     onChange(null);
   };
 
@@ -200,7 +296,7 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
           className={`relative rounded-2xl border border-dashed p-6 text-center cursor-pointer transition-all duration-300 ${
-            audioFile && !isRecording ? "opacity-50 pointer-events-none" : ""
+            (audioFile || isBusy) ? "opacity-50 pointer-events-none" : ""
           } ${
             isDragActive
               ? "border-neutral-900 dark:border-white bg-neutral-900/5 dark:bg-white/5"
@@ -234,7 +330,7 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
         {/* Record Audio Box */}
         <div
           className={`rounded-2xl border p-6 flex flex-col items-center justify-center space-y-3 transition-all duration-300 ${
-            audioFile && !isRecording ? "opacity-50 pointer-events-none" : "border-neutral-200 dark:border-neutral-800/60 bg-white/40 dark:bg-neutral-950/20"
+            (audioFile && !isBusy) ? "opacity-50 pointer-events-none" : "border-neutral-200 dark:border-neutral-800/60 bg-white/40 dark:bg-neutral-950/20"
           }`}
         >
           {isRecording ? (
@@ -259,6 +355,10 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
               <span className="text-xs font-semibold text-red-500 tracking-wider tabular-nums">
                 MEREKAM — {formatTime(recordingSeconds)}
               </span>
+              <span className="text-[10px] text-neutral-400 dark:text-neutral-500">
+                {chunkStatus.processed} bagian ditranskripsi otomatis
+                {chunkStatus.failed > 0 ? ` • ${chunkStatus.failed} gagal (diabaikan)` : ""}
+              </span>
               <button
                 type="button"
                 onClick={(e) => {
@@ -271,6 +371,13 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
                 <span>Hentikan Rekam</span>
               </button>
             </div>
+          ) : isFinalizing ? (
+            <div className="flex flex-col items-center space-y-2">
+              <Loader2 className="w-5 h-5 animate-spin text-neutral-500" />
+              <p className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
+                Menyelesaikan transkripsi bagian terakhir...
+              </p>
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center space-y-2">
               <div className="p-3 rounded-2xl bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400">
@@ -281,7 +388,7 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
                   Rekam Suara Langsung
                 </p>
                 <p className="text-xs text-neutral-400 dark:text-neutral-500 text-center">
-                  Gunakan mikrofon peramban
+                  Bisa merekam berjam-jam, ditranskripsi otomatis per menit
                 </p>
               </div>
               <button
@@ -300,46 +407,68 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
         </div>
       </div>
 
-      {/* Uploaded Audio Info Player Bar */}
+      {/* Result Bar: uploaded audio file OR completed live-recording transcript */}
       <AnimatePresence>
-        {audioFile && !isRecording && (
+        {audioFile && !isBusy && (
           <motion.div
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 5 }}
-            className="flex items-center justify-between rounded-xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/60 p-3.5 shadow-sm"
+            className="rounded-xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/60 p-3.5 shadow-sm space-y-3"
           >
-            <div className="flex items-center space-x-3.5">
-              <button
-                type="button"
-                onClick={togglePlayback}
-                className="p-3 rounded-full bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:opacity-90 active:scale-95 transition-all shadow-md shadow-neutral-950/10"
-              >
-                {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-              </button>
-              <div className="space-y-0.5">
-                <p className="text-xs font-semibold text-neutral-900 dark:text-white max-w-[200px] sm:max-w-[400px] truncate">
-                  {audioFile.name}
-                </p>
-                <p className="text-[10px] text-neutral-400 dark:text-neutral-500">
-                  {formatFileSize(audioFile.size)} • File Terpasang
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3.5">
+                {isTranscriptResult ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowTranscript((v) => !v)}
+                    className="p-3 rounded-full bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:opacity-90 active:scale-95 transition-all shadow-md shadow-neutral-950/10"
+                  >
+                    <FileText className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={togglePlayback}
+                    className="p-3 rounded-full bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:opacity-90 active:scale-95 transition-all shadow-md shadow-neutral-950/10"
+                  >
+                    {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                  </button>
+                )}
+                <div className="space-y-0.5">
+                  <p className="text-xs font-semibold text-neutral-900 dark:text-white max-w-[200px] sm:max-w-[400px] truncate">
+                    {isTranscriptResult ? "Transkrip Rekaman Suara" : audioFile.name}
+                  </p>
+                  <p className="text-[10px] text-neutral-400 dark:text-neutral-500">
+                    {isTranscriptResult
+                      ? `${completedDurationSeconds !== null ? formatTime(completedDurationSeconds) + " • " : ""}${transcriptPreview.length} karakter • Siap Diproses`
+                      : `${formatFileSize(audioFile.size)} • File Terpasang`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <span className="flex items-center space-x-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium px-2 py-0.5 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Siap Diproses</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={removeAudio}
+                  className="p-2 rounded-lg hover:bg-red-500/10 text-neutral-400 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span className="flex items-center space-x-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium px-2 py-0.5 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Siap Diproses</span>
-              </span>
-              <button
-                type="button"
-                onClick={removeAudio}
-                className="p-2 rounded-lg hover:bg-red-500/10 text-neutral-400 hover:text-red-500 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
+            {isTranscriptResult && showTranscript && (
+              <div className="rounded-lg bg-neutral-50 dark:bg-neutral-950/60 border border-neutral-200/60 dark:border-neutral-800/60 p-3 max-h-40 overflow-y-auto">
+                <p className="text-[11px] leading-relaxed text-neutral-600 dark:text-neutral-300 whitespace-pre-wrap">
+                  {transcriptPreview || "(kosong)"}
+                </p>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

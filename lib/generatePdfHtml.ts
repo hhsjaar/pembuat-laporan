@@ -369,7 +369,7 @@ export function generatePdfHtml(templateType: string, reportData: ReportData): s
         <tr>
           <td style="width: 220px;">1. Sumber Informasi</td>
           <td style="width: 15px; text-align: center;">:</td>
-          <td>Pelapor.</td>
+          <td>Ada pada pelapor.</td>
         </tr>
         <tr>
           <td>2. Hubungan Sumber dgn Sasaran</td>
@@ -393,7 +393,7 @@ export function generatePdfHtml(templateType: string, reportData: ReportData): s
         </tr>
       </table>
 
-      <div class="section-title">HAL-HAL YANG DILAPORKAN</div>
+      <div class="section-title">FAKTA-FAKTA</div>
       <div style="text-align: justify; margin-bottom: 14px;">
         ${formatMultilineText(finalIsiLaporan, "12px")}
       </div>

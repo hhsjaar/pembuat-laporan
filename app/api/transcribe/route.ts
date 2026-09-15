@@ -42,6 +42,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File audio tidak ditemukan." }, { status: 400 });
     }
 
+    // The live-recording UI already transcribes itself in small chunks (to stay under Vercel's
+    // ~4.5MB request body cap) and hands back the joined transcript as a plain-text "file".
+    // Pass it through as-is instead of trying to feed text to the audio transcription model.
+    if (file.type === "text/plain" || file.name.toLowerCase().endsWith(".txt")) {
+      const text = await file.text();
+      return NextResponse.json({ text: text.trim() });
+    }
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: "GEMINI_API_KEY tidak ditemukan di environment variables." }, { status: 500 });
