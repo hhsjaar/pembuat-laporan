@@ -1228,6 +1228,13 @@ Tembusan:
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // Live-recording transcript lands directly in the text notes field instead of going through
+  // the audio-file pipeline, so recording length is never bounded by any upload size limit.
+  const handleAudioTranscriptReady = (text: string) => {
+    setUserInput((prev) => (prev.trim() ? `${prev.trim()}\n\n${text}` : text));
+    addToast("Transkrip rekaman ditambahkan ke Catatan Teks.", "success");
+  };
+
   // AI autofill states & function
   const [showAutofillPanel, setShowAutofillPanel] = useState<Record<string, boolean>>({
     umum: false,
@@ -1454,6 +1461,7 @@ Tembusan:
                       <AudioUploader
                         audioFile={audioFile}
                         onChange={setAudioFile}
+                        onTranscriptReady={handleAudioTranscriptReady}
                         onError={(msg) => addToast(msg, "error")}
                       />
                     </div>
@@ -2488,7 +2496,7 @@ Tembusan:
                         <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Rekaman Suara / Sambutan (Audio)</span>
                       </div>
                       <div className="flex-grow">
-                        <AudioUploader audioFile={audioFile} onChange={setAudioFile} onError={(msg) => addToast(msg, "error")} />
+                        <AudioUploader audioFile={audioFile} onChange={setAudioFile} onTranscriptReady={handleAudioTranscriptReady} onError={(msg) => addToast(msg, "error")} />
                       </div>
                     </div>
 
@@ -2559,7 +2567,7 @@ Tembusan:
                             <Volume2 className="w-4 h-4 text-neutral-500" />
                             <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">Rekaman Suara / Sambutan (Audio)</span>
                           </div>
-                          <AudioUploader audioFile={audioFile} onChange={setAudioFile} onError={(msg) => addToast(msg, "error")} />
+                          <AudioUploader audioFile={audioFile} onChange={setAudioFile} onTranscriptReady={handleAudioTranscriptReady} onError={(msg) => addToast(msg, "error")} />
                         </motion.div>
                       )}
 

@@ -2,11 +2,12 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Square, Upload, Play, Trash2, CheckCircle2, Pause, FileText, Loader2 } from "lucide-react";
+import { Mic, Square, Upload, Play, Trash2, CheckCircle2, Pause, Loader2 } from "lucide-react";
 
 interface AudioUploaderProps {
   audioFile: File | null;
   onChange: (file: File | null) => void;
+  onTranscriptReady: (text: string) => void;
   onError?: (message: string) => void;
 }
 
@@ -16,18 +17,15 @@ interface AudioUploaderProps {
 // long the user records.
 const CHUNK_INTERVAL_MS = 60_000;
 
-export default function AudioUploader({ audioFile, onChange, onError }: AudioUploaderProps) {
+export default function AudioUploader({ audioFile, onChange, onTranscriptReady, onError }: AudioUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const [completedDurationSeconds, setCompletedDurationSeconds] = useState<number | null>(null);
   const [chunkStatus, setChunkStatus] = useState({ processed: 0, failed: 0 });
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [transcriptPreview, setTranscriptPreview] = useState("");
-  const [showTranscript, setShowTranscript] = useState(false);
   const audioPlaybackRef = useRef<HTMLAudioElement | null>(null);
 
   // Live long-recording state
@@ -39,7 +37,6 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
   const transcriptPartsRef = useRef<string[]>([]);
   const chunkCounterRef = useRef(0);
 
-  const isTranscriptResult = !!audioFile && audioFile.type === "text/plain";
   const isBusy = isRecording || isFinalizing;
 
   useEffect(() => {
@@ -55,7 +52,7 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
   }, [isRecording]);
 
   useEffect(() => {
-    if (audioFile && audioFile.type !== "text/plain") {
+    if (audioFile) {
       const url = URL.createObjectURL(audioFile);
       setAudioUrl(url);
       return () => URL.revokeObjectURL(url);
@@ -63,15 +60,6 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
       setAudioUrl(null);
     }
   }, [audioFile]);
-
-  useEffect(() => {
-    if (isTranscriptResult && audioFile) {
-      audioFile.text().then(setTranscriptPreview).catch(() => setTranscriptPreview(""));
-    } else {
-      setTranscriptPreview("");
-      setShowTranscript(false);
-    }
-  }, [audioFile, isTranscriptResult]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -192,7 +180,6 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
       pendingUploadsRef.current = [];
       chunkCounterRef.current = 0;
       setChunkStatus({ processed: 0, failed: 0 });
-      setCompletedDurationSeconds(null);
 
       isRecordingRef.current = true;
       setIsRecording(true);
@@ -206,7 +193,6 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
   const stopRecording = async () => {
     if (!isRecordingRef.current) return;
 
-    const totalSeconds = recordingSeconds;
     isRecordingRef.current = false;
     setIsRecording(false);
     setIsFinalizing(true);
@@ -233,10 +219,9 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
       return;
     }
 
-    const transcriptFile = new File([finalText], `rekaman-${Date.now()}.txt`, { type: "text/plain" });
-    setCompletedDurationSeconds(totalSeconds);
     setIsFinalizing(false);
-    onChange(transcriptFile);
+    setChunkStatus({ processed: 0, failed: 0 });
+    onTranscriptReady(finalText);
   };
 
   const togglePlayback = () => {
@@ -261,7 +246,6 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
       audioPlaybackRef.current = null;
     }
     setIsPlaying(false);
-    setCompletedDurationSeconds(null);
     setChunkStatus({ processed: 0, failed: 0 });
     transcriptPartsRef.current = [];
     onChange(null);
@@ -388,7 +372,7 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
                   Rekam Suara Langsung
                 </p>
                 <p className="text-xs text-neutral-400 dark:text-neutral-500 text-center">
-                  Bisa merekam berjam-jam, ditranskripsi otomatis per menit
+                  Bisa merekam berjam-jam, hasilnya otomatis masuk ke Catatan Teks
                 </p>
               </div>
               <button
@@ -407,68 +391,46 @@ export default function AudioUploader({ audioFile, onChange, onError }: AudioUpl
         </div>
       </div>
 
-      {/* Result Bar: uploaded audio file OR completed live-recording transcript */}
+      {/* Uploaded Audio Info Player Bar */}
       <AnimatePresence>
         {audioFile && !isBusy && (
           <motion.div
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 5 }}
-            className="rounded-xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/60 p-3.5 shadow-sm space-y-3"
+            className="flex items-center justify-between rounded-xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/60 p-3.5 shadow-sm"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3.5">
-                {isTranscriptResult ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowTranscript((v) => !v)}
-                    className="p-3 rounded-full bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:opacity-90 active:scale-95 transition-all shadow-md shadow-neutral-950/10"
-                  >
-                    <FileText className="w-4 h-4" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={togglePlayback}
-                    className="p-3 rounded-full bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:opacity-90 active:scale-95 transition-all shadow-md shadow-neutral-950/10"
-                  >
-                    {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-                  </button>
-                )}
-                <div className="space-y-0.5">
-                  <p className="text-xs font-semibold text-neutral-900 dark:text-white max-w-[200px] sm:max-w-[400px] truncate">
-                    {isTranscriptResult ? "Transkrip Rekaman Suara" : audioFile.name}
-                  </p>
-                  <p className="text-[10px] text-neutral-400 dark:text-neutral-500">
-                    {isTranscriptResult
-                      ? `${completedDurationSeconds !== null ? formatTime(completedDurationSeconds) + " • " : ""}${transcriptPreview.length} karakter • Siap Diproses`
-                      : `${formatFileSize(audioFile.size)} • File Terpasang`}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <span className="flex items-center space-x-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium px-2 py-0.5 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Siap Diproses</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={removeAudio}
-                  className="p-2 rounded-lg hover:bg-red-500/10 text-neutral-400 hover:text-red-500 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+            <div className="flex items-center space-x-3.5">
+              <button
+                type="button"
+                onClick={togglePlayback}
+                className="p-3 rounded-full bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:opacity-90 active:scale-95 transition-all shadow-md shadow-neutral-950/10"
+              >
+                {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+              </button>
+              <div className="space-y-0.5">
+                <p className="text-xs font-semibold text-neutral-900 dark:text-white max-w-[200px] sm:max-w-[400px] truncate">
+                  {audioFile.name}
+                </p>
+                <p className="text-[10px] text-neutral-400 dark:text-neutral-500">
+                  {formatFileSize(audioFile.size)} • File Terpasang
+                </p>
               </div>
             </div>
 
-            {isTranscriptResult && showTranscript && (
-              <div className="rounded-lg bg-neutral-50 dark:bg-neutral-950/60 border border-neutral-200/60 dark:border-neutral-800/60 p-3 max-h-40 overflow-y-auto">
-                <p className="text-[11px] leading-relaxed text-neutral-600 dark:text-neutral-300 whitespace-pre-wrap">
-                  {transcriptPreview || "(kosong)"}
-                </p>
-              </div>
-            )}
+            <div className="flex items-center space-x-2">
+              <span className="flex items-center space-x-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium px-2 py-0.5 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Siap Diproses</span>
+              </span>
+              <button
+                type="button"
+                onClick={removeAudio}
+                className="p-2 rounded-lg hover:bg-red-500/10 text-neutral-400 hover:text-red-500 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
