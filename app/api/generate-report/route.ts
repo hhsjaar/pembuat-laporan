@@ -291,6 +291,16 @@ export async function POST(req: NextRequest) {
 
     const currentDay = new Date().toLocaleDateString("id-ID", { weekday: "long" });
 
+    // Calculate yesterday's date for Laporan Harian Intelijen (H-1): header & Fakta-Fakta report on yesterday
+    const yesterdayDateObj = new Date();
+    yesterdayDateObj.setDate(yesterdayDateObj.getDate() - 1);
+    const yesterdayDate = yesterdayDateObj.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    const yesterdayDay = yesterdayDateObj.toLocaleDateString("id-ID", { weekday: "long" });
+
     // Calculate tomorrow's date for Rencana Kegiatan template (H+1)
     const tomorrowDateObj = new Date();
     tomorrowDateObj.setDate(tomorrowDateObj.getDate() + 1);
@@ -786,9 +796,10 @@ Anda WAJIB mengikuti format parafrase, gaya bahasa formal-analitis, dan struktur
 ${calendarContext}
 
 PENTING - ATURAN RESOLUSI TANGGAL DAN HARI:
-- Anda harus menentukan Hari dan Tanggal Pelaporan dari dokumen masukan. Jika di input/referensi ada tanggal spesifik, gunakan tanggal itu. Jika tidak, gunakan tanggal hari ini: ${currentDate}.
+- Laporan Harian Intelijen melaporkan situasi KEMARIN (H-1). Hari dan Tanggal Pelaporan (field "hari" dan "tanggal") WAJIB menggunakan tanggal kemarin: ${yesterdayDay}, ${yesterdayDate}. Hanya jika di input/referensi ada tanggal kejadian spesifik yang berbeda, gunakan tanggal kejadian tersebut. JANGAN gunakan tanggal hari ini (${currentDate}) sebagai tanggal pelaporan.
 - Nama hari pelaporan harus disesuaikan secara presisi dengan tanggal pelaporan tersebut (misalnya: "Kamis, 2 Juli 2026").
 - PENTING: JANGAN PERNAH menyertakan tag delimiter literal seperti "{{hari}}" atau "{{tanggal}}" di dalam nilai respons JSON Anda. Anda harus mengevaluasi hari dan tanggal tersebut secara langsung menjadi teks nyata (contoh: gunakan "Kamis" dan "2 Juli 2026" secara harfiah, bukan "{{hari}}" atau "{{tanggal}}").
+- PENTING - TANGGAL PADA FAKTA-FAKTA: Seluruh penyebutan hari dan tanggal kejadian di dalam bagian Fakta-Fakta (fakta_sosial_politik, fakta_sosial_budaya, kriminalitas_text, laka_lantas_text, bencana_alam_text, vvip_text, lain_lain_text) WAJIB sama dengan Hari dan Tanggal Pelaporan di atas (yaitu kemarin), BUKAN tanggal hari ini.
 
 PENTING - STRUKTUR PENULISAN DOKUMEN RELEVAN:
 1. Nomor Laporan: Buatlah nomor laporan yang logis dengan format "R/LHI/{{nomor}}/{{bulan_romawi}}/REN.4.1.1./{{tahun}}/Intelkam" berdasarkan tanggal pelaporan, contoh "R/LHI/199/VII/REN.4.1.1./2026/Intelkam".
@@ -832,7 +843,7 @@ PENTING - STRUKTUR PENULISAN DOKUMEN RELEVAN:
      - Keamanan Khusus (tahanan_text): Tulis jumlah tahanan di Rutan Polsek Tembalang secara lengkap (misal: "Jumlah tahanan di Rutan Polsek Tembalang 2 orang." atau jika tidak ada tahanan yang dilaporkan/kosong, cukup isi dengan "-").
      - Pengamanan VVIP/VIP (vvip_text): Uraikan kegiatan kunjungan/pengamanan pejabat/tokoh penting. Jika ada lebih dari 1 kegiatan, gunakan penomoran urut angka (1., 2., dst.) dipisahkan dengan '\\n'. Jika tidak ada, cukup isi dengan "-".
      - Lain-lain (lain_lain_text): Pindahkan kegiatan patroli Blue Light Patrol (BLP) siang/malam dari LHS. Jika ada kegiatan patroli terpisah (misal patroli siang dan patroli malam), pisahkan dalam poin bernomor (1. Patroli Siang..., 2. Patroli Malam...) dipisahkan dengan '\\n'. Jika tidak ada, cukup isi dengan "-".
-4. Tanggal Tanda Tangan (tanggal_ttd): Gunakan format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '19 Juli 2026').
+4. Tanggal Tanda Tangan (tanggal_ttd): Gunakan tanggal hari ini (${currentDate}), yaitu 1 hari SETELAH tanggal pelaporan. Format 'tanggal Bulan Tahun' saja, TANPA mencantumkan kata 'Semarang, ' (contoh: '19 Juli 2026').
 
 Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 {
@@ -1191,7 +1202,7 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
 
     // Force all sembako selisih fields to be "-" and apply robust missing field fallbacks for LHI
     if (templateType === "laporan-harian-intelijen" && reportData) {
-      const reportDate = reportData.tanggal || currentDate;
+      const reportDate = reportData.tanggal || yesterdayDate;
       let monthName = "Juli";
       let yearNum = "2026";
       
@@ -1200,8 +1211,8 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
       const yearMatch = reportDate.match(/\b(20\d{2})\b/);
       if (yearMatch) yearNum = yearMatch[1];
       
-      const defaultHari = reportData.hari || "Kamis";
-      const defaultTanggal = reportData.tanggal || currentDate;
+      const defaultHari = reportData.hari || yesterdayDay;
+      const defaultTanggal = reportData.tanggal || yesterdayDate;
       
       const defaultPendahuluanPolitik = `Situasi politik nasional pada ${monthName} ${yearNum} berada dalam fase konsolidasi pemerintahan Presiden Prabowo Subianto pasca-Pemilu 2024, dengan isu utama berkisar pada polemik parliamentary threshold dalam pembahasan RUU Pemilu yang akan dimulai Juli–Agustus 2026, serta tekanan dari aksi penyampaian aspirasi elemen mahasiswa dan buruh yang menuntut hapus outsourcing dan revisi UU Sisdiknas. Di tingkat daerah, koordinasi unsur Forkopimda dioptimalkan sesudah May Day 2026 untuk mengantisipasi dinamika protes buruh. Secara umum, situasi politik domestik tetap aman, tertib, dan kondusif meskipun terdapat dinamika politik yang intens.`;
       
@@ -1298,7 +1309,7 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
         reportData.lain_lain_text = `Pada hari ${defaultHari}, tanggal ${defaultTanggal} tidak ada kejadian menonjol yang dapat dilaporkan`;
       }
       if (!reportData.tanggal_ttd || reportData.tanggal_ttd.trim() === "" || reportData.tanggal_ttd.trim() === "-") {
-        reportData.tanggal_ttd = defaultTanggal;
+        reportData.tanggal_ttd = currentDate;
       }
     }
 
