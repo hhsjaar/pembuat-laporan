@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { geminiClient } from "@/lib/gemini";
+import { ambilAcuan, blokAcuanPrompt, type Acuan } from "@/lib/dataik";
 
 export const runtime = "nodejs";
 
@@ -274,6 +275,28 @@ function healTruncatedJson(str: string): any {
   }
   
   throw new Error("Gagal menyembuhkan JSON yang terpotong.");
+}
+
+// Koreksi ejaan sisa di hasil AI ke penulisan baku dari Data IK (jaring pengaman setelah instruksi prompt).
+function terapkanEjaanBaku(obj: any, acuan: Acuan[]): any {
+  const pasangan = acuan
+    .filter((a) => a.ejaanBeda && a.ditemukan && a.ditemukan.length >= 5 && a.baku && !a.baku.toLowerCase().includes(a.ditemukan.toLowerCase()))
+    .map((a) => ({
+      re: new RegExp(`(?<![\\p{L}\\p{N}])${a.ditemukan.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+")}(?![\\p{L}\\p{N}])`, "giu"),
+      baku: a.baku,
+    }));
+  if (!pasangan.length) return obj;
+  const walk = (v: any): any => {
+    if (typeof v === "string") return pasangan.reduce((t, p) => t.replace(p.re, () => p.baku), v);
+    if (Array.isArray(v)) return v.map(walk);
+    if (v && typeof v === "object") {
+      const r: any = {};
+      for (const k of Object.keys(v)) r[k] = walk(v[k]);
+      return r;
+    }
+    return v;
+  };
+  return walk(obj);
 }
 
 export async function POST(req: NextRequest) {
@@ -1112,6 +1135,13 @@ PENTING: Jika pengguna memberikan instruksi khusus pada bagian ke-5 di atas, And
 Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli di atas. Masukkan hasilnya ke dalam skema JSON yang diminta.`;
     }
 
+    // Acuan baku dari Data IK (nama pejabat & alamat yang sudah dibenarkan pengguna). Gagal/lambat -> diabaikan.
+    const teksMasukan = [transcript, imageAnalysis, pdfText, userInput, userPreference, laporanHarianForm ? JSON.stringify(laporanHarianForm) : ""]
+      .filter((t) => typeof t === "string" && t.trim())
+      .join("\n");
+    const acuanBaku = await ambilAcuan(teksMasukan);
+    userPrompt += blokAcuanPrompt(acuanBaku);
+
     let response;
     const retries = 3;
     let delay = 2000;
@@ -1199,6 +1229,9 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
 
     // Normalize all text newlines and split glued numbered list markers
     reportData = normalizeReportTextNewlines(reportData);
+
+    // Samakan sisa ejaan nama/lokasi dengan penulisan baku Data IK
+    reportData = terapkanEjaanBaku(reportData, acuanBaku);
 
     // Force all sembako selisih fields to be "-" and apply robust missing field fallbacks for LHI
     if (templateType === "laporan-harian-intelijen" && reportData) {

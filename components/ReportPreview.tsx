@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import SaranInput from "./SaranInput";
 import { Download, RotateCcw, FileSpreadsheet, MapPin, Calendar, FileText, Copy, CheckCircle2 } from "lucide-react";
 
 interface ReportData {
@@ -1145,10 +1146,10 @@ Tembusan:
                       />
                     </div>
                     <div>
-                      <input
-                        type="text"
+                      <SaranInput
+                        kind="orang"
                         value={reportData.nama_ttd || ""}
-                        onChange={(e) => handleFieldChange("nama_ttd", e.target.value)}
+                        onValueChange={(v) => handleFieldChange("nama_ttd", v)}
                         className="bg-transparent border border-transparent hover:border-neutral-200 focus:border-accent hover:bg-neutral-50/50 focus:bg-neutral-50/50 rounded px-1 outline-none transition-all text-center font-bold underline text-neutral-955 leading-none w-full"
                       />
                       <input
@@ -1305,10 +1306,10 @@ Tembusan:
                 <MapPin className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                 <div>
                   <p className="text-[9px] font-bold uppercase text-neutral-400">Lokasi / TKP</p>
-                  <input
-                    type="text"
+                  <SaranInput
+                    kind="lokasi"
                     value={reportData.lokasi || ""}
-                    onChange={(e) => handleFieldChange("lokasi", e.target.value)}
+                    onValueChange={(v) => handleFieldChange("lokasi", v)}
                     className="bg-transparent border border-transparent hover:border-neutral-200 focus:border-accent hover:bg-neutral-50/50 focus:bg-neutral-50/50 rounded px-1 outline-none transition-all font-semibold text-neutral-955 truncate max-w-[150px]"
                   />
                 </div>

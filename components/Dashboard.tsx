@@ -10,6 +10,7 @@ import AudioUploader from "./AudioUploader";
 import PdfUploader from "./PdfUploader";
 import ProcessingModal, { ProcessingStep, StepId } from "./ProcessingModal";
 import ReportPreview from "./ReportPreview";
+import SaranInput from "./SaranInput";
 import { exportReportToPdfClient } from "@/lib/clientPdfExport";
 // import VoiceAssistant from "./VoiceAssistant";
 
@@ -2218,28 +2219,38 @@ Tembusan:
                           </div>
                           <div>
                             <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Personil Patroli Siang</label>
-                            <textarea
+                            <SaranInput
+                              multiline
                               rows={2}
+                              kind="personil"
+                              mode="segment"
+                              formatSisip={(it) => it.detail ? `${it.nilai} (${it.detail})` : it.nilai}
                               value={laporanHarianForm.patroliSiangPersonil}
-                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangPersonil: e.target.value })}
+                              onValueChange={(v) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangPersonil: v })}
                               className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all font-mono"
                             />
                           </div>
                           <div>
                             <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Sasaran Patroli Siang</label>
-                            <textarea
+                            <SaranInput
+                              multiline
                               rows={2}
+                              kind="lokasi"
+                              mode="segment"
                               value={laporanHarianForm.patroliSiangSasaran}
-                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangSasaran: e.target.value })}
+                              onValueChange={(v) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangSasaran: v })}
                               className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
                             <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Rute Patroli Siang</label>
-                            <textarea
+                            <SaranInput
+                              multiline
                               rows={2}
+                              kind="lokasi"
+                              mode="segment"
                               value={laporanHarianForm.patroliSiangRute}
-                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangRute: e.target.value })}
+                              onValueChange={(v) => setLaporanHarianForm({ ...laporanHarianForm, patroliSiangRute: v })}
                               className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
@@ -2281,28 +2292,38 @@ Tembusan:
                           </div>
                           <div>
                             <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Personil Patroli Malam</label>
-                            <textarea
+                            <SaranInput
+                              multiline
                               rows={2}
+                              kind="personil"
+                              mode="segment"
+                              formatSisip={(it) => it.detail ? `${it.nilai} (${it.detail})` : it.nilai}
                               value={laporanHarianForm.patroliMalamPersonil}
-                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamPersonil: e.target.value })}
+                              onValueChange={(v) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamPersonil: v })}
                               className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all font-mono"
                             />
                           </div>
                           <div>
                             <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Sasaran Patroli Malam</label>
-                            <textarea
+                            <SaranInput
+                              multiline
                               rows={2}
+                              kind="lokasi"
+                              mode="segment"
                               value={laporanHarianForm.patroliMalamSasaran}
-                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamSasaran: e.target.value })}
+                              onValueChange={(v) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamSasaran: v })}
                               className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
                           <div>
                             <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Rute Patroli Malam</label>
-                            <textarea
+                            <SaranInput
+                              multiline
                               rows={2}
+                              kind="lokasi"
+                              mode="segment"
                               value={laporanHarianForm.patroliMalamRute}
-                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamRute: e.target.value })}
+                              onValueChange={(v) => setLaporanHarianForm({ ...laporanHarianForm, patroliMalamRute: v })}
                               className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                             />
                           </div>
