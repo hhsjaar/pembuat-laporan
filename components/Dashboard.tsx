@@ -12,6 +12,7 @@ import ProcessingModal, { ProcessingStep, StepId } from "./ProcessingModal";
 import ReportPreview from "./ReportPreview";
 import SaranInput from "./SaranInput";
 import { exportReportToPdfClient } from "@/lib/clientPdfExport";
+import { parseLaporanHarianText } from "@/lib/parseLaporanHarian";
 // import VoiceAssistant from "./VoiceAssistant";
 
 interface Toast {
@@ -1108,6 +1109,8 @@ Tembusan:
     lakaLantas: "Tidak ada hal yang dapat dilaporkan.",
     tahananL: "0",
     tahananP: "0",
+    keamananKhusus: "",
+    sosialKeamanan: "",
     bencanaAlam: "Tidak ada hal yang dapat dilaporkan.",
     vvip: "Tidak ada kegiatan untuk dilaporkan.",
     patroliSiangWaktu: "11.00 Wib s/d Selesai.",
@@ -1227,6 +1230,20 @@ Tembusan:
 
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Paste a complete Laporan Harian Situasi text and distribute it into the form fields
+  const [pastedLaporanHarian, setPastedLaporanHarian] = useState("");
+  const applyPastedLaporanHarian = (text: string) => {
+    if (!text.trim()) return;
+    const parsed = parseLaporanHarianText(text);
+    const count = Object.keys(parsed).length;
+    if (count === 0) {
+      addToast("Format laporan tidak dikenali. Pastikan menyalin Laporan Situasi lengkap.", "error");
+      return;
+    }
+    setLaporanHarianForm((prev) => ({ ...prev, ...parsed }));
+    addToast(`${count} kolom Laporan Harian Situasi terisi otomatis dari teks tempelan.`, "success");
   };
 
   // Live-recording transcript lands directly in the text notes field instead of going through
@@ -1974,6 +1991,53 @@ Tembusan:
                   </div>
 
 
+                  {/* Paste full report to autofill all fields */}
+                  <div className="border border-emerald-500/20 rounded-2xl p-4 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 dark:from-emerald-950/10 dark:to-teal-950/10 space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <Copy className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs md:text-sm font-bold text-neutral-900 dark:text-white">
+                          Tempel Laporan Situasi Lengkap
+                        </h4>
+                        <p className="text-[10px] md:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                          Paste teks Laporan Situasi (dari WhatsApp) di sini, seluruh kolom di bawah akan terisi otomatis.
+                        </p>
+                      </div>
+                    </div>
+                    <textarea
+                      rows={4}
+                      value={pastedLaporanHarian}
+                      onChange={(e) => setPastedLaporanHarian(e.target.value)}
+                      onPaste={(e) => {
+                        const text = e.clipboardData.getData("text");
+                        if (text) setTimeout(() => applyPastedLaporanHarian(text), 0);
+                      }}
+                      placeholder={"POLRESTABES SEMARANG\nPOLSEK TEMBALANG\n...\nHari : ...\nTanggal : ..."}
+                      className="block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => applyPastedLaporanHarian(pastedLaporanHarian)}
+                        disabled={!pastedLaporanHarian.trim()}
+                        className="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      >
+                        Isi Kolom Otomatis
+                      </button>
+                      {pastedLaporanHarian && (
+                        <button
+                          type="button"
+                          onClick={() => setPastedLaporanHarian("")}
+                          className="px-3 py-1.5 rounded-full text-xs font-semibold border border-neutral-300 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all"
+                        >
+                          Kosongkan
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Form Tabs Navigation */}
                   <div className="flex border-b border-neutral-200 dark:border-neutral-800 overflow-x-auto whitespace-nowrap">
                     {[
@@ -2093,6 +2157,29 @@ Tembusan:
                               value={laporanHarianForm.vvip}
                               onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, vvip: e.target.value })}
                               className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Sosial Keamanan</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.sosialKeamanan}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, sosialKeamanan: e.target.value })}
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                              placeholder="Kosongkan agar diisi AI dari unggahan"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Keamanan Khusus (Teks Tahanan)</label>
+                            <textarea
+                              rows={2}
+                              value={laporanHarianForm.keamananKhusus}
+                              onChange={(e) => setLaporanHarianForm({ ...laporanHarianForm, keamananKhusus: e.target.value })}
+                              className="mt-1.5 block w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-3 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                              placeholder="Kosongkan agar memakai jumlah tahanan L/P di atas"
                             />
                           </div>
                         </div>

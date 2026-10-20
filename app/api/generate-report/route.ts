@@ -515,7 +515,9 @@ Aturan Tambahan:
       const form = laporanHarianForm || {};
       const totalTahanan = (parseInt(form.tahananL || "0") + parseInt(form.tahananP || "0")) || 0;
       let keamananKhususText = "Tidak ada hal yang dapat dilaporkan.";
-      if (totalTahanan > 0) {
+      if (form.keamananKhusus && form.keamananKhusus.trim()) {
+        keamananKhususText = form.keamananKhusus.trim();
+      } else if (totalTahanan > 0) {
         keamananKhususText = `Jumlah tahanan di Rutan Polsek Tembalang:
 Tahanan laki-laki : ${form.tahananL || "0"}
 Tahanan perempuan : ${form.tahananP || "0"}
@@ -631,7 +633,7 @@ ${form.sosbud || "Tidak ada hal yang dapat dilaporkan."}
 ---
 
 *D. Sosial Keamanan:*
-[ISI_SOSIAL_KEAMANAN]
+${form.sosialKeamanan && form.sosialKeamanan.trim() ? form.sosialKeamanan.trim() : "[ISI_SOSIAL_KEAMANAN]"}
 
 ---
 
