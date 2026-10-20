@@ -524,6 +524,12 @@ Tahanan perempuan : ${form.tahananP || "0"}
 Total : ${totalTahanan}`;
       }
 
+      // Single-line value stays inline and bold; multi-line value (e.g. list of giat masyarakat) goes below the heading
+      const rencanaLine = (label: string, value?: string) => {
+        const v = (value || "NIHIL").trim();
+        return v.includes("\n") ? `*${label}:*\n${v}` : `*${label}: ${v}*`;
+      };
+
       systemPrompt = `Anda adalah asisten AI profesional pembuat Laporan Harian Situasi Kamtibmas (Laporan Harian) resmi untuk Polsek Tembalang, Polrestabes Semarang, Jawa Tengah.
 Tugas Anda adalah merangkai dan menghasilkan teks laporan harian lengkap (isi_laporan) berbahasa Indonesia berdasarkan formulir masukan terstruktur yang disediakan dan data tidak terstruktur yang diunggah pengguna (transkrip, analisa gambar rundown, teks PDF, catatan user).
 
@@ -730,13 +736,13 @@ Hari    : ${form.rencanaHari || ""}
 
 Tanggal : ${form.rencanaTanggal || ""}
 
-*A. Unras : ${form.rencanaUnras || "NIHIL"}*
+${rencanaLine("A. Unras ", form.rencanaUnras)}
 
-*B. Giat Menonjol : ${form.rencanaGiatMenonjol || "NIHIL"}*
+${rencanaLine("B. Giat Menonjol ", form.rencanaGiatMenonjol)}
 
-*C. Politik : ${form.rencanaPolitik || "NIHIL"}*
+${rencanaLine("C. Politik ", form.rencanaPolitik)}
 
-*D. Giat Masyarakat: ${form.rencanaGiatMasyarakat || "NIHIL"}*
+${rencanaLine("D. Giat Masyarakat", form.rencanaGiatMasyarakat)}
 
 *E. Kegiatan Personil:*
 1. ${form.rencanaPersonil1 || "Melaksanakan pam dan monitoring giat masyarakat di wilayah hukum Polsek Tembalang."}
@@ -1158,7 +1164,8 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
           ],
           response_format: { type: "json_object" },
           temperature: 0.3,
-          max_tokens: 8192,
+          // Long Laporan Situasi (many sosbud items) easily exceeds 8k output tokens and gets cut off
+          max_tokens: 32768,
         });
         break; // Success! Break out of loop
       } catch (err: any) {
@@ -1174,6 +1181,10 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
 
     if (!response) {
       throw new Error("Gagal menerima respons dari Gemini API.");
+    }
+
+    if (response.choices[0].finish_reason === "length") {
+      console.warn(`[Gemini API] Output truncated by max_tokens for template: ${templateType}`);
     }
 
     const resultText = response.choices[0].message.content || "{}";
