@@ -125,6 +125,14 @@ function parsePatrol(block: Line[], prefix: "patroliSiang" | "patroliMalam", out
   }
 }
 
+// True when the text is already a structured Laporan Situasi (has the A. Politik, C. Sosial Budaya
+// and D. Sosial Keamanan headings every real report carries). A free-form paste — patrol, prisoners
+// and activities mixed together — returns false and needs AI sorting instead of this parser.
+export function hasLaporanHeadings(text: string): boolean {
+  const lines = toLines(text);
+  return [/^A\.\s*Politik/i, /^C\.\s*Sosial Budaya/i, /^D\.\s*Sosial Keamanan/i].every((re) => findIndex(lines, re) !== -1);
+}
+
 export function parseLaporanHarianText(text: string): Record<string, string> {
   const lines = toLines(text);
   const out: Record<string, string> = {};

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { Sparkles, Sun, Moon, AlertCircle, FileText, ChevronRight, X, Volume2, Image as ImageIcon, PenTool, History, Check, Download, Copy, Clock, Search, Trash2, Eye, Sliders, FileSpreadsheet, Zap, GripVertical, Pencil } from "lucide-react";
@@ -12,7 +12,7 @@ import ProcessingModal, { ProcessingStep, StepId } from "./ProcessingModal";
 import ReportPreview from "./ReportPreview";
 import SaranInput from "./SaranInput";
 import { exportReportToPdfClient } from "@/lib/clientPdfExport";
-import { parseLaporanHarianText } from "@/lib/parseLaporanHarian";
+import { parseLaporanHarianText, hasLaporanHeadings } from "@/lib/parseLaporanHarian";
 // import VoiceAssistant from "./VoiceAssistant";
 
 interface Toast {
@@ -1234,16 +1234,59 @@ Tembusan:
 
   // Paste a complete Laporan Harian Situasi text and distribute it into the form fields
   const [pastedLaporanHarian, setPastedLaporanHarian] = useState("");
-  const applyPastedLaporanHarian = (text: string) => {
-    if (!text.trim()) return;
+  const [isSortingPaste, setIsSortingPaste] = useState(false);
+  const sortingPasteRef = useRef(false);
+  const applyPastedLaporanHarian = async (text: string) => {
+    if (!text.trim() || sortingPasteRef.current) return;
     const parsed = parseLaporanHarianText(text);
-    const count = Object.keys(parsed).length;
-    if (count === 0) {
-      addToast("Format laporan tidak dikenali. Pastikan menyalin Laporan Situasi lengkap.", "error");
+
+    // Laporan yang sudah berstruktur (ada heading A/C/D): salin persis lewat parser aturan baku, tanpa AI.
+    if (hasLaporanHeadings(text)) {
+      const count = Object.keys(parsed).length;
+      if (count === 0) {
+        addToast("Format laporan tidak dikenali. Pastikan menyalin Laporan Situasi lengkap.", "error");
+        return;
+      }
+      setLaporanHarianForm((prev) => ({ ...prev, ...parsed }));
+      addToast(`${count} kolom Laporan Harian Situasi terisi otomatis dari teks tempelan.`, "success");
       return;
     }
-    setLaporanHarianForm((prev) => ({ ...prev, ...parsed }));
-    addToast(`${count} kolom Laporan Harian Situasi terisi otomatis dari teks tempelan.`, "success");
+
+    // Teks bercampur/belum berstruktur (patroli, tahanan, kegiatan, dll.): AI memilah ke kolom yang tepat.
+    sortingPasteRef.current = true;
+    setIsSortingPaste(true);
+    addToast("Teks belum berstruktur — AI sedang memilah isinya ke kolom yang tepat…", "info");
+    try {
+      const res = await fetch("/api/generate-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ templateType: "laporan-harian-autofill", scope: "tempel", userInput: text }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const ai = await res.json();
+
+      // Hanya nilai tidak kosong yang menimpa form (kolom tanpa data di teks tetap seperti semula);
+      // hasil parser aturan baku (salinan persis) didahulukan di atas hasil AI.
+      const sorted: Record<string, string> = {};
+      for (const [key, raw] of Object.entries(ai ?? {})) {
+        const v = typeof raw === "number" ? String(raw) : raw;
+        if (key in laporanHarianForm && typeof v === "string" && v.trim()) sorted[key] = v.trim();
+      }
+      const merged = { ...sorted, ...parsed };
+      const count = Object.keys(merged).length;
+      if (count === 0) {
+        addToast("AI tidak menemukan data laporan yang bisa dimasukkan ke kolom.", "error");
+        return;
+      }
+      setLaporanHarianForm((prev) => ({ ...prev, ...merged }));
+      addToast(`${count} kolom terisi — AI memilah isi tempelan. Periksa kembali tiap tab (Sosial Budaya, Patroli, dll.).`, "success");
+    } catch (err) {
+      console.error("Paste sort error:", err);
+      addToast(err instanceof Error && err.message ? `AI gagal memilah teks: ${err.message}` : "AI gagal memilah teks tempelan.", "error");
+    } finally {
+      sortingPasteRef.current = false;
+      setIsSortingPaste(false);
+    }
   };
 
   // Live-recording transcript lands directly in the text notes field instead of going through
@@ -2002,7 +2045,7 @@ Tembusan:
                           Tempel Laporan Situasi Lengkap
                         </h4>
                         <p className="text-[10px] md:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-                          Paste teks Laporan Situasi (dari WhatsApp) di sini, seluruh kolom di bawah akan terisi otomatis.
+                          Paste teks Laporan Situasi (dari WhatsApp) di sini, seluruh kolom di bawah akan terisi otomatis. Jika isinya bercampur/belum rapi (patroli, tahanan, kegiatan, dll.), AI akan memilahnya ke kolom yang tepat.
                         </p>
                       </div>
                     </div>
@@ -2021,10 +2064,10 @@ Tembusan:
                       <button
                         type="button"
                         onClick={() => applyPastedLaporanHarian(pastedLaporanHarian)}
-                        disabled={!pastedLaporanHarian.trim()}
+                        disabled={!pastedLaporanHarian.trim() || isSortingPaste}
                         className="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                       >
-                        Isi Kolom Otomatis
+                        {isSortingPaste ? "AI sedang memilah…" : "Isi Kolom Otomatis"}
                       </button>
                       {pastedLaporanHarian && (
                         <button

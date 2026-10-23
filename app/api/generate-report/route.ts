@@ -992,6 +992,24 @@ PENTING - ATURAN FORMAT JSON:
         jsonSchema = `{
   "rencanaHari": "...", "rencanaTanggal": "...", "rencanaWaktu": "...", "rencanaSasaran": "...", "rencanaKegiatan": "...", "rencanaHasil": "...", "rencanaKeterangan": "..."
 }`;
+      } else if (scope === "tempel") {
+        // Teks tempelan yang belum berstruktur (patroli, tahanan, kegiatan, dll. bercampur): AI memilah ke kolom form.
+        // Prompt khusus ditimpa di bawah karena ketentuan default umum (harga/"Tidak ada hal...") bertentangan di sini.
+        scopeInstructions = "";
+        jsonSchema = `{
+  "hari": "", "tanggal": "", "waktu": "",
+  "politik": "", "sosbud": "", "sosialKeamanan": "",
+  "kriminalitas": "", "lakaLantas": "", "tahananL": "", "tahananP": "", "bencanaAlam": "", "vvip": "", "catatan": "",
+  "berasMin": "", "berasMax": "", "kedelaiMin": "", "kedelaiMax": "",
+  "cabaiBesarMin": "", "cabaiBesarMax": "", "cabaiRawitMin": "", "cabaiRawitMax": "", "cabaiTamparMin": "", "cabaiTamparMax": "",
+  "bawangMerahMin": "", "bawangMerahMax": "", "bawangPutihMin": "", "bawangPutihMax": "",
+  "jagungMin": "", "jagungMax": "", "gulaMin": "", "gulaMax": "", "minyakMin": "", "minyakMax": "", "teriguMin": "", "teriguMax": "",
+  "dagingSapiMin": "", "dagingSapiMax": "", "dagingAyamMin": "", "dagingAyamMax": "", "telurMin": "", "telurMax": "",
+  "garamMin": "", "garamMax": "", "lpgMin": "", "lpgMax": "",
+  "patroliSiangWaktu": "", "patroliSiangCuaca": "", "patroliSiangPersonil": "", "patroliSiangSasaran": "", "patroliSiangRute": "", "patroliSiangHasil": "",
+  "patroliMalamWaktu": "", "patroliMalamCuaca": "", "patroliMalamPersonil": "", "patroliMalamSasaran": "", "patroliMalamRute": "", "patroliMalamHasil": "",
+  "rencanaHari": "", "rencanaTanggal": "", "rencanaUnras": "", "rencanaGiatMenonjol": "", "rencanaPolitik": "", "rencanaGiatMasyarakat": ""
+}`;
       } else {
         scopeInstructions = `Ekstrak seluruh informasi laporan harian secara lengkap. PENTING UNTUK BIDANG SOSIAL BUDAYA ('sosbud'): Anda WAJIB mengekstrak SELURUH topik/kegiatan sosial budaya yang ada pada masukan pengguna tanpa ada yang terlewat (contoh: jika ada 3 kegiatan utama, sertakan ketiga-tiganya dengan penomoran urut 1., 2., 3.). Pindai seluruh teks masukan sampai selesai dan DILARANG KERAS terhenti pada topik pertama meskipun topik pertama memiliki rincian rundown jam yang panjang.`;
         jsonSchema = `{
@@ -1065,6 +1083,37 @@ ${jsonSchema}
 PENTING - ATURAN FORMAT JSON:
 1. JANGAN PERNAH menggunakan enter atau baris baru fisik di dalam nilai string JSON. Semua baris baru wajib ditulis menggunakan karakter escape '\\n'.
 2. JANGAN PERNAH menggunakan tanda kutip ganda mentah (") di dalam nilai string JSON. Jika ingin menulis kutipan, gunakan tanda kutip tunggal (') saja.`;
+
+      if (scope === "tempel") {
+        systemPrompt = `Anda adalah asisten AI yang memilah teks laporan kepolisian Polsek Tembalang yang bercampur-aduk ke dalam kolom formulir Laporan Harian Situasi (LHS).
+
+Masukan pengguna adalah teks tempelan yang BELUM tersusun rapi: berbagai jenis informasi (patroli, tahanan, kriminalitas, kecelakaan, kegiatan masyarakat/sosial budaya, unjuk rasa, VVIP, rencana kegiatan, dll.) bercampur dan terpecah-pecah, tanpa judul bagian yang jelas. Tugas Anda: BACA SELURUH TEKS SAMPAI AKHIR, klasifikasikan setiap potongan informasi, lalu tempatkan ke kolom yang tepat.
+
+${calendarContext}
+
+PANDUAN KLASIFIKASI KOLOM:
+- politik: kegiatan/isu politik (partai, pemilu/pilkada, DPRD, deklarasi, kunjungan tokoh politik).
+- sosbud (Sosial Budaya): SEMUA kegiatan masyarakat yang bukan politik dan bukan gangguan keamanan: keagamaan (misa, ibadah, pengajian, haul, perayaan hari besar), pendidikan/akademik (kuliah umum, seminar, PMB, wisuda, sosialisasi, diskusi, kajian), kemasyarakatan (bakti sosial, kerja bakti, hajatan, pertemuan warga), seni budaya, olahraga, festival. Kegiatan berjudul "Monitoring dan Pengamanan Kegiatan ..." hampir selalu masuk sosbud, kecuali berupa unjuk rasa/politik.
+- sosialKeamanan: gangguan sosial yang melibatkan massa: unjuk rasa/unras, eksekusi/pengosongan lahan, sengketa, konflik antarwarga, tawuran.
+- kriminalitas: tindak pidana (pencurian, penganiayaan, narkoba, penipuan, dll.). lakaLantas: kecelakaan lalu lintas. bencanaAlam: banjir, longsor, pohon tumbang, dll. vvip: kunjungan/pengawalan pejabat VVIP/VIP.
+- tahananL / tahananP: JUMLAH tahanan laki-laki / perempuan di rutan, hanya angka (contoh "4"). Jika hanya ada total tanpa rincian, isi tahananL dengan total dan tahananP "0".
+- patroliSiang* / patroliMalam*: data patroli BLP siang (sekitar pukul 11.00) dan malam (sekitar 22.00): waktu, cuaca, personil, sasaran, rute, hasil giat. Pisahkan siang dan malam dengan benar.
+- harga komoditas (xxxMin = harga terendah, xxxMax = harga tertinggi): tulis seperti di teks dengan titik ribuan (contoh "15.000"). Jangan tertukar Min dan Max.
+- hari, tanggal, waktu: hari dan tanggal pelaksanaan laporan jika disebut. catatan: kalimat catatan/kesimpulan umum jika ada. rencana*: rencana kegiatan hari berikutnya jika ada.
+
+ATURAN KETAT:
+1. JANGAN MENGARANG. Hanya gunakan informasi yang ADA di teks. Kolom yang tidak ada informasinya WAJIB berupa string kosong "" — JANGAN mengisi "Tidak ada hal yang dapat dilaporkan", dan JANGAN mengisi nilai default apa pun.
+2. SALIN redaksi ASLI teks: jangan meringkas, jangan mengubah nama, angka, jam, tempat, atau nomor surat perintah. Anda hanya boleh merapikan penomoran dan baris. Pertahankan tanda * dan _ yang sudah ada di teks asli.
+3. Satu informasi cukup ditempatkan di SATU kolom (jangan diduplikasi). Jika ragu antara dua kolom, pilih yang paling sesuai maknanya.
+4. Jika satu kolom memuat beberapa kegiatan, beri penomoran 1., 2., 3. dan WAJIB memuat SEMUA kegiatan tanpa terlewat — jangan berhenti di kegiatan pertama dan jangan terkecoh penomoran jam rundown di dalam suatu kegiatan.
+
+Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
+${jsonSchema}
+
+PENTING - ATURAN FORMAT JSON:
+1. JANGAN PERNAH menggunakan enter atau baris baru fisik di dalam nilai string JSON. Semua baris baru wajib ditulis menggunakan karakter escape '\\n'.
+2. JANGAN PERNAH menggunakan tanda kutip ganda mentah (") di dalam nilai string JSON. Jika ingin menulis kutipan, gunakan tanda kutip tunggal (') saja.`;
+      }
     } else {
       systemPrompt = `Anda adalah asisten AI profesional pembuat laporan dinas resmi dan korporat berbahasa Indonesia.
 Tugas Anda adalah membuat isi laporan resmi formal bahasa Indonesia berdasarkan hasil transkrip audio, analisis gambar rundown acara, isi guidebook PDF panduan acara, dan catatan user. Gunakan gaya bahasa profesional, singkat, jelas, dan format sesuai laporan dinas resmi (EYD yang disempurnakan, sopan, objektif, dan bernada formal).
