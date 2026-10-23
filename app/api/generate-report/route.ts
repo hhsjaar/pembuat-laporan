@@ -4,6 +4,22 @@ import { ambilAcuan, blokAcuanPrompt, type Acuan } from "@/lib/dataik";
 
 export const runtime = "nodejs";
 
+// Format baku bagian "C. Sosial Budaya" pada Laporan Harian Situasi (mengikuti laporan jadi Polsek Tembalang).
+// Dipakai bersama oleh pemilah tempelan (scope "tempel"), tombol AI tab Sosial Budaya, dan penyusunan laporan akhir.
+const SOSBUD_FORMAT_GUIDE = `FORMAT BAGIAN SOSIAL BUDAYA (WAJIB, ikuti persis gaya laporan jadi Polsek Tembalang):
+- Setiap kegiatan diberi nomor urut "1.", "2.", "3." diikuti JUDUL tebal WhatsApp (diapit satu tanda *, contoh: *Judul Kegiatan*).
+- JUDUL memakai Title Case: SETIAP KATA diawali huruf kapital (termasuk Di, Dan, Dalam, Yang, Antar). Singkatan/akronim tetap kapital semua (UNDIP, PORPROV, PLN, XVII) dan nama kegiatan/angka ditulis seperti aslinya. Judul LANGSUNG menyebut kegiatan beserta lokasinya — DILARANG memakai awalan "Pengamanan Dan Monitoring", "Monitoring Dan Pengamanan", "Pengamanan", atau "Monitoring". Contoh: *Lanjutan Turnamen Futsal Public Cup 2026 Di UNDIP International Futsal Stadium Jl. Prof. Soedarto, Bulusan, Kec. Tembalang, Kota Semarang*
+- Rincian tiap kegiatan memakai butir huruf KECIL "a.", "b.", "c." dst (BUKAN huruf kapital A., B., C.). Isi butir diurutkan seperti berikut. Urutan ini HANYA panduan isi — JANGAN menuliskan kata labelnya ("Pelaksanaan:", "Rincian acara:", "Pengamanan:", "Hasil:", "Penutup:") di hasil; setelah "a.", "b.", dst LANGSUNG tulis kalimat isinya, seperti "a. Pada hari Minggu tanggal ... pukul ... WIB bertempat di ...".
+  a. Isi pelaksanaan: "Pada hari ... tanggal ... pukul ... WIB bertempat di ... sedang/telah berlangsung ... yang diselenggarakan oleh ... dengan Penanggungjawab Sdr. ... selaku ...".
+  b. Isi rincian acara: durasi/jadwal, jumlah peserta/tim, tema, biaya/hadiah, sponsor, susunan panitia, ketentuan peserta/penonton, pembagian grup, dan data pendukung lain yang ada di teks.
+  c. Isi pengamanan: mekanisme pengamanan internal panitia (misal body checking), jumlah personil Polsek Tembalang, dan dasar pengamanan (nomor & tanggal Surat Perintah/Sprin — salin nomor persis seperti di teks).
+  d. Isi hasil/jalannya kegiatan (hasil pertandingan, jadwal lanjutan, rangkaian acara) dengan sub-butir "1)", "2)" dan "a)", "b)" bila perlu.
+  e. Kalimat penutup, misal: "Selama kegiatan berlangsung dengan aman terkendali, kejadian menonjol nihil." (sesuaikan dengan fakta di teks; bila disebut ada kejadian, tuliskan).
+  Daftar bersarang DI DALAM sebuah butir selalu memakai "1)", "2)", lalu "a)", "b)" — ubah penomoran "1.", "2." atau simbol "-"/"•" dari teks sumber menjadi bentuk ini (contoh: "d. Hasil pertandingan sebagai berikut:" lalu "1) Pertandingan Semi Final:" lalu "a) Tim A vs Tim B skor 40:55.").
+  Boleh menambah butir f., g., dst bila kegiatan lebih rumit. JANGAN menghilangkan satu pun fakta dari teks sumber (nama, angka, jam, tempat, skor, nomor surat).
+- BUANG kop surat, kalimat pembuka/penutup, dan tanda tangan dari laporan sumber ("Kepada Yth", "Dari", "Perihal", "Dilaporkan dengan hormat kepada Komandan bahwa", "DUMP", "Hormat Kami", "Tembusan", nama penandatangan) — jangan masuk ke sosbud. Judul kegiatan diambil dari isi "Perihal" lalu dirapikan sesuai aturan judul di atas.
+- Pisahkan antar kegiatan dan antar butir dengan satu baris kosong.`;
+
 // --- DYNAMIC CALENDAR CORRECTOR HELPERS ---
 
 function getCorrectWeekdayIndo(dayNameMatched: string, dateNum: number, monthName: string, yearNum: number): string {
@@ -111,6 +127,15 @@ function normalizeReportTextNewlines(obj: any): any {
 }
 
 
+
+// Pastikan ada satu baris kosong (a) sebelum judul kegiatan bernomor berhuruf tebal (mis. "2. *Judul*") dan
+// (b) sebelum tiap butir huruf kecil "a." s.d. "h.", seperti pada laporan jadi — walau AI lupa menyisipkannya.
+// Sub-butir bersarang "1)", "a)" sengaja tidak disentuh.
+function spasiAntarKegiatanSosbud(text: string): string {
+  return text
+    .replace(/([^\n])\n(\d+\.\s+\*[^*\n])/g, "$1\n\n$2")
+    .replace(/([^\n])\n([a-h]\.\s+\S)/g, "$1\n\n$2");
+}
 
 function sanitizeJsonString(str: string): string {
   // Normalize line endings
@@ -764,14 +789,14 @@ Aturan Penulisan & Pengisian:
 3. Jika ADA peristiwa politik, sosial budaya (perayaan ibadah, misa, haul), sosial keamanan (eksekusi lahan, unras), kegiatan VVIP (kunjungan walikota, gubernur), jelaskan secara detail dan komprehensif memakai diksi intelkam resmi yang luwes dan dinamis (tidak monoton/stiff/robotik).
 4. Untuk [KAPOLSEK_NAMA], selalu gunakan nama "KOMPOL KRISTIYASTUTI HANDAYANI, S.H., M.H." (Jangan pernah menggunakan nama KOMPOL WAHDAH M., S.H., S.I.K. untuk template Laporan Harian ini).
 5. Untuk bagian *C. Sosial Budaya*, jika ada kegiatan, Anda WAJIB mengekstrak SELURUH topik/kegiatan sosial budaya yang ada pada masukan pengguna tanpa ada yang terlewat (contoh: jika ada 3 kegiatan utama seperti PMB Undip, Seminar Lemhannas, dan Sosialisasi Bawaslu, Anda WAJIB memuat narasi untuk KETIGA-TIGANYA!). Gunakan format penomoran:
-   1. [JUDUL KEGIATAN INDIKATIF PERTAMA] (dimulai dengan *_Monitoring Dan Pengamanan Kegiatan..._* atau sejenisnya, tebal dan miring menggunakan *_ dan _*)
+   1. [JUDUL KEGIATAN PERTAMA] (tebal dengan satu tanda *, Title Case setiap kata diawali huruf kapital, LANGSUNG menyebut kegiatan dan lokasinya, TANPA awalan "Monitoring Dan Pengamanan"/"Pengamanan Dan Monitoring"; contoh: *Lanjutan Turnamen Futsal Public Cup 2026 Di UNDIP International Futsal Stadium Jl. Prof. Soedarto, Bulusan, Kec. Tembalang, Kota Semarang*)
    a. Rincian pelaksanaan, hari, tanggal, waktu, tempat, penyelenggara, pemateri/tokoh, jumlah jemaat/peserta.
    b. Dasar pengamanan (Undang-Undang No 2 Tahun 2002, surat perintah/sprin jika terdeteksi atau simulasikan nomor sprin logis yang valid).
    c. Jalannya pengamanan, situasi akhir, dan nihil kejadian menonjol.
    d. Dan seterusnya. Jika ada hal yang panjang dan kompleks yang mengharuskan ada poin E, F, dan seterusnya, eksekusilah, jangan terpatok pada poin A-D saja.
-   2. [JUDUL KEGIATAN INDIKATIF KEDUA] (*_Monitoring Dan Pengamanan Kegiatan..._*)
+   2. [JUDUL KEGIATAN KEDUA] (format judul sama seperti di atas: *Judul Title Case Tanpa Awalan Pengamanan/Monitoring*)
    a. Rincian pelaksanaan, dst.
-   3. [JUDUL KEGIATAN INDIKATIF KETIGA] (*_Monitoring Dan Pengamanan Kegiatan..._*)
+   3. [JUDUL KEGIATAN KETIGA] (format judul sama seperti di atas: *Judul Title Case Tanpa Awalan Pengamanan/Monitoring*)
    a. Rincian pelaksanaan, dst.
    PENTING: Pindai teks masukan sampai selesai! Jangan terkecoh oleh penomoran jam rundown internal (misal 1. Pukul 05.30 dst.) di dalam kegiatan pertama, pastikan seluruh Judul Kegiatan Utama (1, 2, 3, dst.) tercover semua!
 
@@ -977,7 +1002,9 @@ PENTING - ATURAN FORMAT JSON:
   "politik": "..."
 }`;
       } else if (scope === "sosbud") {
-        scopeInstructions = `Fokus HANYA pada informasi kegiatan Sosial Budaya (keagamaan, kemasyarakatan, aksi sosial, kuliah umum, dll.) di wilayah hukum Polsek Tembalang. Ekstrak SELURUH topik/kegiatan yang ada di masukan pengguna tanpa ada yang terlewat (misal: jika ada 3 kegiatan utama seperti PMB Undip, Seminar Lemhannas, dan Sosialisasi Bawaslu, WAJIB memuat KETIGA-TIGANYA!). PENTING: Pindai masukan hingga akhir dan jangan terkecoh oleh penomoran rundown jam internal (seperti 1. Pukul 05.30, 2. Pukul 07.30) di dalam rincian acara. Tetap temukan seluruh topik utama (1. Kegiatan..., 2. Kegiatan..., 3. Kegiatan...). Jika terdapat lebih dari 1 topik/kegiatan, WAJIB memberikan penomoran urut (1. ..., 2. ..., 3. ..., dst) untuk masing-masing topik. Tiru gaya bahasa referensi resmi kepolisian. Jika tidak ada informasi sosial budaya sama sekali, gunakan default 'Tidak ada hal yang dapat dilaporkan'.`;
+        scopeInstructions = `Fokus HANYA pada informasi kegiatan Sosial Budaya (keagamaan, kemasyarakatan, aksi sosial, kuliah umum, dll.) di wilayah hukum Polsek Tembalang. Ekstrak SELURUH topik/kegiatan yang ada di masukan pengguna tanpa ada yang terlewat (misal: jika ada 3 kegiatan utama seperti PMB Undip, Seminar Lemhannas, dan Sosialisasi Bawaslu, WAJIB memuat KETIGA-TIGANYA!). PENTING: Pindai masukan hingga akhir dan jangan terkecoh oleh penomoran rundown jam internal (seperti 1. Pukul 05.30, 2. Pukul 07.30) di dalam rincian acara. Tetap temukan seluruh topik utama (1. Kegiatan..., 2. Kegiatan..., 3. Kegiatan...). Jika terdapat lebih dari 1 topik/kegiatan, WAJIB memberikan penomoran urut (1. ..., 2. ..., 3. ..., dst) untuk masing-masing topik. Tiru gaya bahasa referensi resmi kepolisian. Jika tidak ada informasi sosial budaya sama sekali, gunakan default 'Tidak ada hal yang dapat dilaporkan'.
+
+${SOSBUD_FORMAT_GUIDE}`;
         jsonSchema = `{
   "sosbud": "..."
 }`;
@@ -1103,9 +1130,11 @@ PANDUAN KLASIFIKASI KOLOM:
 
 ATURAN KETAT:
 1. JANGAN MENGARANG. Hanya gunakan informasi yang ADA di teks. Kolom yang tidak ada informasinya WAJIB berupa string kosong "" — JANGAN mengisi "Tidak ada hal yang dapat dilaporkan", dan JANGAN mengisi nilai default apa pun.
-2. SALIN redaksi ASLI teks: jangan meringkas, jangan mengubah nama, angka, jam, tempat, atau nomor surat perintah. Anda hanya boleh merapikan penomoran dan baris. Pertahankan tanda * dan _ yang sudah ada di teks asli.
+2. Untuk SEMUA kolom: jangan meringkas dan jangan mengubah nama, angka, jam, tempat, skor, atau nomor surat perintah. Khusus kolom sosbud, SUSUN ULANG isinya ke FORMAT BAGIAN SOSIAL BUDAYA di bawah (judul Title Case tanpa awalan Pengamanan/Monitoring, butir a./b./c.). Untuk kolom lain, salin redaksi asli (boleh merapikan penomoran dan baris, pertahankan tanda * dan _ yang sudah ada).
 3. Satu informasi cukup ditempatkan di SATU kolom (jangan diduplikasi). Jika ragu antara dua kolom, pilih yang paling sesuai maknanya.
 4. Jika satu kolom memuat beberapa kegiatan, beri penomoran 1., 2., 3. dan WAJIB memuat SEMUA kegiatan tanpa terlewat — jangan berhenti di kegiatan pertama dan jangan terkecoh penomoran jam rundown di dalam suatu kegiatan.
+
+${SOSBUD_FORMAT_GUIDE}
 
 Anda wajib mengembalikan respons dalam format JSON yang valid dengan skema berikut:
 ${jsonSchema}
@@ -1291,6 +1320,10 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
 
     // Normalize all text newlines and split glued numbered list markers
     reportData = normalizeReportTextNewlines(reportData);
+
+    if (templateType === "laporan-harian-autofill" && reportData && typeof reportData.sosbud === "string") {
+      reportData.sosbud = spasiAntarKegiatanSosbud(reportData.sosbud);
+    }
 
     // Samakan sisa ejaan nama/lokasi dengan penulisan baku Data IK
     reportData = terapkanEjaanBaku(reportData, acuanBaku);
