@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { FileText, Upload, Trash2, CheckCircle2 } from "lucide-react";
+import { MAX_PDF_SIZE_BYTES, MAX_PDF_SIZE_MB } from "@/lib/clientPdfText";
 
 interface PdfUploaderProps {
   pdfFile: File | null;
@@ -25,8 +26,8 @@ export default function PdfUploader({ pdfFile, onChange, onError }: PdfUploaderP
 
   const processFile = (file: File) => {
     if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-      if (file.size > 4 * 1024 * 1024) {
-        const errMsg = "Ukuran berkas PDF melebihi batas 4MB untuk hosting Vercel. Silakan unggah berkas yang lebih kecil.";
+      if (file.size > MAX_PDF_SIZE_BYTES) {
+        const errMsg = `Ukuran berkas PDF melebihi batas ${MAX_PDF_SIZE_MB}MB. Silakan unggah berkas yang lebih kecil.`;
         if (onError) {
           onError(errMsg);
         } else {
@@ -97,7 +98,7 @@ export default function PdfUploader({ pdfFile, onChange, onError }: PdfUploaderP
                 Unggah Panduan Acara (PDF)
               </p>
               <p className="text-xs text-neutral-400 dark:text-neutral-500">
-                Format berkas PDF hingga 10MB
+                Format berkas PDF hingga {MAX_PDF_SIZE_MB}MB
               </p>
             </div>
           </div>

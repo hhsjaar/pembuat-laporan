@@ -12,6 +12,7 @@ import ProcessingModal, { ProcessingStep, StepId } from "./ProcessingModal";
 import ReportPreview from "./ReportPreview";
 import SaranInput from "./SaranInput";
 import { exportReportToPdfClient } from "@/lib/clientPdfExport";
+import { extractPdfText, MAX_PDF_SIZE_BYTES, MAX_PDF_SIZE_MB } from "@/lib/clientPdfText";
 import { parseLaporanHarianText, hasLaporanHeadings } from "@/lib/parseLaporanHarian";
 // import VoiceAssistant from "./VoiceAssistant";
 
@@ -1571,8 +1572,8 @@ Tembusan:
       return;
     }
 
-    if (pdfFile && pdfFile.size > 4.2 * 1024 * 1024) {
-      addToast("Ukuran berkas PDF melebihi batas 4.2MB untuk hosting Vercel. Silakan gunakan berkas PDF yang lebih kecil.", "error");
+    if (pdfFile && pdfFile.size > MAX_PDF_SIZE_BYTES) {
+      addToast(`Ukuran berkas PDF melebihi batas ${MAX_PDF_SIZE_MB}MB. Silakan gunakan berkas PDF yang lebih kecil.`, "error");
       return;
     }
 
@@ -1636,32 +1637,13 @@ Tembusan:
       // STEP 2: PDF Guidebook Parsing
       if (pdfFile) {
         updateStepStatus("parse-pdf", "running");
-        const pdfFormData = new FormData();
-        pdfFormData.append("file", pdfFile);
-
-        const pdfRes = await fetch("/api/parse-pdf", {
-          method: "POST",
-          body: pdfFormData,
-        });
-
-        if (!pdfRes.ok) {
-          let errorMessage = "Gagal melakukan ekstraksi teks berkas PDF.";
-          try {
-            const errData = await pdfRes.json();
-            errorMessage = errData.error || errorMessage;
-          } catch {
-            try {
-              const errText = await pdfRes.text();
-              errorMessage = errText || `Error ${pdfRes.status}: ${pdfRes.statusText}`;
-            } catch {
-              errorMessage = `Error ${pdfRes.status}: ${pdfRes.statusText}`;
-            }
-          }
-          throw new Error(errorMessage);
+        // Ekstraksi di browser agar PDF besar tidak terkena limit body request Vercel
+        try {
+          pdfText = await extractPdfText(pdfFile);
+        } catch (err) {
+          console.error("PDF extraction error:", err);
+          throw new Error("Gagal melakukan ekstraksi teks berkas PDF. Pastikan berkas tidak rusak atau terkunci kata sandi.");
         }
-
-        const data = await pdfRes.json();
-        pdfText = data.text;
         updateStepStatus("parse-pdf", "success");
       } else {
         updateStepStatus("parse-pdf", "success"); // Skip gracefully
