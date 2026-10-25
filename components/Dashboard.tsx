@@ -1638,11 +1638,24 @@ Tembusan:
       if (pdfFile) {
         updateStepStatus("parse-pdf", "running");
         // Ekstraksi di browser agar PDF besar tidak terkena limit body request Vercel
+        const setPdfStepDescription = (description: string) =>
+          setSteps((prev) => prev.map((s) => (s.id === "parse-pdf" ? { ...s, description } : s)));
         try {
-          pdfText = await extractPdfText(pdfFile);
+          const pdfResult = await extractPdfText(pdfFile, (page, total) =>
+            setPdfStepDescription(`Membaca halaman ${page} dari ${total}...`)
+          );
+          pdfText = pdfResult.text;
+          if (pdfResult.truncated) {
+            addToast(
+              `Teks PDF sangat panjang, hanya ${pdfResult.extractedPages} dari ${pdfResult.totalPages} halaman pertama yang dipakai AI.`,
+              "info"
+            );
+          }
         } catch (err) {
           console.error("PDF extraction error:", err);
           throw new Error("Gagal melakukan ekstraksi teks berkas PDF. Pastikan berkas tidak rusak atau terkunci kata sandi.");
+        } finally {
+          setPdfStepDescription(INITIAL_STEPS.find((s) => s.id === "parse-pdf")!.description);
         }
         updateStepStatus("parse-pdf", "success");
       } else {
