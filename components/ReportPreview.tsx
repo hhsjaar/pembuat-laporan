@@ -619,6 +619,18 @@ Tembusan:
                     className="bg-transparent border border-transparent hover:border-neutral-200 focus:border-accent hover:bg-neutral-50/50 focus:bg-neutral-50/50 rounded px-1 outline-none transition-all font-semibold text-neutral-800 w-full"
                   />
                 </div>
+                {reportData.nomor_sumber && (
+                  <p
+                    className={`-mt-3 text-[11px] font-sans font-medium ${
+                      reportData.nomor_sumber === "drive" ? "text-emerald-700" : "text-amber-700"
+                    }`}
+                  >
+                    {reportData.nomor_sumber === "drive"
+                      ? "✓ Nomor otomatis dari Google Drive. "
+                      : "⚠ Nomor perkiraan — Drive belum terbaca, mohon periksa & isi nomor manual. "}
+                    {reportData.nomor_catatan}
+                  </p>
+                )}
                 <div className="text-center my-6">
                   <h2 className="font-bold tracking-wide text-neutral-955 uppercase underline inline-block pb-0.5" style={{ fontSize: "14pt" }}>
                     LAPORAN HARIAN INTELIJEN

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { geminiClient } from "@/lib/gemini";
 import { ambilAcuan, blokAcuanPrompt, type Acuan } from "@/lib/dataik";
+import { getNextNomor } from "@/lib/nomorLaporan";
 
 export const runtime = "nodejs";
 
@@ -1350,11 +1351,30 @@ Silakan buat laporan dinas resmi dengan detail faktual utuh sesuai masukan asli 
       
       const defaultPendahuluanKeamanan = `Situasi kamtibmas secara umum kondusif, namun deteksi dini terhadap gangguan jalanan kelompok remaja pada malam hari tetap diintensifkan. Di sisi lain, kewaspadaan terhadap ancaman terorisme tetap menjadi prioritas utama di mana penyebaran paham radikal kini masif memanfaatkan algoritma media sosial dan game online untuk mendoktrin anak-anak serta generasi muda secara mandiri.`;
 
-      if (!reportData.nomor_laporan) {
-        const romawiMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
-        const monthIndex = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"].indexOf(monthName.toLowerCase());
-        const romawi = romawiMonths[monthIndex !== -1 ? monthIndex : 6];
-        reportData.nomor_laporan = `R/LHI/199/${romawi}/REN.4.1.1./${yearNum}/Intelkam`;
+      // Nomor surat = nomor terakhir di Google Drive + 1 (angka lanjut per tahun,
+      // bulan romawi mengikuti tanggal laporan). Nomor buatan AI TIDAK dipakai
+      // kalau Drive berhasil dibaca; kalau Drive gagal, tetap pakai nomor
+      // perkiraan lama tapi ditandai supaya UI memperingatkan pengguna.
+      const romawiMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+      const monthIndex = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"].indexOf(monthName.toLowerCase());
+      const hasilNomor = await getNextNomor({
+        kode: "LHI",
+        bulan: monthIndex !== -1 ? monthIndex + 1 : 7,
+        tahun: Number(yearNum),
+      });
+      if (hasilNomor.ok) {
+        reportData.nomor_laporan = hasilNomor.nomor;
+        reportData.nomor_sumber = "drive";
+        reportData.nomor_catatan = hasilNomor.berkas
+          ? `Lanjutan dari nomor ${hasilNomor.terakhir} (${hasilNomor.berkas})`
+          : "Tahun baru, mulai dari nomor 1";
+      } else {
+        reportData.nomor_sumber = "perkiraan";
+        reportData.nomor_catatan = hasilNomor.alasan;
+        if (!reportData.nomor_laporan) {
+          const romawi = romawiMonths[monthIndex !== -1 ? monthIndex : 6];
+          reportData.nomor_laporan = `R/LHI/199/${romawi}/REN.4.1.1./${yearNum}/Intelkam`;
+        }
       }
       
       if (!reportData.hari) reportData.hari = defaultHari;
