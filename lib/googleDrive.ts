@@ -135,6 +135,24 @@ export async function listRecentFiles(folderId: string, limit = 12): Promise<Dri
   return files.slice(0, limit);
 }
 
+/**
+ * Berkas (bukan folder) yang namanya memuat `awalan`, terbaru dulu -- dari
+ * seluruh Drive yang terlihat oleh service account. Pencocokan "contains" Drive
+ * longgar, jadi pemanggil tetap harus menyaring ulang namanya.
+ */
+export async function cariBerkasByNama(awalan: string, limit = 50): Promise<DriveFile[]> {
+  if (!/^[A-Za-z]{1,20}$/.test(awalan)) throw new Error("Awalan nama berkas tidak valid.");
+  const res = await driveGet("/files", {
+    q: `name contains '${awalan}' and trashed = false and mimeType != '${MIME_FOLDER}'`,
+    orderBy: "modifiedTime desc",
+    pageSize: String(limit),
+    fields: "files(id,name,mimeType,modifiedTime)",
+    includeItemsFromAllDrives: "true",
+    corpora: "allDrives",
+  });
+  return ((await res.json()) as { files: DriveFile[] }).files ?? [];
+}
+
 function docxToText(buf: ArrayBuffer): string {
   const zip = new PizZip(buf);
   const xml = zip.file("word/document.xml")?.asText() ?? "";

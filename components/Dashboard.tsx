@@ -553,12 +553,14 @@ export default function Dashboard() {
     setTimeout(() => setIsCopiedHistoryId(null), 2000);
   };
 
-  const handleDownloadHistoryTxt = (item: any) => {
+  const handleDownloadHistoryTxt = async (item: any) => {
     try {
       const element = document.createElement("a");
       const file = new Blob([item.content], { type: 'text/plain;charset=utf-8' });
       element.href = URL.createObjectURL(file);
-      const filename = `${item.template_type}-${item.id.slice(0, 8)}.txt`;
+      const filename =
+        (await getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, { ...item.meta_data?.raw_report, perihal: item.perihal || item.meta_data?.raw_report?.perihal }, "txt")) ||
+        `${item.template_type}-${item.id.slice(0, 8)}.txt`;
       element.download = filename;
       document.body.appendChild(element);
       element.click();
@@ -593,7 +595,7 @@ export default function Dashboard() {
     return null;
   };
 
-  const getExportFilename = (type: string, createdAt?: string, reportData?: any, ext: "docx" | "pdf" = "docx") => {
+  const getExportFilename = async (type: string, createdAt?: string, reportData?: any, ext: "docx" | "pdf" | "txt" = "docx") => {
     let dateObj: Date | null = null;
 
     if (reportData) {
@@ -617,11 +619,35 @@ export default function Dashboard() {
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const year = String(dateObj.getFullYear()).slice(-2);
 
+    const perihalAsli = reportData?.perihal || reportData?.judul;
+
+    // Utamakan pola nama berkas sebelumnya di Google Drive (mis. "LAPHAR 25102026").
+    // Gagal / tidak terhubung / tidak ada contoh -> pakai nama bawaan di bawah.
+    try {
+      const res = await fetch("/api/nama-berkas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          templateType: type,
+          ext,
+          tanggal: `${dateObj.getFullYear()}-${month}-${day}`,
+          perihal: perihalAsli,
+        }),
+        signal: AbortSignal.timeout(4000),
+      });
+      if (res.ok) {
+        const { nama } = await res.json();
+        if (nama) return nama as string;
+      }
+    } catch {
+      // abaikan: lanjut ke nama bawaan
+    }
+
     if (type === "rencana-kegiatan") {
       return `REN-${day}${month}${year}.${ext}`;
     }
     if (type === "laporan-harian-intelijen") {
-      return `LAPHAR-${day}${month}${year}.${ext}`;
+      return `LAPHAR ${day}${month}${dateObj.getFullYear()}.${ext}`;
     }
 
     const sanitize = (text?: string) => {
@@ -630,16 +656,13 @@ export default function Dashboard() {
     };
 
     if (type === "laporan-informasi") {
-      const perihal = reportData?.perihal || reportData?.judul || "tanpa-perihal";
-      return `LI-${sanitize(perihal)}.${ext}`;
+      return `LI-${sanitize(perihalAsli)}.${ext}`;
     }
     if (type === "laporan-harian-khusus") {
-      const perihal = reportData?.perihal || reportData?.judul || "tanpa-perihal";
-      return `LAPHARSUS-${sanitize(perihal)}.${ext}`;
+      return `LAPHARSUS-${sanitize(perihalAsli)}.${ext}`;
     }
     if (type === "infosus") {
-      const perihal = reportData?.perihal || reportData?.judul || "tanpa-perihal";
-      return `INFOSUS-${sanitize(perihal)}.${ext}`;
+      return `INFOSUS-${sanitize(perihalAsli)}.${ext}`;
     }
 
     return null;
@@ -655,7 +678,7 @@ export default function Dashboard() {
     setIsDownloadingPdf(true);
     try {
       let filename = `${item.template_type}-${item.id.slice(0, 8)}.pdf`;
-      const customFilename = getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, rawReport, "pdf");
+      const customFilename = await getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, rawReport, "pdf");
       if (customFilename) {
         filename = customFilename;
       }
@@ -703,7 +726,7 @@ export default function Dashboard() {
       link.href = url;
       
       let filename = `${item.template_type}-${item.id.slice(0, 8)}.docx`;
-      const customFilename = getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, rawReport, "docx");
+      const customFilename = await getExportFilename(item.template_type, item.created_at || item.meta_data?.timestamp, rawReport, "docx");
       if (customFilename) {
         filename = customFilename;
       }
@@ -1818,7 +1841,7 @@ Tembusan:
       link.href = url;
       
       let filename = `${templateType}-${Date.now()}.docx`;
-      const customFilename = getExportFilename(templateType, undefined, reportData);
+      const customFilename = await getExportFilename(templateType, undefined, reportData);
       if (customFilename) {
         filename = customFilename;
       }
@@ -1862,7 +1885,7 @@ Tembusan:
 
     try {
       let filename = `${templateType}-${Date.now()}.pdf`;
-      const customFilename = getExportFilename(templateType, undefined, reportData, "pdf");
+      const customFilename = await getExportFilename(templateType, undefined, reportData, "pdf");
       if (customFilename) {
         filename = customFilename;
       }

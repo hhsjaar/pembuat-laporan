@@ -65,3 +65,12 @@ di nama dan isi berkas. PDF tidak dibaca.
 
 Catatan: nomor dihitung dari apa yang **sudah ada di Drive**. Dua laporan yang dibuat berurutan
 sebelum yang pertama diunggah ke Drive akan mendapat nomor yang sama.
+
+### Nama berkas mengikuti pola di Drive
+
+Saat laporan diunduh/disimpan (Word, PDF, atau .txt dari riwayat), nama berkas meniru berkas
+sebelumnya di Drive: awalan per jenis (`LAPHAR`, `REN`, `LI`, `LAPHARSUS`, `INFOSUS`), pemisah,
+format tanggal, dan panjang tahun dipelajari dari berkas terbaru dengan awalan yang sama
+(contoh: Drive berisi `LAPHAR 25102026` → hasilnya `LAPHAR 27102026.docx`). Tanggal yang dipakai
+adalah tanggal laporan. Kode: `lib/namaBerkas.ts`, endpoint `/api/nama-berkas`.
+Jika Drive tidak terhubung atau belum ada contoh, dipakai nama bawaan.
