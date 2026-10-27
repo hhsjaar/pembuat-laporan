@@ -59,7 +59,8 @@ di nama dan isi berkas. PDF tidak dibaca.
    | `GOOGLE_DRIVE_FOLDER_ID` | ID folder (bagian akhir URL `drive.google.com/drive/folders/<ID>`) |
    | `GOOGLE_DRIVE_FOLDER_ID_LHI` | opsional — kalau folder LHI berbeda dari folder default |
 
-5. Restart server. Di preview Laporan Harian Intelijen akan muncul "✓ Nomor otomatis dari Google Drive".
+5. Restart server (atau redeploy di Vercel). Cek cepat: buka `/api/drive-status` di browser — `terhubung: true` berarti beres,
+   `terhubung: false` disertai `alasan`. Di preview Laporan Harian Intelijen akan muncul "✓ Nomor otomatis dari Google Drive".
    Jika Drive belum terhubung/gagal dibaca, muncul peringatan oranye "Nomor perkiraan" beserta alasannya.
 
 Catatan: nomor dihitung dari apa yang **sudah ada di Drive**. Dua laporan yang dibuat berurutan
