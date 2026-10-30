@@ -19,9 +19,6 @@ export const LABEL_LAPORAN_WA: Record<string, string> = {
   "wa-kemajuan": "Laporan Kemajuan (WA)",
 };
 
-// Nama Penandatangan yang disimpan sebagai kapolsek_nama di riwayat (kolom wajib di tabel).
-export const PENANDATANGAN_WA = "KOMBES POL ERLIN TANG JAYA, S.H., S.I.K., M.H.";
-
 // Judul untuk daftar Riwayat.
 export function judulLaporanWa(type: WaTemplateType, data: Record<string, any>): string {
   if (type === "wa-kemajuan") {
@@ -32,6 +29,9 @@ export function judulLaporanWa(type: WaTemplateType, data: Record<string, any>):
   const ringkasan = teks(data.ringkasan_gangguan);
   return ringkasan !== KOSONG ? `Laporan Segera Gangguan Kamtibmas ${ringkasan}` : "Laporan Segera Gangguan Kamtibmas";
 }
+
+// Nama Penandatangan yang disimpan sebagai kapolsek_nama di riwayat (kolom wajib di tabel).
+export const PENANDATANGAN_WA = "KOMBES POL ERLIN TANG JAYA, S.H., S.I.K., M.H.";
 
 const KEPALA = `POLRESTABES SEMARANG
 
@@ -46,15 +46,11 @@ Tembusan:
 5. Kabid Propam Polda Jateng
 6. Dir/Kabid terkait`;
 
-// Penutup mengikuti contoh dari pengguna apa adanya (kalimat penutup & penandatangan berbeda di tiap jenis laporan).
-const PENUTUP_SEGERA = `Dump, Terima Kasih.
-
-KBP ERLIN TANG JAYA, SH., SIK., M.H.`;
-
-const PENUTUP_KEMAJUAN = `Dump, Terima Kasih.
+// Penutup & penandatangan sama untuk kedua jenis laporan.
+const PENUTUP = `Dump, Terima Kasih.
 
 KAPOLRESTABES SEMARANG
-KOMBES POL ERLIN TANG JAYA, S.H., S.I.K., M.H.`;
+${PENANDATANGAN_WA}`;
 
 // Skema JSON yang diminta dari AI untuk tiap jenis laporan.
 const SKEMA_SEGERA = `{
@@ -219,7 +215,7 @@ ${teks(data.tindakan_kepolisian)}
 15. *Keterangan Lain:*
 ${teks(data.keterangan_lain)}
 
-${PENUTUP_SEGERA}`;
+${PENUTUP}`;
   }
 
   return `${KEPALA}
@@ -247,5 +243,5 @@ ${daftarHuruf(data.keterangan_tersangka)}
 12. *Kerugian:* ${teks(data.kerugian)}
 13. *Kesatuan Yang Menangani:* ${teks(data.kesatuan_menangani)}
 
-${PENUTUP_KEMAJUAN}`;
+${PENUTUP}`;
 }
