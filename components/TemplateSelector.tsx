@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { Terminal, Activity, Radar, Shield, CheckCircle2, Zap, Eye, CalendarDays } from "lucide-react";
+import { Terminal, Activity, Radar, Shield, CheckCircle2, Zap, Eye, CalendarDays, Siren, TrendingUp } from "lucide-react";
+import type { WaTemplateType } from "@/lib/laporanWa";
 
-export type TemplateType = "laporan-informasi" | "laporan-kegiatan" | "laporan-harian-khusus" | "laporan-khusus-3" | "laporan-harian" | "infosus" | "laporan-harian-intelijen" | "rencana-kegiatan";
+export type TemplateType = "laporan-informasi" | "laporan-kegiatan" | "laporan-harian-khusus" | "laporan-khusus-3" | "laporan-harian" | "infosus" | "laporan-harian-intelijen" | "rencana-kegiatan" | WaTemplateType;
 
 interface TemplateSelectorProps {
   selected: TemplateType;
@@ -75,6 +76,24 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
       colSpan: "col-span-12 lg:col-span-4",
       aspectRatio: "h-16 sm:h-auto sm:aspect-[4/3]",
     },
+    {
+      id: "wa-segera-kamtibmas" as TemplateType,
+      title: "Laporan Segera Gangguan Kamtibmas (WA)",
+      icon: Siren,
+      color: "from-purple-500/10 to-indigo-500/10 text-purple-500 dark:text-purple-400",
+      borderColor: "hover:border-purple-500/30 selected:border-purple-500",
+      colSpan: "col-span-6 lg:col-span-6",
+      aspectRatio: "aspect-[4/3] sm:aspect-[8/3]",
+    },
+    {
+      id: "wa-kemajuan" as TemplateType,
+      title: "Laporan Kemajuan (WA)",
+      icon: TrendingUp,
+      color: "from-purple-500/10 to-indigo-500/10 text-purple-500 dark:text-purple-400",
+      borderColor: "hover:border-purple-500/30 selected:border-purple-500",
+      colSpan: "col-span-6 lg:col-span-6",
+      aspectRatio: "aspect-[4/3] sm:aspect-[8/3]",
+    },
   ];
 
   const selectedStyles: Record<TemplateType, string> = {
@@ -86,6 +105,8 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
     "infosus": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
     "laporan-harian-intelijen": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
     "rencana-kegiatan": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
+    "wa-segera-kamtibmas": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
+    "wa-kemajuan": "ring-3 ring-purple-500 dark:ring-purple-400 shadow-xl shadow-purple-500/10 bg-purple-50/10 dark:bg-purple-950/10 border-purple-500/30",
   };
 
   const checkColor: Record<TemplateType, string> = {
@@ -97,6 +118,8 @@ export default function TemplateSelector({ selected, onChange }: TemplateSelecto
     "infosus": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
     "laporan-harian-intelijen": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
     "rencana-kegiatan": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
+    "wa-segera-kamtibmas": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
+    "wa-kemajuan": "text-purple-600 dark:text-purple-400 fill-purple-500/20",
   };
 
   return (

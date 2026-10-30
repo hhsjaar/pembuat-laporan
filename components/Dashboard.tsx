@@ -10,6 +10,8 @@ import AudioUploader from "./AudioUploader";
 import PdfUploader from "./PdfUploader";
 import ProcessingModal, { ProcessingStep, StepId } from "./ProcessingModal";
 import ReportPreview from "./ReportPreview";
+import WaReportPanel from "./WaReportPanel";
+import { isWaTemplate } from "@/lib/laporanWa";
 import SaranInput from "./SaranInput";
 import { exportReportToPdfClient } from "@/lib/clientPdfExport";
 import { extractPdfText, MAX_PDF_SIZE_BYTES, MAX_PDF_SIZE_MB } from "@/lib/clientPdfText";
@@ -2033,7 +2035,9 @@ Tembusan:
                   Buat Laporan Otomatis dengan AI
                 </h2>
                 <p className="hidden sm:block text-sm sm:text-base text-neutral-500 dark:text-neutral-400 max-w-2xl leading-relaxed">
-                  Unggah rundown gambar, guidebook PDF panduan, rekaman sambutan suara, dan catatan teks. AI akan memformulasikan laporan resmi dinas yang dinamis, akurat, dan terstruktur ke format Microsoft Word (.docx).
+                  {isWaTemplate(templateType)
+                    ? "Tempel satu teks penuh berisi keterangan kejadian. AI akan memilah dan menyusunnya ke format laporan teks WhatsApp yang siap disalin."
+                    : "Unggah rundown gambar, guidebook PDF panduan, rekaman sambutan suara, dan catatan teks. AI akan memformulasikan laporan resmi dinas yang dinamis, akurat, dan terstruktur ke format Microsoft Word (.docx)."}
                 </p>
               </div>
 
@@ -2596,8 +2600,11 @@ Tembusan:
                 </div>
               )}
 
-              {/* Multi-Input Upload Grid Layout (Hidden for laporan-harian) */}
-              {templateType !== "laporan-harian" && (
+              {/* Laporan teks WhatsApp: satu kolom teks penuh, tanpa unggahan berkas */}
+              {isWaTemplate(templateType) && <WaReportPanel key={templateType} templateType={templateType} addToast={addToast} />}
+
+              {/* Multi-Input Upload Grid Layout (Hidden for laporan-harian & laporan WA) */}
+              {templateType !== "laporan-harian" && !isWaTemplate(templateType) && (
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
                     2. Masukkan Data Fakta Lapangan (Minimal Salah Satu)
@@ -2767,6 +2774,7 @@ Tembusan:
               )}
 
               {/* Box: Preferensi & Arahan Khusus (Opsional) */}
+              {!isWaTemplate(templateType) && (<>
               <div className="space-y-4 pt-2">
                 <h3 className="text-sm font-semibold tracking-tight text-neutral-400 dark:text-neutral-500 uppercase">
                   {templateType === "laporan-harian" ? "2. Preferensi & Arahan Khusus AI (Opsional)" : "3. Preferensi & Arahan Khusus AI (Opsional)"}
@@ -2799,6 +2807,7 @@ Tembusan:
                   <ChevronRight className="w-4.5 h-4.5 ml-1 opacity-80 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
+              </>)}
             </motion.div>
           ) : (
             /* Result Sheet Preview State */
