@@ -17,7 +17,7 @@ const COPY: Record<WaTemplateType, { judul: string; placeholder: string }> = {
   "wa-kemajuan": {
     judul: "Laporan Kemajuan",
     placeholder:
-      "Tempel seluruh perkembangan perkara dalam satu teks: nomor LP, peristiwa, periode, lokasi, fakta terbaru, penangkapan tersangka, keterangan tersangka, modus, motif, alat, kerugian, dll. AI akan memilah ke 13 poin laporan.",
+      "Tempel seluruh perkembangan perkara dalam satu teks: nomor LP, peristiwa, periode, lokasi, fakta terbaru, penangkapan tersangka, keterangan tersangka, modus, motif, alat, kerugian, dll. AI akan memilah ke 16 poin laporan.",
   },
 };
 

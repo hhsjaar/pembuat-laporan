@@ -69,7 +69,7 @@ const SKEMA_SEGERA = `{
   "alat_digunakan": "...",
   "kerugian": "...",
   "bukti_disita": "...",
-  "kesatuan_menangani": "...",
+  "satuan_tambahan": ["...", "..."],
   "tindakan_kepolisian": "...",
   "keterangan_lain": "..."
 }`;
@@ -81,10 +81,13 @@ const SKEMA_KEMAJUAN = `{
   "perkara": "...",
   "waktu": "...",
   "tempat_kejadian": "...",
+  "korban": ["...", "..."],
+  "saksi": ["...", "..."],
   "uraian_singkat": "...",
   "fakta_fakta": ["...", "..."],
   "penangkapan_tersangka": ["...", "..."],
   "keterangan_tersangka": ["...", "..."],
+  "barang_bukti": ["...", "..."],
   "modus_operandi": "...",
   "motif": "...",
   "alat_digunakan": "...",
@@ -99,11 +102,17 @@ export function buildWaSystemPrompt(type: WaTemplateType, hariIni: string): stri
   const aturanKhusus = isSegera
     ? `- "ringkasan_gangguan" dipakai dalam kalimat "Laporan Segera gangguan Kamtibmas <ringkasan_gangguan>": singkat (maks. 1 baris), memuat jenis gangguan dan lokasi/wilayahnya bila ada.
 - Waktu kejadian, dilaporkan, dan mendatangi TKP ditulis lengkap: "Hari, tanggal Bulan Tahun, pukul HH.MM WIB". Bila hanya sebagian yang disebut, tulis sebagian itu; bila tidak ada sama sekali tulis "${KOSONG}".
-- Bila ada beberapa korban/pelaku/saksi, tulis satu per baris dengan awalan "a. ", "b. ", dst. (pisahkan baris dengan \\n). Sertakan nama, umur, pekerjaan, dan alamat sejauh disebut di teks.`
-    : `- "fakta_fakta", "penangkapan_tersangka", dan "keterangan_tersangka" adalah ARRAY string; satu butir per elemen, TANPA awalan "a." / "b." (nomor huruf ditambahkan otomatis). Bila tidak ada informasi, isi dengan array berisi satu elemen "${KOSONG}".
+- Bila ada beberapa korban/pelaku/saksi, tulis satu per baris dengan awalan "a. ", "b. ", dst. (pisahkan baris dengan \\n). Sertakan nama, umur, pekerjaan, dan alamat sejauh disebut di teks.
+- "satuan_tambahan" (untuk poin Kesatuan Yang Menangani) adalah ARRAY berisi nol atau lebih nilai PERSIS dari: "BPBD", "Inafis Polrestabes Semarang", "Basarnas". Polsek Tembalang SELALU menangani dan ditambahkan otomatis, jadi JANGAN ditulis di array. Pilih satuan yang kira-kira dibutuhkan untuk peristiwa tersebut, bisa lebih dari satu atau tidak ada sama sekali (array kosong []):
+  * "BPBD": bila peristiwa berkaitan dengan bencana alam / cuaca ekstrem (banjir, longsor, pohon tumbang, angin kencang, kebakaran lahan, dsb.) atau perlu penanganan kebencanaan/evakuasi warga.
+  * "Inafis Polrestabes Semarang": bila ada tindak pidana atau kejadian yang perlu olah TKP / identifikasi (korban meninggal atau luka akibat tindak kejahatan, pencurian, kekerasan, penemuan jenazah, kebakaran/ledakan yang dicurigai, laka lantas berat) atau disebut sidik jari, identifikasi korban, olah TKP.
+  * "Basarnas": bila perlu operasi pencarian dan pertolongan (orang hilang, tenggelam, korban tertimbun/terjebak, banjir atau longsor dengan korban, kecelakaan besar). 
+  Bila teks menyebut satuan tersebut terlibat, masukkan juga. Jangan memilih satuan yang tidak relevan.`
+    : `- "korban", "saksi", "fakta_fakta", "penangkapan_tersangka", "keterangan_tersangka", dan "barang_bukti" adalah ARRAY string; satu butir per elemen, TANPA awalan "a." / "b." (nomor huruf ditambahkan otomatis). Bila tidak ada informasi, isi dengan array berisi satu elemen "${KOSONG}".
 - "waktu" adalah periode perkembangan, contoh: "1 s.d. 7 Oktober 2026" atau satu tanggal bila hanya satu hari.
 - "dasar" memuat nomor Laporan Polisi / laporan gangguan sebelumnya beserta tanggalnya bila disebut.
-- "fakta_fakta" berisi perkembangan terkini (situasi, keterangan saksi, barang bukti baru). "penangkapan_tersangka" khusus penangkapan (tanggal & lokasi). "keterangan_tersangka" berisi peran, pengakuan, dan hasil pengembangan.`;
+- "fakta_fakta" berisi perkembangan terkini (situasi, keterangan saksi, barang bukti baru). "penangkapan_tersangka" khusus penangkapan (tanggal & lokasi). "keterangan_tersangka" berisi peran, pengakuan, dan hasil pengembangan.
+- "korban" dan "saksi": satu orang per elemen, sertakan nama (atau inisial), umur, pekerjaan, dan alamat sejauh disebut di teks. "barang_bukti": satu barang per elemen (jenis, merek/nomor, jumlah) yang telah disita/diamankan.`;
 
   return `Anda adalah asisten AI penyusun ${nama} untuk Polrestabes Semarang, berbahasa Indonesia baku kepolisian (formal, ringkas, lugas).
 Tugas Anda: membaca SATU teks panjang dari pengguna (bisa berupa kronologi, catatan lapangan, atau pesan WhatsApp yang bercampur), lalu mengelompokkan isinya ke kolom-kolom laporan.
@@ -146,6 +155,22 @@ function daftarHuruf(v: unknown): string {
     .filter((x) => x !== KOSONG);
   if (item.length === 0) return `a. ${KOSONG}`;
   return item.map((x, i) => `${String.fromCharCode(97 + (i % 26))}. ${x}`).join("\n");
+}
+
+const SATUAN_WAJIB = "Polsek Tembalang";
+const SATUAN_OPSIONAL = [
+  { nama: "BPBD", kunci: "bpbd" },
+  { nama: "Inafis Polrestabes Semarang", kunci: "inafis" },
+  { nama: "Basarnas", kunci: "basarnas" },
+];
+
+// Satuan penanganan (Laporan Segera no. 13): Polsek Tembalang selalu ada; BPBD / Inafis / Basarnas
+// ditambahkan hanya bila dipilih AI. Nama dikanonkan dari daftar tetap, urutan selalu sama.
+function daftarSatuan(v: unknown): string {
+  const dipilih = (Array.isArray(v) ? v : typeof v === "string" ? [v] : []).map((x) => String(x).toLowerCase());
+  const satuan = [SATUAN_WAJIB, ...SATUAN_OPSIONAL.filter((o) => dipilih.some((d) => d.includes(o.kunci))).map((o) => o.nama)];
+  if (satuan.length === 1) return satuan[0];
+  return satuan.map((x, i) => `${String.fromCharCode(97 + i)}. ${x}`).join("\n");
 }
 
 export function salamWaktu(now: Date = new Date()): string {
@@ -207,7 +232,7 @@ ${teks(data.kerugian)}
 ${teks(data.bukti_disita)}
 
 13. *Kesatuan Yang Menangani:*
-${teks(data.kesatuan_menangani)}
+${daftarSatuan(data.satuan_tambahan)}
 
 14. *Tindakan Kepolisian:*
 ${teks(data.tindakan_kepolisian)}
@@ -230,18 +255,24 @@ Mohon ijin bersama ini kami kirimkan Laporan Kemajuan/Perkembangan penanganan ka
 2. *Perkara/Peristiwa:* ${teks(data.perkara)}
 3. *Waktu:* ${teks(data.waktu)}
 4. *Tempat Kejadian:* ${teks(data.tempat_kejadian)}
-5. *Uraian Singkat Kejadian:* ${teks(data.uraian_singkat)}
-6. *Fakta-Fakta / Perkembangan Terkini:*
+5. *Korban:*
+${daftarHuruf(data.korban)}
+6. *Saksi-Saksi:*
+${daftarHuruf(data.saksi)}
+7. *Uraian Singkat Kejadian:* ${teks(data.uraian_singkat)}
+8. *Fakta-Fakta / Perkembangan Terkini:*
 ${daftarHuruf(data.fakta_fakta)}
-7. *Penangkapan Tersangka:*
+9. *Penangkapan Tersangka:*
 ${daftarHuruf(data.penangkapan_tersangka)}
-8. *Keterangan Tersangka:*
+10. *Keterangan Tersangka:*
 ${daftarHuruf(data.keterangan_tersangka)}
-9. *Modus Operandi:* ${teks(data.modus_operandi)}
-10. *Motif:* ${teks(data.motif)}
-11. *Alat Yang Digunakan:* ${teks(data.alat_digunakan)}
-12. *Kerugian:* ${teks(data.kerugian)}
-13. *Kesatuan Yang Menangani:* ${teks(data.kesatuan_menangani)}
+11. *Barang Bukti:*
+${daftarHuruf(data.barang_bukti)}
+12. *Modus Operandi:* ${teks(data.modus_operandi)}
+13. *Motif:* ${teks(data.motif)}
+14. *Alat Yang Digunakan:* ${teks(data.alat_digunakan)}
+15. *Kerugian:* ${teks(data.kerugian)}
+16. *Kesatuan Yang Menangani:* ${teks(data.kesatuan_menangani)}
 
 ${PENUTUP}`;
 }
