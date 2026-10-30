@@ -9,7 +9,10 @@ export function isWaTemplate(t: unknown): t is WaTemplateType {
   return typeof t === "string" && (WA_TEMPLATE_TYPES as string[]).includes(t);
 }
 
-const KOSONG = "-";
+// Penanda poin yang tidak ada isinya / tidak dilaporkan.
+const KOSONG = "NIHIL";
+// Variasi "kosong" yang kadang ditulis AI; semuanya diseragamkan menjadi KOSONG.
+const POLA_KOSONG = /^(?:[-–—]+|nihil|tidak ada|belum ada|n\/a)\.?$/i;
 
 export const LABEL_LAPORAN_WA: Record<string, string> = {
   "wa-segera-kamtibmas": "Laporan Segera (WA)",
@@ -126,7 +129,7 @@ ATURAN FORMAT JSON:
 2. Jangan pakai tanda kutip ganda mentah (") di dalam nilai string; pakai tanda kutip tunggal (').`;
 }
 
-// Nilai teks: buang markup yang bentrok dengan tebal-WhatsApp, rapikan spasi, kosong -> "-".
+// Nilai teks: buang markup yang bentrok dengan tebal-WhatsApp, rapikan spasi, kosong -> "NIHIL".
 function teks(v: unknown): string {
   if (typeof v !== "string") return KOSONG;
   const bersih = v
@@ -136,7 +139,7 @@ function teks(v: unknown): string {
     .map((l) => l.trim())
     .filter(Boolean)
     .join("\n");
-  return bersih || KOSONG;
+  return !bersih || POLA_KOSONG.test(bersih) ? KOSONG : bersih;
 }
 
 // Daftar bersub-huruf: a. ..., b. ...

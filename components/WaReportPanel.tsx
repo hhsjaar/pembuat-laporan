@@ -198,7 +198,7 @@ export default function WaReportPanel({ templateType, addToast }: WaReportPanelP
               className={`${textareaClass} resize-y min-h-[420px] sm:min-h-[560px] font-mono leading-relaxed`}
             />
             <p className="text-xs text-neutral-400">
-              Tanda *teks* akan tampil tebal di WhatsApp. Periksa kolom bertanda &quot;-&quot; (tidak disebut di teks) sebelum dikirim.
+              Tanda *teks* akan tampil tebal di WhatsApp. Periksa poin bertanda NIHIL (tidak disebut di teks) sebelum dikirim.
             </p>
           </div>
         </div>
