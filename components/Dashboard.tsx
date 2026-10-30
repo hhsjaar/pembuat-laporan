@@ -11,7 +11,7 @@ import PdfUploader from "./PdfUploader";
 import ProcessingModal, { ProcessingStep, StepId } from "./ProcessingModal";
 import ReportPreview from "./ReportPreview";
 import WaReportPanel from "./WaReportPanel";
-import { isWaTemplate } from "@/lib/laporanWa";
+import { isWaTemplate, LABEL_LAPORAN_WA } from "@/lib/laporanWa";
 import SaranInput from "./SaranInput";
 import { exportReportToPdfClient } from "@/lib/clientPdfExport";
 import { extractPdfText, MAX_PDF_SIZE_BYTES, MAX_PDF_SIZE_MB } from "@/lib/clientPdfText";
@@ -494,8 +494,8 @@ export default function Dashboard() {
         setParsedGuests([]);
       }
 
-      // Sync new generic list blocks
-      const lists = parseAllLists(selectedHistoryItem.content);
+      // Sync new generic list blocks (laporan WA memakai nomor poin tetap, tidak untuk diurutkan ulang)
+      const lists = isWaTemplate(selectedHistoryItem.template_type) ? [] : parseAllLists(selectedHistoryItem.content);
       setParsedLists(lists);
       if (lists.length > 0) {
         // Default to the first list if the current selectedListId is invalid
@@ -650,6 +650,9 @@ export default function Dashboard() {
     }
     if (type === "laporan-harian-intelijen") {
       return `LAPHAR ${day}${month}${dateObj.getFullYear()}.${ext}`;
+    }
+    if (isWaTemplate(type)) {
+      return `${type === "wa-kemajuan" ? "LAPKEM" : "LAPSEG"} ${day}${month}${dateObj.getFullYear()}.${ext}`;
     }
 
     const sanitize = (text?: string) => {
@@ -2945,6 +2948,8 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
               { id: "laporan-harian", label: "Laporan Harian" },
               { id: "laporan-harian-intelijen", label: "LHI (Intelijen)" },
               { id: "rencana-kegiatan", label: "Rencana Kegiatan" },
+              { id: "wa-segera-kamtibmas", label: LABEL_LAPORAN_WA["wa-segera-kamtibmas"] },
+              { id: "wa-kemajuan", label: LABEL_LAPORAN_WA["wa-kemajuan"] },
             ];
 
             const getCategoryCount = (catId: string) => {
@@ -3066,6 +3071,9 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                       } else if (item.template_type === "rencana-kegiatan") {
                         badgeLabel = "Rencana Kegiatan";
                         badgeStyles = "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20";
+                      } else if (isWaTemplate(item.template_type)) {
+                        badgeLabel = LABEL_LAPORAN_WA[item.template_type];
+                        badgeStyles = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
                       } else {
                         badgeLabel = "Laporan Lainnya";
                       }
@@ -3162,6 +3170,8 @@ CREATE INDEX idx_report_history_perihal ON report_history (perihal);`}
                         ? "LHI (Intelijen)"
                         : selectedHistoryItem.template_type === "rencana-kegiatan"
                         ? "Rencana Kegiatan"
+                        : isWaTemplate(selectedHistoryItem.template_type)
+                        ? LABEL_LAPORAN_WA[selectedHistoryItem.template_type]
                         : "Laporan Harian"}
                     </span>
                     <span className="text-[10px] text-neutral-400 font-medium">

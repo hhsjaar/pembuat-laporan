@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Sparkles, Copy, Check, Loader2, RotateCcw, PenTool, MessageSquareText } from "lucide-react";
-import type { WaTemplateType } from "@/lib/laporanWa";
+import { PENANDATANGAN_WA, type WaTemplateType } from "@/lib/laporanWa";
 
 interface WaReportPanelProps {
   templateType: WaTemplateType;
@@ -26,6 +26,50 @@ export default function WaReportPanel({ templateType, addToast }: WaReportPanelP
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [historyId, setHistoryId] = useState<string | null>(null);
+  // Teks terakhir yang sudah tersimpan di riwayat; beda dengan `result` berarti pengguna menyunting.
+  const savedTextRef = useRef("");
+
+  // Simpan otomatis hasil edit ke riwayat (debounce), seperti template laporan lain.
+  useEffect(() => {
+    if (!historyId || !result || result === savedTextRef.current) return;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/history", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: historyId, content: result }),
+        });
+        if (res.ok) savedTextRef.current = result;
+      } catch (err) {
+        console.error("Gagal memperbarui riwayat:", err);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [result, historyId]);
+
+  const saveToHistory = async (text: string, judul: string) => {
+    try {
+      const res = await fetch("/api/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          template_type: templateType,
+          perihal: judul,
+          content: text,
+          kapolsek_nama: PENANDATANGAN_WA,
+          meta_data: { timestamp: new Date().toISOString(), format: "whatsapp" },
+        }),
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        savedTextRef.current = text;
+        setHistoryId(saved.id);
+      }
+    } catch (err) {
+      console.error("Gagal menyimpan ke riwayat:", err);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!input.trim()) {
@@ -42,7 +86,9 @@ export default function WaReportPanel({ templateType, addToast }: WaReportPanelP
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Error ${res.status}: ${res.statusText}`);
       setResult(data.text);
+      setHistoryId(null);
       setIsCopied(false);
+      void saveToHistory(data.text, data.judul || COPY[templateType].judul);
       addToast("Laporan siap disalin ke WhatsApp.", "success");
     } catch (err: any) {
       addToast(err.message || "Gagal menyusun laporan.", "error");
@@ -71,6 +117,7 @@ export default function WaReportPanel({ templateType, addToast }: WaReportPanelP
   const handleReset = () => {
     setInput("");
     setResult("");
+    setHistoryId(null);
     setIsCopied(false);
   };
 
@@ -133,7 +180,7 @@ export default function WaReportPanel({ templateType, addToast }: WaReportPanelP
             <div className="flex items-center justify-between pb-3.5 border-b border-neutral-100 dark:border-neutral-800/60">
               <div className="flex items-center space-x-2">
                 <MessageSquareText className="w-4.5 h-4.5 text-neutral-500" />
-                <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Siap Salin (dapat diedit)</span>
+                <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Siap Salin (dapat diedit, tersimpan otomatis di Riwayat)</span>
               </div>
               <button
                 type="button"

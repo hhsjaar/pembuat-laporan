@@ -11,6 +11,25 @@ export function isWaTemplate(t: unknown): t is WaTemplateType {
 
 const KOSONG = "-";
 
+export const LABEL_LAPORAN_WA: Record<string, string> = {
+  "wa-segera-kamtibmas": "Laporan Segera (WA)",
+  "wa-kemajuan": "Laporan Kemajuan (WA)",
+};
+
+// Nama Penandatangan yang disimpan sebagai kapolsek_nama di riwayat (kolom wajib di tabel).
+export const PENANDATANGAN_WA = "KOMBES POL ERLIN TANG JAYA, S.H., S.I.K., M.H.";
+
+// Judul untuk daftar Riwayat.
+export function judulLaporanWa(type: WaTemplateType, data: Record<string, any>): string {
+  if (type === "wa-kemajuan") {
+    const perihal = teks(data.perihal);
+    if (perihal !== KOSONG) return perihal;
+    return `Laporan Kemajuan ${teks(data.jenis_gangguan)}`.trim();
+  }
+  const ringkasan = teks(data.ringkasan_gangguan);
+  return ringkasan !== KOSONG ? `Laporan Segera Gangguan Kamtibmas ${ringkasan}` : "Laporan Segera Gangguan Kamtibmas";
+}
+
 const KEPALA = `POLRESTABES SEMARANG
 
 Kepada Yth: Kapolda Jateng

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { geminiClient } from "@/lib/gemini";
-import { buildWaSystemPrompt, isWaTemplate, renderLaporanWa } from "@/lib/laporanWa";
+import { buildWaSystemPrompt, isWaTemplate, judulLaporanWa, renderLaporanWa } from "@/lib/laporanWa";
 
 export const runtime = "nodejs";
 
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     if (!content) throw new Error("Gagal menerima respons dari Gemini API.");
 
     const data = parseJsonObject(content);
-    return NextResponse.json({ text: renderLaporanWa(templateType, data, now) });
+    return NextResponse.json({ text: renderLaporanWa(templateType, data, now), judul: judulLaporanWa(templateType, data) });
   } catch (err: any) {
     console.error("[generate-wa] error:", err);
     return NextResponse.json({ error: err.message || "Gagal menyusun laporan WhatsApp." }, { status: 500 });
